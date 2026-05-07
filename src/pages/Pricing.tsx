@@ -19,8 +19,8 @@ export const Pricing = () => {
   const tiers = [
     {
       name: "Free",
-      monthlyPrice: "₹0",
-      annualPrice: "₹0",
+      monthlyPrice: "$0",
+      annualPrice: "$0",
       period: "/month",
       annualBilled: "Free forever",
       desc: "For solo founders and PMs validating the evidence-based product loop.",
@@ -41,10 +41,10 @@ export const Pricing = () => {
     },
     {
       name: "Starter",
-      monthlyPrice: "₹59",
-      annualPrice: "₹49", 
+      monthlyPrice: "$59",
+      annualPrice: "$49", 
       period: "/month",
-      annualBilled: "Billed ₹588 yearly",
+      annualBilled: "Billed $588 yearly",
       desc: "For early-stage startups establishing their first evidence-based product loop.",
       features: [
         "3 Members, Unlimited Viewers",
@@ -63,10 +63,10 @@ export const Pricing = () => {
     },
     {
       name: "Growth",
-      monthlyPrice: "₹179",
-      annualPrice: "₹149", 
+      monthlyPrice: "$179",
+      annualPrice: "$149", 
       period: "/month",
-      annualBilled: "Billed ₹1,788 yearly",
+      annualBilled: "Billed $1,788 yearly",
       desc: "For scaling product teams that need deeper signal volume and team collaboration.",
       features: [
         "8 Members, Unlimited Viewers",
@@ -86,10 +86,10 @@ export const Pricing = () => {
     },
     {
       name: "Scale",
-      monthlyPrice: "₹449",
-      annualPrice: "₹369", 
+      monthlyPrice: "$449",
+      annualPrice: "$369", 
       period: "/month",
-      annualBilled: "Billed ₹4,428 yearly",
+      annualBilled: "Billed $4,428 yearly",
       desc: "For large organizations requiring maximum volume, security, and premium AI models.",
       features: [
         "20 Members, Unlimited Viewers",
@@ -191,7 +191,7 @@ export const Pricing = () => {
                 {tier.period && <span className={`text-sm font-bold ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>{tier.period}</span>}
               </div>
               <div className={`text-xs font-medium mb-8 h-4 ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>
-                {isAnnual && tier.annualPrice !== "₹0" ? tier.annualBilled : (tier.annualPrice === "₹0" ? "Free forever" : "Billed monthly")}
+                {isAnnual && tier.annualPrice !== "$0" ? tier.annualBilled : (tier.annualPrice === "$0" ? "Free forever" : "Billed monthly")}
               </div>
 
               <ul className="space-y-4 mb-8 flex-1">
