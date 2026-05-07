@@ -12,9 +12,13 @@ import {
   AlertCircle, 
   Zap,
   Sparkles,
-  PieChart
+  PieChart,
+  Plus,
+  Rocket,
+  FileText,
+  ChevronRight
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
@@ -28,6 +32,7 @@ import { Skeleton } from '../../components/ui/Skeleton';
 export const Dashboard = () => {
   const { activeWorkspace } = useWorkspace();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const wsId = activeWorkspace?.id;
 
   const { data: oppData, isLoading: oppLoading } = useOpportunities(wsId);
@@ -64,172 +69,256 @@ export const Dashboard = () => {
   const solvedLaunches = launches.filter(l => l.pm_verdict === 'Solved').length;
   const decisionAlpha = launches.length > 0 ? Math.round((solvedLaunches / launches.length) * 100) : 0;
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
   return (
     <AppLayout 
-      title={`Welcome back, ${firstName}.`} 
-      subtitle="Here is what needs your attention today."
+      title={`${getGreeting()}, ${firstName}.`} 
+      subtitle={`${currentDate} • Here is what needs your attention today.`}
     >
-      {/* 1. URGENT: Reviews Due Banner - Premium Glassmorphism */}
+      {/* 1. URGENT: Reviews Due Banner */}
       {reviewsDue.length > 0 && (
-        <div className="mb-8 relative overflow-hidden rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm border border-amber-200/60 bg-gradient-to-br from-amber-50/90 to-orange-50/50 backdrop-blur-md animate-[fadeIn_0.4s_ease-out]">
+        <div className="mb-8 relative overflow-hidden rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm border border-amber-200/60 bg-gradient-to-br from-amber-50/90 to-orange-50/50 backdrop-blur-md animate-slide-up">
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-orange-400/10 rounded-full blur-2xl pointer-events-none"></div>
           
-          <div className="flex items-start sm:items-center gap-5 text-amber-900 relative z-10">
-            <div className="p-3.5 bg-white/60 backdrop-blur-sm rounded-2xl shrink-0 shadow-sm border border-amber-100/50">
-              <Clock className="w-6 h-6 text-amber-600" />
+          <div className="flex items-start sm:items-center gap-4 text-amber-900 relative z-10">
+            <div className="p-3 bg-white/60 backdrop-blur-sm rounded-xl shrink-0 shadow-sm border border-amber-100/50">
+              <Clock className="w-5 h-5 text-amber-600 animate-pulse-slow" />
             </div>
             <div>
-              <h3 className="font-heading text-xl font-bold tracking-tight">Launch Reviews Due</h3>
-              <p className="text-sm font-medium text-amber-700/80 mt-1">
-                You have {reviewsDue.length} launch{reviewsDue.length > 1 ? 'es' : ''} that have passed the 7-day measurement window.
+              <h3 className="font-heading text-lg font-bold tracking-tight">Launch Reviews Due</h3>
+              <p className="text-sm font-medium text-amber-700/80 mt-0.5">
+                You have {reviewsDue.length} launch{reviewsDue.length > 1 ? 'es' : ''} pending outcome measurement.
               </p>
             </div>
           </div>
-          <Link to="/app/launches" className="relative z-10 bg-white text-amber-700 border border-amber-200/50 px-6 py-3 rounded-xl text-sm font-bold shadow-sm hover:shadow-md hover:bg-amber-50/50 hover:border-amber-300 transition-all duration-300 shrink-0 w-full sm:w-auto text-center">
-            Review Outcomes
+          <Link to="/app/launches" className="relative z-10 bg-white text-amber-700 border border-amber-200/50 px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:shadow-md hover:bg-amber-50/50 hover:border-amber-300 transition-all duration-300 shrink-0 w-full sm:w-auto text-center flex items-center justify-center gap-2 group">
+            Review Outcomes <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
       )}
 
-      {/* 2. MAIN CONTENT: Opportunities & Execution */}
+      {/* 2. PULSE STATS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-slide-up stagger-1">
+        {/* Total Signals */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-default">
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-2 bg-blue-50 rounded-lg border border-blue-100 text-brand-blue transition-colors"><PieChart className="w-4 h-4" /></div>
+            <span className="text-[10px] font-bold text-brand-blue uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded border border-blue-100">Free Plan</span>
+          </div>
+          <div className="text-3xl font-heading font-black text-gray-900">{signalsCount}</div>
+          <div className="text-xs font-medium text-gray-500 mt-1">Signals Processed</div>
+          <div className="w-full bg-gray-100 rounded-full h-1.5 mt-4 overflow-hidden">
+            <div className="bg-brand-blue h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${Math.min(100, (signalsCount / 200) * 100)}%` }}></div>
+          </div>
+        </div>
+
+        {/* Unmatched Signals */}
+        <Link to="/app/signals" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-1 hover:border-amber-200 transition-all duration-300 block">
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-2 bg-amber-50 rounded-lg border border-amber-100 text-amber-600 transition-colors"><AlertCircle className="w-4 h-4" /></div>
+          </div>
+          <div className="text-3xl font-heading font-black text-gray-900">{unmatchedSignals}</div>
+          <div className="text-xs font-medium text-gray-500 mt-1">Unmatched Signals</div>
+          <div className="text-[10px] font-bold text-amber-600 mt-4 flex items-center gap-1 group-hover:underline"><ArrowRight className="w-3 h-3" /> Needs Triage</div>
+        </Link>
+
+        {/* Top Opportunity Score */}
+        <Link to="/app/opportunities" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-1 hover:border-astrix-teal/30 transition-all duration-300 block">
+          <div className="absolute -right-6 -top-6 w-24 h-24 bg-astrix-teal/5 rounded-full blur-2xl group-hover:bg-astrix-teal/10 transition-colors"></div>
+          <div className="flex justify-between items-start mb-4 relative z-10">
+            <div className="p-2 bg-teal-50 rounded-lg border border-teal-100 text-astrix-teal transition-colors"><Zap className="w-4 h-4" /></div>
+          </div>
+          <div className="text-3xl font-heading font-black text-astrix-teal relative z-10">{opportunities[0]?.opportunity_score || 0}</div>
+          <div className="text-xs font-medium text-gray-500 mt-1 relative z-10">Max Opportunity Score</div>
+          <div className="text-[10px] font-bold text-gray-400 mt-4 relative z-10">Highest priority index</div>
+        </Link>
+
+        {/* Decision Alpha */}
+        <Link to="/app/launches" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-1 hover:border-green-200 transition-all duration-300 block">
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-2 bg-green-50 rounded-lg border border-green-100 text-green-600 transition-colors"><CheckCircle2 className="w-4 h-4" /></div>
+          </div>
+          <div className="text-3xl font-heading font-black text-gray-900">{decisionAlpha}%</div>
+          <div className="text-xs font-medium text-gray-500 mt-1">Decision Alpha</div>
+          <div className="text-[10px] font-bold text-green-600 mt-4 flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Proof Accuracy</div>
+        </Link>
+      </div>
+
+      {/* 3. QUICK ACTIONS BAR */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-2.5 mb-8 shadow-sm flex flex-wrap sm:flex-nowrap gap-2 items-center justify-between animate-slide-up stagger-2">
+        <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
+          <button 
+            onClick={() => navigate('/app/signals/new')}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:text-gray-900 transition-all hover:shadow-sm"
+          >
+            <Plus className="w-4 h-4" /> Add Signal
+          </button>
+          <button 
+            onClick={() => navigate('/app/problems')}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:text-gray-900 transition-all hover:shadow-sm"
+          >
+            <Layers className="w-4 h-4" /> New Problem
+          </button>
+          <button 
+            onClick={() => navigate('/app/decisions')}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:text-gray-900 transition-all hover:shadow-sm"
+          >
+            <Rocket className="w-4 h-4" /> Log Launch
+          </button>
+        </div>
+        <button 
+          onClick={() => window.dispatchEvent(new CustomEvent('open-upload-modal'))}
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-astrix-teal hover:bg-astrix-darkTeal text-white rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md"
+        >
+          <UploadCloud className="w-4 h-4" /> Import CSV
+        </button>
+      </div>
+
+      {/* 4. MAIN CONTENT: Opportunities & Execution */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-12">
         
-        {/* Left: Top Opportunities */}
-        <div className="xl:col-span-2 flex flex-col">
-          <div className="flex items-center justify-between mb-5 px-1">
-            <h2 className="font-heading text-xl font-bold text-gray-900 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-astrix-teal" /> Top Opportunities
+        {/* Left: Top Opportunities Leaderboard */}
+        <div className="xl:col-span-2 flex flex-col animate-slide-up stagger-3">
+          <div className="flex items-center justify-between mb-4 px-1">
+            <h2 className="font-heading text-lg font-bold text-gray-900 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-astrix-teal" /> Ranked Opportunities
             </h2>
-            <Link to="/app/opportunities" className="text-sm font-bold text-astrix-teal hover:text-astrix-darkTeal transition-colors flex items-center gap-1 group">
-              View all <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <Link to="/app/opportunities" className="text-xs font-bold text-astrix-teal hover:text-astrix-darkTeal transition-colors uppercase tracking-widest flex items-center gap-1">
+              View all <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
           
-          <div className="bg-white rounded-3xl border border-gray-200/60 shadow-apple overflow-hidden flex-1 relative">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-astrix-teal via-brand-blue to-purple-500 opacity-80"></div>
-            
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex-1 flex flex-col">
             {oppLoading ? (
-              <div className="p-8 space-y-8">
-                <Skeleton className="w-full h-16 rounded-2xl" />
-                <Skeleton className="w-full h-16 rounded-2xl" />
-                <Skeleton className="w-full h-16 rounded-2xl" />
+              <div className="p-6 space-y-4">
+                <Skeleton className="w-full h-16 rounded-xl" />
+                <Skeleton className="w-full h-16 rounded-xl" />
+                <Skeleton className="w-full h-16 rounded-xl" />
               </div>
             ) : topOpportunities.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center p-8">
-                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100 shadow-inner">
-                  <Database className="w-8 h-8 text-gray-300" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">No opportunities found</h3>
+              <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center p-8 bg-gray-50/50">
+                <Database className="w-12 h-12 text-gray-300 mb-4" />
+                <h3 className="text-base font-bold text-gray-900 mb-2">No opportunities found</h3>
                 <p className="text-sm text-gray-500 font-medium max-w-sm">Upload customer signals and run AI clustering to generate your first ranked opportunities.</p>
+                <button onClick={() => navigate('/app/problems')} className="mt-6 bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-gray-50">Go to Problems</button>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100/80">
+              <div className="divide-y divide-gray-100 flex-1">
                 {topOpportunities.map((opp, index) => (
-                  <Link 
+                  <div 
                     key={opp.id} 
-                    to={`/app/opportunities/${opp.id}`}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-6 hover:bg-gray-50/80 transition-all duration-300 group gap-4 sm:gap-0 relative overflow-hidden"
+                    className={`relative p-5 hover:bg-gray-50 transition-all duration-200 group flex items-center justify-between gap-4 ${index === 0 ? 'bg-teal-50/10' : ''}`}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-astrix-teal/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                    
-                    <div className="flex items-start sm:items-center gap-5 relative z-10">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-heading font-black text-xl shrink-0 transition-all duration-500 group-hover:scale-105 group-hover:shadow-md ${opp.opportunity_score >= 80 ? 'bg-gradient-to-br from-astrix-teal to-teal-600 text-white shadow-sm border border-teal-500/20' : opp.opportunity_score >= 60 ? 'bg-gradient-to-br from-astrix-gold to-yellow-500 text-gray-900 shadow-sm border border-yellow-400/20' : 'bg-gray-100 text-gray-500 border border-gray-200'}`}>
-                        {opp.opportunity_score}
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-heading font-black text-lg shrink-0 shadow-sm transition-transform group-hover:scale-105 ${index === 0 ? 'bg-astrix-teal text-white' : index === 1 ? 'bg-gray-200 text-gray-700' : index === 2 ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-500'}`}>
+                        {index + 1}
                       </div>
-                      <div>
-                        <h3 className="font-bold text-gray-900 text-base md:text-lg mb-1.5 line-clamp-1 group-hover:text-astrix-teal transition-colors">
+                      <div className="flex-1 min-w-0 pr-4">
+                        <Link to={`/app/opportunities/${opp.id}`} className="font-bold text-gray-900 text-base mb-1 truncate block group-hover:text-astrix-teal transition-colors">
                           {opp.problems?.title || 'Unknown Problem'}
-                        </h3>
-                        <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs font-mono font-medium text-gray-500">
-                          <span className={`px-2.5 py-1 rounded-md uppercase tracking-wider font-bold ${opp.recommended_action === 'Build' ? 'bg-blue-50 text-blue-700 border border-blue-100/50' : opp.recommended_action === 'Fix' ? 'bg-yellow-50 text-yellow-700 border border-yellow-100/50' : 'bg-gray-100 text-gray-700 border border-gray-200/50'}`}>
+                        </Link>
+                        <div className="flex items-center gap-3 text-xs font-mono text-gray-500">
+                          <span className={`px-2 py-0.5 rounded uppercase tracking-wider font-bold ${opp.recommended_action === 'Build' ? 'bg-blue-50 text-blue-700' : opp.recommended_action === 'Fix' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-700'}`}>
                             {opp.recommended_action || 'Review'}
                           </span>
-                          <span className="hidden sm:inline text-gray-300">•</span>
-                          <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
-                            <Layers className="w-3.5 h-3.5 text-gray-400" /> {opp.problems?.evidence_count || 0} Signals
-                          </span>
+                          <span className="truncate">{formatCurrency(opp.problems?.affected_arr || 0)} ARR at risk</span>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-6 pl-19 sm:pl-0 relative z-10">
-                      <div className="text-left sm:text-right">
-                        <div className="text-[10px] font-mono text-gray-400 uppercase font-bold mb-1 tracking-widest">ARR at Risk</div>
-                        <div className="font-bold text-gray-900 text-base">{formatCurrency(opp.problems?.affected_arr || 0)}</div>
-                      </div>
-                      <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 group-hover:border-astrix-teal group-hover:text-astrix-teal group-hover:bg-teal-50 transition-all duration-300 shrink-0 shadow-sm group-hover:shadow">
-                        <ArrowRight className="w-4.5 h-4.5 group-hover:translate-x-0.5 transition-transform" />
+                    <div className="flex items-center gap-6 shrink-0">
+                      {/* Hidden Quick Action on Hover */}
+                      <Link 
+                        to={`/app/opportunities/${opp.id}`}
+                        className="hidden md:flex opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300 bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:border-astrix-teal hover:text-astrix-teal items-center gap-1"
+                      >
+                        Decide <ArrowRight className="w-3 h-3" />
+                      </Link>
+
+                      <div className="flex flex-col items-end">
+                        <div className="text-2xl font-heading font-black text-gray-900">{opp.opportunity_score}</div>
+                        <div className="w-16 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
+                          <div className={`h-full rounded-full ${opp.opportunity_score >= 80 ? 'bg-astrix-teal' : 'bg-astrix-gold'}`} style={{ width: `${opp.opportunity_score}%` }}></div>
+                        </div>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             )}
           </div>
         </div>
 
-        {/* Right: Execution Tracking */}
-        <div className="xl:col-span-1 flex flex-col gap-8">
+        {/* Right: Execution Feed (Timeline Style) */}
+        <div className="xl:col-span-1 flex flex-col gap-8 animate-slide-up stagger-4">
           
-          {/* Active Launches */}
-          <div className="flex flex-col flex-1">
+          {/* Active Launches Timeline */}
+          <div className="flex flex-col">
             <div className="flex items-center justify-between mb-4 px-1">
-              <h2 className="font-heading text-lg font-bold text-gray-900">Active Launches</h2>
-              <Link to="/app/launches" className="text-xs font-bold text-gray-400 hover:text-astrix-teal transition-colors uppercase tracking-widest">See all</Link>
+              <h2 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                <Activity className="w-4 h-4 text-brand-blue" /> Active Launches
+              </h2>
+              <Link to="/app/launches" className="text-xs font-bold text-gray-400 hover:text-brand-blue transition-colors">View all</Link>
             </div>
-            <div className="bg-white rounded-3xl border border-gray-200/60 shadow-apple p-6 flex-1 flex flex-col relative overflow-hidden group hover:shadow-apple-hover transition-shadow duration-500">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col">
               {activeLaunches.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
-                  <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3 border border-gray-100">
-                    <Activity className="w-5 h-5 text-gray-400" />
-                  </div>
+                <div className="text-center py-8 bg-gray-50/50 rounded-xl border border-gray-100 border-dashed">
                   <p className="text-sm text-gray-500 font-medium">No active launches.</p>
                 </div>
               ) : (
-                <div className="space-y-5 relative z-10">
-                  {activeLaunches.slice(0, 3).map(launch => (
-                    <Link key={launch.id} to={`/app/launches/${launch.id}`} className="block group/item border-b border-gray-50/80 last:border-0 pb-4 last:pb-0">
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <div className="text-sm font-bold text-gray-900 line-clamp-1 group-hover/item:text-astrix-teal transition-colors">{launch.title}</div>
-                        <span className="text-[9px] font-mono font-bold text-blue-600 bg-blue-50 border border-blue-100/50 px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0">Tracking</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-400 font-medium">
-                        <Clock className="w-3.5 h-3.5" /> {new Date(launch.launched_at).toLocaleDateString()}
-                      </div>
-                    </Link>
+                <div className="relative pl-4 border-l-2 border-gray-100 space-y-6">
+                  {activeLaunches.slice(0, 3).map((launch, i) => (
+                    <div key={launch.id} className="relative group">
+                      <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 bg-white border-2 border-brand-blue rounded-full group-hover:scale-125 group-hover:bg-brand-blue transition-all"></div>
+                      <Link to={`/app/launches/${launch.id}`} className="block pl-2">
+                        <div className="text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-brand-blue transition-colors">{launch.title}</div>
+                        <div className="text-xs text-gray-500 font-medium mt-1 flex items-center gap-1.5">
+                          <Rocket className="w-3 h-3" /> Launched {new Date(launch.launched_at).toLocaleDateString()}
+                        </div>
+                      </Link>
+                    </div>
                   ))}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Recent Decisions */}
-          <div className="flex flex-col flex-1">
+          {/* Recent Decisions Timeline */}
+          <div className="flex flex-col">
             <div className="flex items-center justify-between mb-4 px-1">
-              <h2 className="font-heading text-lg font-bold text-gray-900">Recent Decisions</h2>
-              <Link to="/app/decisions" className="text-xs font-bold text-gray-400 hover:text-astrix-teal transition-colors uppercase tracking-widest">History</Link>
+              <h2 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                <FileText className="w-4 h-4 text-gray-500" /> Recent Decisions
+              </h2>
+              <Link to="/app/decisions" className="text-xs font-bold text-gray-400 hover:text-gray-900 transition-colors">History</Link>
             </div>
-            <div className="bg-white rounded-3xl border border-gray-200/60 shadow-apple p-6 flex-1 flex flex-col relative overflow-hidden group hover:shadow-apple-hover transition-shadow duration-500">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col">
               {recentDecisions.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
-                  <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3 border border-gray-100">
-                    <CheckCircle2 className="w-5 h-5 text-gray-400" />
-                  </div>
+                <div className="text-center py-8 bg-gray-50/50 rounded-xl border border-gray-100 border-dashed">
                   <p className="text-sm text-gray-500 font-medium">No decisions logged.</p>
                 </div>
               ) : (
-                <div className="space-y-5 relative z-10">
-                  {recentDecisions.map(dec => (
-                    <Link key={dec.id} to={`/app/decisions/${dec.id}`} className="block group/item border-b border-gray-50/80 last:border-0 pb-4 last:pb-0">
-                      <div className="flex items-center gap-2.5 mb-2">
-                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border ${dec.action === 'Build' ? 'bg-blue-50 text-blue-700 border-blue-100/50' : dec.action === 'Fix' ? 'bg-yellow-50 text-yellow-700 border-yellow-100/50' : 'bg-gray-50 text-gray-600 border-gray-200/50'}`}>
-                          {dec.action}
-                        </span>
-                        <span className="text-[10px] text-gray-400 font-mono font-medium">{new Date(dec.created_at).toLocaleDateString()}</span>
-                      </div>
-                      <div className="text-sm font-bold text-gray-900 line-clamp-1 group-hover/item:text-astrix-teal transition-colors">{dec.title}</div>
-                    </Link>
+                <div className="relative pl-4 border-l-2 border-gray-100 space-y-6">
+                  {recentDecisions.map((dec, i) => (
+                    <div key={dec.id} className="relative group">
+                      <div className={`absolute -left-[21px] top-1 w-2.5 h-2.5 bg-white border-2 rounded-full group-hover:scale-125 transition-all ${dec.action === 'Build' ? 'border-blue-500 group-hover:bg-blue-500' : dec.action === 'Fix' ? 'border-yellow-500 group-hover:bg-yellow-500' : 'border-gray-400 group-hover:bg-gray-400'}`}></div>
+                      <Link to={`/app/decisions/${dec.id}`} className="block pl-2">
+                        <div className="text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-astrix-teal transition-colors">{dec.title}</div>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${dec.action === 'Build' ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
+                            {dec.action}
+                          </span>
+                          <span className="text-[10px] text-gray-400 font-mono">{new Date(dec.created_at).toLocaleDateString()}</span>
+                        </div>
+                      </Link>
+                    </div>
                   ))}
                 </div>
               )}
@@ -238,87 +327,6 @@ export const Dashboard = () => {
 
         </div>
       </div>
-
-      {/* 3. PERFORMANCE STATS: Bottom context */}
-      <h2 className="font-heading text-xl font-bold text-gray-900 mb-5 px-1">Workspace Pulse</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6 mb-12">
-        
-        {/* Total Signals + Quota */}
-        <div className="bg-white rounded-3xl border border-gray-200/60 shadow-sm p-6 relative overflow-hidden group hover:shadow-apple hover:-translate-y-1 transition-all duration-500">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 bg-gray-50 rounded-xl border border-gray-100 shadow-sm group-hover:bg-white transition-colors"><PieChart className="w-4.5 h-4.5 text-gray-500" /></div>
-              <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Signal Quota</div>
-            </div>
-            <div className="flex items-end gap-3 mb-2">
-              <div className="text-3xl font-heading font-black text-gray-900">{signalsCount}</div>
-              <div className="text-sm font-medium text-gray-500 mb-1.5">/ 200 used</div>
-            </div>
-            <div className="w-full bg-gray-100 rounded-full h-1.5 mt-2">
-              <div className="bg-brand-blue h-1.5 rounded-full" style={{ width: `${Math.min(100, (signalsCount / 200) * 100)}%` }}></div>
-            </div>
-            <div className="text-[10px] font-bold text-brand-blue uppercase tracking-widest mt-3">Free Plan</div>
-          </div>
-        </div>
-
-        {/* Unmatched Signals (Needs Triage) */}
-        <div className="bg-white rounded-3xl border border-gray-200/60 shadow-sm p-6 relative overflow-hidden group hover:shadow-apple hover:-translate-y-1 transition-all duration-500">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 bg-gray-50 rounded-xl border border-gray-100 shadow-sm group-hover:bg-white transition-colors"><AlertCircle className="w-4.5 h-4.5 text-gray-500" /></div>
-              <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Unmatched Signals</div>
-            </div>
-            <div className="flex items-end gap-3">
-              <div className="text-3xl font-heading font-black text-gray-900">{unmatchedSignals}</div>
-              <div className="text-sm font-medium text-gray-500 mb-1.5">needs triage</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Top Opportunity Score */}
-        <div className="bg-white rounded-3xl border border-gray-200/60 shadow-sm p-6 relative overflow-hidden group hover:shadow-apple hover:-translate-y-1 transition-all duration-500">
-          <div className="absolute inset-0 bg-gradient-to-br from-teal-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 bg-teal-50 rounded-xl border border-teal-100 shadow-sm group-hover:bg-white transition-colors"><Zap className="w-4.5 h-4.5 text-astrix-teal" /></div>
-              <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Max Opp Score</div>
-            </div>
-            <div className="flex items-end gap-3">
-              <div className="text-3xl font-heading font-black text-astrix-teal">{opportunities[0]?.opportunity_score || 0}</div>
-              <div className="text-sm font-medium text-gray-500 mb-1.5">priority index</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Decisions Made */}
-        <div className="bg-white rounded-3xl border border-gray-200/60 shadow-sm p-6 relative overflow-hidden group hover:shadow-apple hover:-translate-y-1 transition-all duration-500">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-100 shadow-sm group-hover:bg-white transition-colors"><CheckCircle2 className="w-4.5 h-4.5 text-brand-blue" /></div>
-              <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Decision Alpha</div>
-            </div>
-            <div className="flex items-end gap-3">
-              <div className="text-3xl font-heading font-black text-gray-900">{decisionAlpha}%</div>
-              <div className="text-sm font-medium text-gray-500 mb-1.5">proof accuracy</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Floating Action Button */}
-      <button 
-        onClick={() => window.dispatchEvent(new CustomEvent('open-upload-modal'))}
-        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 bg-gray-900 text-white p-4 rounded-full shadow-apple hover:bg-brand-blue hover:shadow-glow-blue transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-blue z-40 group flex items-center gap-3 overflow-hidden hover:-translate-y-1"
-        title="Upload Signals (N)"
-      >
-        <UploadCloud className="w-6 h-6 shrink-0" />
-        <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-bold text-sm">
-          Import Data
-        </span>
-      </button>
     </AppLayout>
   );
 };

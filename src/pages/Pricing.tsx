@@ -25,88 +25,76 @@ export const Pricing = () => {
       annualBilled: "Free forever",
       desc: "For solo founders and PMs validating the evidence-based product loop.",
       features: [
-        "1 Member, 2 Viewers",
+        "Up to 2 members",
         "1 Workspace",
-        "200 signals / month",
-        "100 AI Classifications / month",
-        "5 AI Memos / month",
-        "Standard Launch Reviews",
-        "AI Model: Gemini",
+        "Up to 200 signals",
+        "Up to 50 accounts",
+        "Max 1 active launch",
+        "~100 AI calls/month"
       ],
-      comingSoon: [
-        "Advanced Analytics"
-      ],
+      comingSoon: [],
       cta: "Start Free",
       popular: false
     },
     {
-      name: "Starter",
-      monthlyPrice: "$59",
-      annualPrice: "$49", 
-      period: "/month",
-      annualBilled: "Billed $588 yearly",
+      name: "Pro",
+      monthlyPrice: "$39",
+      annualPrice: "$29", 
+      period: "/maker/month",
+      annualBilled: "Billed $348 yearly per maker",
       desc: "For early-stage startups establishing their first evidence-based product loop.",
       features: [
-        "3 Members, Unlimited Viewers",
-        "1 Workspace",
-        "2,000 signals / month",
-        "500 AI Classifications / month",
-        "20 AI Memos / month",
-        "Standard Launch Reviews",
-        "AI Model: Gemini",
+        "Up to 5 maker seats included",
+        "Up to 2 Workspaces",
+        "Up to 5,000 signals",
+        "Up to 1,000 accounts",
+        "Up to 10 active launches",
+        "~1,500 AI calls/month",
+        "Priority email support"
       ],
-      comingSoon: [
-        "Advanced Analytics"
-      ],
-      cta: "Start with Starter",
-      popular: false
-    },
-    {
-      name: "Growth",
-      monthlyPrice: "$179",
-      annualPrice: "$149", 
-      period: "/month",
-      annualBilled: "Billed $1,788 yearly",
-      desc: "For scaling product teams that need deeper signal volume and team collaboration.",
-      features: [
-        "8 Members, Unlimited Viewers",
-        "1 Workspace",
-        "10,000 signals / month",
-        "2,500 AI Classifications / month",
-        "100 AI Memos / month",
-        "Ask Assistant",
-        "Advanced Launch Reviews",
-        "AI Model: Gemini + OpenRouter",
-      ],
-      comingSoon: [
-        "Advanced Analytics"
-      ],
-      cta: "Start with Growth",
+      comingSoon: [],
+      cta: "Start with Pro",
       popular: true
     },
     {
-      name: "Scale",
-      monthlyPrice: "$449",
-      annualPrice: "$369", 
-      period: "/month",
-      annualBilled: "Billed $4,428 yearly",
-      desc: "For large organizations requiring maximum volume, security, and premium AI models.",
+      name: "Business",
+      monthlyPrice: "$69",
+      annualPrice: "$59", 
+      period: "/maker/month",
+      annualBilled: "Billed $708 yearly per maker",
+      desc: "For scaling product teams that need deeper signal volume and analytics.",
       features: [
-        "20 Members, Unlimited Viewers",
-        "10 Workspaces",
-        "50,000 signals / month",
-        "10,000 AI Classifications / month",
-        "500 AI Memos / month",
-        "Ask Assistant",
-        "Audit Log & Priority Support",
-        "Advanced Launch Reviews",
-        "AI Model: Grok",
+        "Up to 15 maker seats included",
+        "Unlimited Workspaces",
+        "Up to 25,000 signals",
+        "Up to 5,000 accounts",
+        "Unlimited active launches",
+        "~5,000 AI calls/month",
+        "Advanced opportunity analytics",
+        "Higher-priority support"
+      ],
+      comingSoon: [],
+      cta: "Start with Business",
+      popular: false
+    },
+    {
+      name: "Enterprise",
+      monthlyPrice: "Custom",
+      annualPrice: "Custom", 
+      period: "",
+      annualBilled: "Contact us for pricing",
+      desc: "For large organizations requiring maximum volume, security, and premium models.",
+      features: [
+        "Unlimited seats and higher limits",
+        "Dedicated onboarding and support",
+        "Custom integrations",
+        "Security reviews & SSO",
+        "Advanced permissions"
       ],
       comingSoon: [
-        "Advanced Analytics",
         "Jira Two-Way Sync"
       ],
-      cta: "Start with Scale",
+      cta: "Contact Sales",
       popular: false
     }
   ];
@@ -161,7 +149,7 @@ export const Pricing = () => {
               <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 shadow-sm ${isAnnual ? 'translate-x-8' : 'translate-x-1'}`} />
             </button>
             <span className={`text-sm font-bold flex items-center gap-2 ${isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
-              Annually <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Save ~17%</span>
+              Annually <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Save ~20%</span>
             </span>
           </div>
         </div>
@@ -191,7 +179,7 @@ export const Pricing = () => {
                 {tier.period && <span className={`text-sm font-bold ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>{tier.period}</span>}
               </div>
               <div className={`text-xs font-medium mb-8 h-4 ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>
-                {isAnnual && tier.annualPrice !== "$0" ? tier.annualBilled : (tier.annualPrice === "$0" ? "Free forever" : "Billed monthly")}
+                {isAnnual && tier.annualPrice !== "$0" && tier.annualPrice !== "Custom" ? tier.annualBilled : (tier.annualPrice === "$0" ? "Free forever" : "Billed monthly")}
               </div>
 
               <ul className="space-y-4 mb-8 flex-1">
