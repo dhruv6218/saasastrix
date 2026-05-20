@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useMousePosition } from './hooks/useMousePosition';
 import { AuthProvider } from './contexts/AuthContext';
 import { WorkspaceProvider } from './contexts/WorkspaceContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -48,8 +47,6 @@ import { AccountDetail } from './pages/app/AccountDetail';
 import { SignalDetail } from './pages/app/SignalDetail';
 
 function App() {
-  useMousePosition();
-
   return (
     <ToastProvider>
       <AuthProvider>
@@ -73,7 +70,6 @@ function App() {
 
               {/* Protected Onboarding Flow */}
               <Route path="/onboarding" element={<Navigate to="/onboarding/step-1" replace />} />
-              <Route path="/onboarding/workspace" element={<Navigate to="/onboarding/step-1" replace />} />
               <Route path="/onboarding/step-1" element={<ProtectedRoute><Step1Workspace /></ProtectedRoute>} />
               <Route path="/onboarding/step-2" element={<ProtectedRoute><Step2Data /></ProtectedRoute>} />
               <Route path="/onboarding/step-3" element={<ProtectedRoute><Step3Results /></ProtectedRoute>} />
@@ -83,7 +79,6 @@ function App() {
               <Route path="/app/dashboard" element={<Navigate to="/app" replace />} />
               
               <Route path="/app/signals" element={<ProtectedRoute><SignalExplorer /></ProtectedRoute>} />
-              <Route path="/app/signals/new" element={<ProtectedRoute><SignalExplorer defaultOpenAdd /></ProtectedRoute>} />
               <Route path="/app/signals/:id" element={<ProtectedRoute><SignalDetail /></ProtectedRoute>} />
               
               <Route path="/app/accounts" element={<ProtectedRoute><AccountsList /></ProtectedRoute>} />
@@ -106,10 +101,8 @@ function App() {
               <Route path="/app/launches/:id" element={<ProtectedRoute><LaunchDetail /></ProtectedRoute>} />
               
               <Route path="/app/assistant" element={<ProtectedRoute><Assistant /></ProtectedRoute>} />
-              
               <Route path="/app/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               
-              {/* Catch all 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>

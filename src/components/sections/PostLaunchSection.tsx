@@ -1,6 +1,6 @@
 import React from 'react';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
-import { TrendingUp, ArrowRight } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 
 export const PostLaunchSection = () => {
   const { ref, isVisible } = useScrollReveal(0.2);
@@ -14,7 +14,7 @@ export const PostLaunchSection = () => {
             <span className="w-8 h-[2px] bg-green-600"></span> Phase 11: The Loop <span className="w-8 h-[2px] bg-green-600"></span>
           </div>
           <h2 className="font-heading text-fluid-2 leading-[0.9] tracking-tighter text-gray-900">
-            Did It <br/><span className="text-gray-300 text-stroke">Actually Work?</span>
+            Did It <br/><span className="text-brand-blue">Actually Work?</span>
           </h2>
         </div>
 

@@ -49,7 +49,7 @@ export const ChaosSection = () => {
           </div>
           <h2 className="font-heading text-fluid-2 leading-[0.9] tracking-tighter text-gray-900 mb-8">
             Data <br/><span className="text-gray-400">Everywhere.</span><br/>
-            Clarity <br/><span className="text-gray-300 text-stroke">Nowhere.</span>
+            Clarity <br/><span className="text-brand-blue">Nowhere.</span>
           </h2>
           <p className="text-lg md:text-xl text-gray-600 max-w-md font-medium">
             Without account context, noise looks exactly like signal. You are building features for the loudest voices, not the highest value.

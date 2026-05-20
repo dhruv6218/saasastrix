@@ -17,7 +17,7 @@ export const VolumeValueSection = () => {
           </div>
           <h2 className="font-heading text-fluid-2 leading-[0.9] tracking-tighter text-gray-900 mb-6 md:mb-8">
             Volume <br/>
-            <span className="text-gray-300 text-stroke">Beats Value.</span>
+            <span className="text-brand-blue">Beats Value.</span>
           </h2>
           <p className="text-lg md:text-xl text-gray-600 font-medium mb-6 md:mb-8">
             Right now, a button color change requested by 500 free users looks more urgent than a critical SSO bug affecting 3 Enterprise accounts.

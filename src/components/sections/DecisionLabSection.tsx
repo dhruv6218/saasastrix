@@ -15,7 +15,7 @@ export const DecisionLabSection = () => {
           </div>
           <h2 className="font-heading text-fluid-2 leading-[0.9] tracking-tighter text-gray-900">
             Compare. Justify. <br/>
-            <span className="text-gray-300 text-stroke">Commit.</span>
+            <span className="text-brand-blue">Commit.</span>
           </h2>
           <p className="text-lg md:text-xl text-gray-600 font-medium mt-6 md:mt-8 max-w-2xl">
             The Decision Lab lets you compare top opportunities side-by-side. Run what-if scenarios, log your rationale, and create a permanent paper trail of why you built what you built.

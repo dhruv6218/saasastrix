@@ -16,7 +16,7 @@ export const EvidenceViewSection = () => {
           </div>
           <h2 className="font-heading text-fluid-2 leading-[0.9] tracking-tighter text-gray-900 mb-6 md:mb-8">
             Never Lose <br/>
-            <span className="text-gray-300 text-stroke">The Context.</span>
+            <span className="text-brand-blue">The Context.</span>
           </h2>
           <p className="text-lg md:text-xl text-gray-600 font-medium mb-8">
             Every canonical problem is backed by raw, traceable evidence. Drill down into exact quotes, sentiment distribution, and affected accounts before making a call.

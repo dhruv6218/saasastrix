@@ -28,6 +28,7 @@ import {
   useLaunches 
 } from '../../lib/api';
 import { Skeleton } from '../../components/ui/Skeleton';
+import { formatCurrency } from '../../lib/utils';
 
 export const Dashboard = () => {
   const { activeWorkspace } = useWorkspace();
@@ -41,7 +42,6 @@ export const Dashboard = () => {
   const { data: launchData } = useLaunches(wsId);
 
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'there';
-
   const opportunities = oppData || [];
   const signalsCount = sigData?.total || 0;
   const decisions = decData || [];
@@ -57,15 +57,7 @@ export const Dashboard = () => {
     return daysSinceLaunch >= 7; 
   });
   
-  const formatCurrency = (value: number) => {
-    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `$${(value / 1000).toFixed(0)}k`;
-    return `$${value}`;
-  };
-
   const unmatchedSignals = Math.max(0, Math.floor(signalsCount * 0.15));
-
-  // Dynamic Decision Alpha Calculation
   const solvedLaunches = launches.filter(l => l.pm_verdict === 'Solved').length;
   const decisionAlpha = launches.length > 0 ? Math.round((solvedLaunches / launches.length) * 100) : 0;
 
@@ -83,11 +75,9 @@ export const Dashboard = () => {
       title={`${getGreeting()}, ${firstName}.`} 
       subtitle={`${currentDate} • Here is what needs your attention today.`}
     >
-      {/* 1. URGENT: Reviews Due Banner */}
       {reviewsDue.length > 0 && (
         <div className="mb-8 relative overflow-hidden rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm border border-amber-200/60 bg-gradient-to-br from-amber-50/90 to-orange-50/50 backdrop-blur-md animate-slide-up">
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
-          
           <div className="flex items-start sm:items-center gap-4 text-amber-900 relative z-10">
             <div className="p-3 bg-white/60 backdrop-blur-sm rounded-xl shrink-0 shadow-sm border border-amber-100/50">
               <Clock className="w-5 h-5 text-amber-600 animate-pulse-slow" />
@@ -105,12 +95,10 @@ export const Dashboard = () => {
         </div>
       )}
 
-      {/* 2. PULSE STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-slide-up stagger-1">
-        {/* Total Signals */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-default">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2 bg-blue-50 rounded-lg border border-blue-100 text-brand-blue transition-colors"><PieChart className="w-4 h-4" /></div>
+            <div className="p-2 bg-blue-50 rounded-lg border border-blue-100 text-brand-blue"><PieChart className="w-4 h-4" /></div>
             <span className="text-[10px] font-bold text-brand-blue uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded border border-blue-100">Free Plan</span>
           </div>
           <div className="text-3xl font-heading font-black text-gray-900">{signalsCount}</div>
@@ -120,31 +108,28 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Unmatched Signals */}
         <Link to="/app/signals" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-1 hover:border-amber-200 transition-all duration-300 block">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2 bg-amber-50 rounded-lg border border-amber-100 text-amber-600 transition-colors"><AlertCircle className="w-4 h-4" /></div>
+            <div className="p-2 bg-amber-50 rounded-lg border border-amber-100 text-amber-600"><AlertCircle className="w-4 h-4" /></div>
           </div>
           <div className="text-3xl font-heading font-black text-gray-900">{unmatchedSignals}</div>
           <div className="text-xs font-medium text-gray-500 mt-1">Unmatched Signals</div>
           <div className="text-[10px] font-bold text-amber-600 mt-4 flex items-center gap-1 group-hover:underline"><ArrowRight className="w-3 h-3" /> Needs Triage</div>
         </Link>
 
-        {/* Top Opportunity Score */}
         <Link to="/app/opportunities" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-1 hover:border-astrix-teal/30 transition-all duration-300 block">
           <div className="absolute -right-6 -top-6 w-24 h-24 bg-astrix-teal/5 rounded-full blur-2xl group-hover:bg-astrix-teal/10 transition-colors"></div>
           <div className="flex justify-between items-start mb-4 relative z-10">
-            <div className="p-2 bg-teal-50 rounded-lg border border-teal-100 text-astrix-teal transition-colors"><Zap className="w-4 h-4" /></div>
+            <div className="p-2 bg-teal-50 rounded-lg border border-teal-100 text-astrix-teal"><Zap className="w-4 h-4" /></div>
           </div>
           <div className="text-3xl font-heading font-black text-astrix-teal relative z-10">{opportunities[0]?.opportunity_score || 0}</div>
           <div className="text-xs font-medium text-gray-500 mt-1 relative z-10">Max Opportunity Score</div>
           <div className="text-[10px] font-bold text-gray-400 mt-4 relative z-10">Highest priority index</div>
         </Link>
 
-        {/* Decision Alpha */}
         <Link to="/app/launches" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-1 hover:border-green-200 transition-all duration-300 block">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2 bg-green-50 rounded-lg border border-green-100 text-green-600 transition-colors"><CheckCircle2 className="w-4 h-4" /></div>
+            <div className="p-2 bg-green-50 rounded-lg border border-green-100 text-green-600"><CheckCircle2 className="w-4 h-4" /></div>
           </div>
           <div className="text-3xl font-heading font-black text-gray-900">{decisionAlpha}%</div>
           <div className="text-xs font-medium text-gray-500 mt-1">Decision Alpha</div>
@@ -152,40 +137,24 @@ export const Dashboard = () => {
         </Link>
       </div>
 
-      {/* 3. QUICK ACTIONS BAR */}
       <div className="bg-white border border-gray-200 rounded-2xl p-2.5 mb-8 shadow-sm flex flex-wrap sm:flex-nowrap gap-2 items-center justify-between animate-slide-up stagger-2">
         <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
-          <button 
-            onClick={() => navigate('/app/signals/new')}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:text-gray-900 transition-all hover:shadow-sm"
-          >
+          <button onClick={() => navigate('/app/signals/new')} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:text-gray-900 transition-all hover:shadow-sm">
             <Plus className="w-4 h-4" /> Add Signal
           </button>
-          <button 
-            onClick={() => navigate('/app/problems')}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:text-gray-900 transition-all hover:shadow-sm"
-          >
+          <button onClick={() => navigate('/app/problems')} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:text-gray-900 transition-all hover:shadow-sm">
             <Layers className="w-4 h-4" /> New Problem
           </button>
-          <button 
-            onClick={() => navigate('/app/decisions')}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:text-gray-900 transition-all hover:shadow-sm"
-          >
+          <button onClick={() => navigate('/app/decisions')} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:text-gray-900 transition-all hover:shadow-sm">
             <Rocket className="w-4 h-4" /> Log Launch
           </button>
         </div>
-        <button 
-          onClick={() => window.dispatchEvent(new CustomEvent('open-upload-modal'))}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-astrix-teal hover:bg-astrix-darkTeal text-white rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md"
-        >
+        <button onClick={() => window.dispatchEvent(new CustomEvent('open-upload-modal'))} className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-astrix-teal hover:bg-astrix-darkTeal text-white rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md">
           <UploadCloud className="w-4 h-4" /> Import CSV
         </button>
       </div>
 
-      {/* 4. MAIN CONTENT: Opportunities & Execution */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-12">
-        
-        {/* Left: Top Opportunities Leaderboard */}
         <div className="xl:col-span-2 flex flex-col animate-slide-up stagger-3">
           <div className="flex items-center justify-between mb-4 px-1">
             <h2 className="font-heading text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -213,10 +182,7 @@ export const Dashboard = () => {
             ) : (
               <div className="divide-y divide-gray-100 flex-1">
                 {topOpportunities.map((opp, index) => (
-                  <div 
-                    key={opp.id} 
-                    className={`relative p-5 hover:bg-gray-50 transition-all duration-200 group flex items-center justify-between gap-4 ${index === 0 ? 'bg-teal-50/10' : ''}`}
-                  >
+                  <div key={opp.id} className={`relative p-5 hover:bg-gray-50 transition-all duration-200 group flex items-center justify-between gap-4 ${index === 0 ? 'bg-teal-50/10' : ''}`}>
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-heading font-black text-lg shrink-0 shadow-sm transition-transform group-hover:scale-105 ${index === 0 ? 'bg-astrix-teal text-white' : index === 1 ? 'bg-gray-200 text-gray-700' : index === 2 ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-500'}`}>
                         {index + 1}
@@ -233,16 +199,10 @@ export const Dashboard = () => {
                         </div>
                       </div>
                     </div>
-                    
                     <div className="flex items-center gap-6 shrink-0">
-                      {/* Hidden Quick Action on Hover */}
-                      <Link 
-                        to={`/app/opportunities/${opp.id}`}
-                        className="hidden md:flex opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300 bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:border-astrix-teal hover:text-astrix-teal items-center gap-1"
-                      >
+                      <Link to={`/app/opportunities/${opp.id}`} className="hidden md:flex opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300 bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:border-astrix-teal hover:text-astrix-teal items-center gap-1">
                         Decide <ArrowRight className="w-3 h-3" />
                       </Link>
-
                       <div className="flex flex-col items-end">
                         <div className="text-2xl font-heading font-black text-gray-900">{opp.opportunity_score}</div>
                         <div className="w-16 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
@@ -257,10 +217,7 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Right: Execution Feed (Timeline Style) */}
         <div className="xl:col-span-1 flex flex-col gap-8 animate-slide-up stagger-4">
-          
-          {/* Active Launches Timeline */}
           <div className="flex flex-col">
             <div className="flex items-center justify-between mb-4 px-1">
               <h2 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-widest flex items-center gap-2">
@@ -275,7 +232,7 @@ export const Dashboard = () => {
                 </div>
               ) : (
                 <div className="relative pl-4 border-l-2 border-gray-100 space-y-6">
-                  {activeLaunches.slice(0, 3).map((launch, i) => (
+                  {activeLaunches.slice(0, 3).map((launch) => (
                     <div key={launch.id} className="relative group">
                       <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 bg-white border-2 border-brand-blue rounded-full group-hover:scale-125 group-hover:bg-brand-blue transition-all"></div>
                       <Link to={`/app/launches/${launch.id}`} className="block pl-2">
@@ -291,7 +248,6 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          {/* Recent Decisions Timeline */}
           <div className="flex flex-col">
             <div className="flex items-center justify-between mb-4 px-1">
               <h2 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-widest flex items-center gap-2">
@@ -306,7 +262,7 @@ export const Dashboard = () => {
                 </div>
               ) : (
                 <div className="relative pl-4 border-l-2 border-gray-100 space-y-6">
-                  {recentDecisions.map((dec, i) => (
+                  {recentDecisions.map((dec) => (
                     <div key={dec.id} className="relative group">
                       <div className={`absolute -left-[21px] top-1 w-2.5 h-2.5 bg-white border-2 rounded-full group-hover:scale-125 transition-all ${dec.action === 'Build' ? 'border-blue-500 group-hover:bg-blue-500' : dec.action === 'Fix' ? 'border-yellow-500 group-hover:bg-yellow-500' : 'border-gray-400 group-hover:bg-gray-400'}`}></div>
                       <Link to={`/app/decisions/${dec.id}`} className="block pl-2">
@@ -324,7 +280,6 @@ export const Dashboard = () => {
               )}
             </div>
           </div>
-
         </div>
       </div>
     </AppLayout>

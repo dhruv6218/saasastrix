@@ -71,7 +71,7 @@ Enterprise accounts are churning due to lack of SAML SSO.
           </div>
           <h2 className="font-heading text-fluid-2 leading-[0.9] tracking-tighter text-gray-900 mb-8">
             One Click. <br/>
-            <span className="text-gray-300 text-stroke">Execution Ready.</span>
+            <span className="text-brand-blue">Execution Ready.</span>
           </h2>
           <p className="text-lg md:text-xl text-gray-600 font-medium mb-8">
             Stop writing boilerplate. Once a decision is made, AI instantly generates your Decision Memo and PRD—complete with evidence citations.

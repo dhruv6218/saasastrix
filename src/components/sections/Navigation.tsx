@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { MagneticButton } from '../ui/MagneticButton';
-import { InstallPrompt } from '../InstallPrompt';
 
 export const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -62,26 +61,22 @@ export const Navigation = () => {
       <nav className={`fixed top-0 left-0 right-0 z-[60] transition-all duration-300 ${hidden ? '-translate-y-full' : 'translate-y-0'} ${scrolled || mobileMenuOpen ? 'py-4 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-sm' : 'py-8 bg-transparent'}`}>
         <div className="max-w-[1400px] mx-auto px-6 md:px-12 flex items-center justify-between">
           
-          {/* Logo */}
           <Link to="/" onClick={(e) => handleNavClick(e, '/')} className="flex items-center gap-3 group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded-lg p-1 relative z-[70]">
-            <div className="relative flex items-center justify-center">
-              <img 
-                src="https://images.dualite.app/102e86e1-720e-45cc-9e4e-55e865135e96/asset-b9a7a63e-c65a-4fa8-9433-c13564a7364e.webp" 
-                alt="Astrix Logo" 
-                className="h-10 w-auto relative z-10 object-contain group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
+            <img 
+              src="https://images.dualite.app/102e86e1-720e-45cc-9e4e-55e865135e96/asset-b9a7a63e-c65a-4fa8-9433-c13564a7364e.webp" 
+              alt="Astrix Logo" 
+              className="h-10 w-auto relative z-10 object-contain group-hover:scale-105 transition-transform duration-300"
+            />
             <span className="font-heading text-2xl font-black tracking-tighter text-gray-900 hidden sm:block">ASTRIX</span>
           </Link>
           
-          {/* Desktop Center Links */}
           <div className="hidden md:flex items-center gap-8 font-sans text-sm font-medium text-gray-500">
             {navLinks.map((item) => (
               <Link 
                 key={item.name} 
                 to={item.path} 
                 onClick={(e) => handleNavClick(e, item.path)}
-                className="hover:text-gray-900 transition-colors relative group py-2 px-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:text-gray-900"
+                className="hover:text-gray-900 transition-colors relative group py-2 px-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
               >
                 {item.name}
                 <span className="absolute bottom-0 left-0 w-full h-[1px] bg-gray-900 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
@@ -89,10 +84,8 @@ export const Navigation = () => {
             ))}
           </div>
 
-          {/* Desktop CTA & Mobile Toggle */}
           <div className="flex items-center gap-4 relative z-[70]">
             <div className="hidden md:flex items-center gap-4">
-              <InstallPrompt />
               <Link to="/login" className="text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded-md px-2 py-1">
                 Log in
               </Link>
@@ -103,7 +96,6 @@ export const Navigation = () => {
               </MagneticButton>
             </div>
             
-            {/* Mobile Menu Button */}
             <button 
               className="md:hidden p-2 text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded-md"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -115,7 +107,6 @@ export const Navigation = () => {
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay */}
       <div className={`fixed inset-0 bg-white z-[55] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden flex flex-col justify-center px-8 ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <div className="flex flex-col gap-6">
           {navLinks.map((item, i) => (
@@ -132,11 +123,10 @@ export const Navigation = () => {
           ))}
           
           <div className={`mt-8 transition-all duration-500 delay-300 flex flex-col gap-4 ${mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <InstallPrompt />
-            <Link to="/signup" className="w-full bg-brand-blue text-white px-6 py-4 rounded-full text-lg font-bold shadow-glow-blue text-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-blue focus-visible:ring-offset-2">
+            <Link to="/signup" className="w-full bg-brand-blue text-white px-6 py-4 rounded-full text-lg font-bold shadow-glow-blue text-center">
               Start Free
             </Link>
-            <Link to="/login" className="w-full bg-gray-50 text-gray-900 border border-gray-200 px-6 py-4 rounded-full text-lg font-bold text-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gray-300 focus-visible:ring-offset-2">
+            <Link to="/login" className="w-full bg-gray-50 text-gray-900 border border-gray-200 px-6 py-4 rounded-full text-lg font-bold text-center">
               Log In
             </Link>
           </div>

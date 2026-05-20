@@ -31,7 +31,7 @@ export const EmpireSection = () => {
         </div>
 
         <h2 className={`font-heading text-fluid-2 leading-[0.9] tracking-tighter mb-8 md:mb-10 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          Your next decision <br/> <span className="text-gray-300 text-stroke">deserves proof.</span>
+          Your next decision <br/> <span className="text-brand-blue">deserves proof.</span>
         </h2>
         
         <p className={`text-lg md:text-xl text-gray-500 font-medium max-w-2xl mb-12 md:mb-16 transition-all duration-700 delay-100 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>

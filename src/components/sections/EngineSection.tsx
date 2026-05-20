@@ -20,7 +20,7 @@ export const EngineSection = () => {
           </div>
           <h2 className="font-heading text-fluid-1 leading-[1] tracking-tighter mb-10">
             No Black Boxes. <br/>
-            <span className="text-gray-300 text-stroke">Just Math.</span>
+            <span className="text-brand-blue">Just Math.</span>
           </h2>
           
           <div className="font-mono text-base md:text-xl space-y-4 text-gray-500 border-l-2 border-gray-200 pl-6 md:pl-8 font-medium">
