@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MainLayout } from '../layouts/MainLayout';
-import { Check, HelpCircle, Loader2, Sparkles } from 'lucide-react';
+import { Check, HelpCircle, Loader2, Sparkles, Minus } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useToast } from '../contexts/ToastContext';
@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 export const Pricing = () => {
   const { ref: headerRef, isVisible: headerVisible } = useScrollReveal();
   const { ref: cardsRef, isVisible: cardsVisible } = useScrollReveal(0.1);
+  const { ref: tableRef, isVisible: tableVisible } = useScrollReveal(0.05);
 
   const { activeWorkspace } = useWorkspace();
   const { addToast } = useToast();
@@ -23,14 +24,16 @@ export const Pricing = () => {
       annualPrice: "$0",
       period: "/month",
       annualBilled: "Free forever",
-      desc: "For solo founders and PMs validating the evidence-based product loop.",
+      desc: "For solo founders and PMs completing their first evidence-based product loop.",
       features: [
-        "Up to 2 members",
-        "1 Workspace",
-        "Up to 200 signals",
-        "Up to 50 accounts",
-        "Max 1 active launch",
-        "~100 AI calls/month"
+        "1 workspace · 2 maker seats",
+        "Up to 200 signals & 50 accounts",
+        "Up to 10 active problems",
+        "Top 5 opportunities (no compare)",
+        "Max 1 active launch, 3 lifetime",
+        "~100 AI calls/month",
+        "Basic AI: signal suggestions & 1× memo per decision",
+        "1 CSV upload per entity type",
       ],
       comingSoon: [],
       cta: "Start Free",
@@ -42,15 +45,18 @@ export const Pricing = () => {
       annualPrice: "$49",
       period: "/month",
       annualBilled: "Billed $588 yearly",
-      desc: "For early-stage startups establishing their first evidence-based product loop.",
+      desc: "Run outcome-driven product rituals for a small team.",
       features: [
-        "Up to 5 maker seats included",
-        "Up to 2 Workspaces",
-        "Up to 5,000 signals",
-        "Up to 1,000 accounts",
-        "Up to 10 active launches",
+        "1 workspace · 3 maker seats",
+        "Up to 3,000 signals & 500 accounts",
+        "Up to 50 active problems",
+        "Full opportunity list + compare mode",
+        "Up to 5 active launches, unlimited completed",
         "~1,500 AI calls/month",
-        "Priority email support"
+        "Decision memo, PRD & user story drafts",
+        "Multiple CSV uploads + account matching",
+        "Launch & verdict dashboard widgets",
+        "Email support",
       ],
       comingSoon: [],
       cta: "Start with Starter",
@@ -62,16 +68,19 @@ export const Pricing = () => {
       annualPrice: "$149",
       period: "/month",
       annualBilled: "Billed $1,789 yearly",
-      desc: "For scaling product teams that need deeper signal volume and analytics.",
+      desc: "Make accountability a default in your product org.",
       features: [
-        "Up to 15 maker seats included",
-        "Unlimited Workspaces",
-        "Up to 25,000 signals",
-        "Up to 5,000 accounts",
-        "Unlimited active launches",
-        "~5,000 AI calls/month",
-        "Advanced opportunity analytics",
-        "Higher-priority support"
+        "Up to 3 workspaces · 8 maker seats",
+        "Up to 15,000 signals & 2,000 accounts",
+        "Up to 150 active problems",
+        "Opportunity saved views & filters",
+        "Decision tags (Theme, OKR link)",
+        "Up to 15 active launches, unlimited completed",
+        "~4,000 AI calls/month · higher-quality models",
+        "Accountability dashboard (verdicts, ARR)",
+        "Required verdict enforcement toggle",
+        "Basic activity log",
+        "Priority email support",
       ],
       comingSoon: [],
       cta: "Start with Growth",
@@ -83,14 +92,19 @@ export const Pricing = () => {
       annualPrice: "$374",
       period: "/month",
       annualBilled: "Billed $4,489 yearly",
-      desc: "For large organizations requiring maximum volume, security, and premium AI models.",
+      desc: "Evidence-backed bets and accountability, at org scale.",
       features: [
-        "Unlimited seats and higher limits",
-        "Dedicated onboarding and support",
-        "Custom integrations",
-        "Security reviews & SSO",
-        "Advanced permissions",
-        "~20,000 AI calls/month"
+        "Unlimited workspaces · 20 maker seats",
+        "Up to 100,000 signals & 10,000 accounts",
+        "Up to 500 active problems",
+        "Custom score views + opportunity export",
+        "Decision & launch templates by squad",
+        "Unlimited active launches",
+        "~10,000 AI calls/month · top-tier models",
+        "Executive & Board view (bets, win/loss, ARR)",
+        "Granular roles (Owner, Admin, Maker, Read-only)",
+        "Advanced activity log + audit trail export",
+        "High-priority support + onboarding session",
       ],
       comingSoon: [
         "Jira Two-Way Sync"
@@ -98,6 +112,81 @@ export const Pricing = () => {
       cta: "Start with Scale",
       popular: false
     }
+  ];
+
+  type CellValue = string | boolean | null;
+
+  const comparisonCategories: {
+    label: string;
+    rows: { feature: string; values: CellValue[] }[];
+  }[] = [
+    {
+      label: "Workspace & Seats",
+      rows: [
+        { feature: "Workspaces", values: ["1", "1", "Up to 3", "Unlimited"] },
+        { feature: "Maker Seats", values: ["2", "3", "8", "20"] },
+      ]
+    },
+    {
+      label: "Signals & Data",
+      rows: [
+        { feature: "Signals", values: ["200", "3,000", "15,000", "100,000"] },
+        { feature: "Accounts", values: ["50", "500", "2,000", "10,000"] },
+        { feature: "Active Problems", values: ["10", "50", "150", "500"] },
+        { feature: "CSV Uploads", values: ["1 per type", "Multiple", "Multiple", "Multiple"] },
+        { feature: "Auto Account Matching", values: [false, true, true, true] },
+      ]
+    },
+    {
+      label: "Opportunities",
+      rows: [
+        { feature: "Opportunity Visibility", values: ["Top 5 only", "Full list", "Full list", "Full list"] },
+        { feature: "Compare Mode", values: [false, true, true, true] },
+        { feature: "Saved Views & Filters", values: [false, false, true, true] },
+        { feature: "Custom Score Views", values: [false, false, false, true] },
+        { feature: "Opportunity Export", values: [false, false, false, true] },
+      ]
+    },
+    {
+      label: "Launches & Outcomes",
+      rows: [
+        { feature: "Active Launches", values: ["1", "5", "15", "Unlimited"] },
+        { feature: "Completed Launches", values: ["3 lifetime", "Unlimited", "Unlimited", "Unlimited"] },
+        { feature: "Day 7 / 30 Outcome Reviews", values: [true, true, true, true] },
+        { feature: "Verdict Dashboard Widgets", values: [false, true, true, true] },
+        { feature: "Accountability Dashboard", values: [false, "Basic", "Full (ARR, segments)", "Exec + Board view"] },
+        { feature: "Required Verdict Enforcement", values: [false, false, true, true] },
+        { feature: "Decision Tags (Theme, OKR)", values: [false, false, true, true] },
+        { feature: "Decision & Launch Templates", values: [false, false, false, true] },
+      ]
+    },
+    {
+      label: "AI",
+      rows: [
+        { feature: "AI Calls / Month", values: ["~100", "~1,500", "~4,000", "~10,000"] },
+        { feature: "Signal Suggestions", values: [true, true, true, true] },
+        { feature: "Decision Memo & PRD Drafts", values: ["1× per decision", true, true, "Bulk generation"] },
+        { feature: "User Story Draft", values: [false, true, true, true] },
+        { feature: "Model Quality", values: ["Standard", "Standard", "Higher-quality", "Top-tier"] },
+      ]
+    },
+    {
+      label: "Governance & Security",
+      rows: [
+        { feature: "Activity Log", values: [false, false, "Basic", "Advanced + Filters"] },
+        { feature: "Audit Trail Export", values: [false, false, false, true] },
+        { feature: "Granular Roles", values: [false, false, false, true] },
+      ]
+    },
+    {
+      label: "Support",
+      rows: [
+        { feature: "Support Level", values: ["Docs + Email", "Email", "Priority Email", "High-Priority"] },
+        { feature: "Onboarding Session", values: [false, false, false, true] },
+        { feature: "Weekly Summary Email", values: [false, false, true, true] },
+        { feature: "Quarterly Check-in", values: [false, false, false, true] },
+      ]
+    },
   ];
 
   const faqs = [
@@ -117,15 +206,22 @@ export const Pricing = () => {
       navigate('/signup');
       return;
     }
-
     setLoadingTier(tier.name);
-    
     setTimeout(() => {
       setLoadingTier(null);
       addToast(`Redirecting to checkout for ${tier.name} plan...`, "success");
       navigate('/app/settings?tab=billing');
     }, 1500);
   };
+
+  const renderCell = (val: CellValue, isPopular: boolean) => {
+    if (val === true) return <Check className={`w-5 h-5 mx-auto ${isPopular ? 'text-brand-yellow' : 'text-brand-blue'}`} />;
+    if (val === false) return <Minus className="w-4 h-4 mx-auto text-gray-300" />;
+    if (val === null) return <Minus className="w-4 h-4 mx-auto text-gray-300" />;
+    return <span className={`text-sm font-semibold ${isPopular ? 'text-white' : 'text-gray-700'}`}>{val}</span>;
+  };
+
+  const planColors = ['', 'bg-brand-blue', '', ''];
 
   return (
     <MainLayout>
@@ -142,7 +238,7 @@ export const Pricing = () => {
           {/* Billing Toggle */}
           <div className={`flex items-center justify-center gap-4 transition-all duration-700 delay-200 ${headerVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
             <span className={`text-sm font-bold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>Monthly</span>
-            <button 
+            <button
               onClick={() => setIsAnnual(!isAnnual)}
               className="w-14 h-7 bg-brand-blue rounded-full relative transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-blue/30"
               aria-label="Toggle annual billing"
@@ -157,11 +253,11 @@ export const Pricing = () => {
       </div>
 
       {/* Pricing Cards */}
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 -mt-12 relative z-10 mb-32" ref={cardsRef}>
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 -mt-12 relative z-10 mb-20" ref={cardsRef}>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 max-w-[1400px] mx-auto">
           {tiers.map((tier, i) => (
-            <div 
-              key={i} 
+            <div
+              key={i}
               className={`relative rounded-3xl p-6 lg:p-8 flex flex-col transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 ${cardsVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'} ${tier.popular ? 'bg-brand-blue text-white shadow-glow-blue xl:scale-105 z-20 border-none' : 'bg-white text-gray-900 shadow-apple border border-gray-200'}`}
               style={{ transitionDelay: `${i * 100}ms` }}
             >
@@ -172,7 +268,7 @@ export const Pricing = () => {
               )}
               <h3 className={`text-xl font-heading font-bold mb-2 ${tier.popular ? 'text-white' : 'text-gray-900'}`}>{tier.name}</h3>
               <p className={`text-sm mb-6 h-16 font-medium ${tier.popular ? 'text-blue-100' : 'text-gray-500'}`}>{tier.desc}</p>
-              
+
               <div className="mb-2">
                 <span className="text-4xl lg:text-5xl font-heading font-black tracking-tighter">
                   {isAnnual ? tier.annualPrice : tier.monthlyPrice}
@@ -180,21 +276,19 @@ export const Pricing = () => {
                 {tier.period && <span className={`text-sm font-bold ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>{tier.period}</span>}
               </div>
               <div className={`text-xs font-medium mb-8 h-4 ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>
-                {isAnnual && tier.annualPrice !== "$0" && tier.annualPrice !== "Custom" ? tier.annualBilled : (tier.annualPrice === "$0" ? "Free forever" : "Billed monthly")}
+                {isAnnual && tier.annualPrice !== "$0" ? tier.annualBilled : (tier.annualPrice === "$0" ? "Free forever" : "Billed monthly")}
               </div>
 
-              <ul className="space-y-4 mb-8 flex-1">
+              <ul className="space-y-3.5 mb-8 flex-1">
                 {tier.features.map((feat, j) => (
                   <li key={j} className="flex items-start gap-3 text-sm font-medium">
-                    <Check className={`w-5 h-5 shrink-0 ${tier.popular ? 'text-brand-yellow' : 'text-brand-blue'}`} />
+                    <Check className={`w-4 h-4 shrink-0 mt-0.5 ${tier.popular ? 'text-brand-yellow' : 'text-brand-blue'}`} />
                     <span className={tier.popular ? 'text-blue-50' : 'text-gray-600'}>{feat}</span>
                   </li>
                 ))}
-                
-                {/* Coming Soon Features */}
                 {tier.comingSoon.map((feat, j) => (
                   <li key={`cs-${j}`} className="flex items-start gap-3 text-sm font-medium opacity-70">
-                    <Sparkles className={`w-5 h-5 shrink-0 ${tier.popular ? 'text-blue-300' : 'text-gray-400'}`} />
+                    <Sparkles className={`w-4 h-4 shrink-0 mt-0.5 ${tier.popular ? 'text-blue-300' : 'text-gray-400'}`} />
                     <span className={tier.popular ? 'text-blue-100' : 'text-gray-500'}>
                       {feat} <span className="text-[10px] uppercase tracking-wider font-bold ml-1 opacity-80">(Coming Soon)</span>
                     </span>
@@ -202,7 +296,7 @@ export const Pricing = () => {
                 ))}
               </ul>
 
-              <button 
+              <button
                 onClick={() => handleCheckout(tier)}
                 disabled={loadingTier === tier.name}
                 className={`w-full py-3.5 rounded-xl font-bold transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 flex items-center justify-center gap-2 ${tier.popular ? 'bg-white text-brand-blue hover:bg-gray-50 focus-visible:ring-white shadow-sm' : 'bg-gray-900 text-white hover:bg-brand-blue focus-visible:ring-brand-blue shadow-sm'} disabled:opacity-70`}
@@ -211,6 +305,82 @@ export const Pricing = () => {
               </button>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Comparison Table */}
+      <div className={`max-w-[1200px] mx-auto px-4 md:px-6 mb-32 transition-all duration-700 ${tableVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`} ref={tableRef}>
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-heading font-bold tracking-tight text-gray-900 mb-3">Compare all features</h2>
+          <p className="text-gray-500 font-medium">Everything that's included in each plan, side by side.</p>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-apple">
+          {/* Table Header */}
+          <div className="grid grid-cols-5 border-b border-gray-100">
+            <div className="p-5 col-span-1" />
+            {tiers.map((tier, i) => (
+              <div
+                key={i}
+                className={`p-5 text-center ${tier.popular ? 'bg-brand-blue' : ''}`}
+              >
+                <div className={`text-sm font-black uppercase tracking-widest mb-1 ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>{tier.name}</div>
+                <div className={`text-2xl font-heading font-black tracking-tighter ${tier.popular ? 'text-white' : 'text-gray-900'}`}>
+                  {isAnnual ? tier.annualPrice : tier.monthlyPrice}
+                </div>
+                {tier.period && (
+                  <div className={`text-xs font-medium ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>{tier.period}</div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Table Body */}
+          {comparisonCategories.map((cat, ci) => (
+            <div key={ci}>
+              {/* Category Label */}
+              <div className="grid grid-cols-5 bg-gray-50 border-b border-gray-100">
+                <div className="col-span-5 px-5 py-3">
+                  <span className="text-xs font-black uppercase tracking-widest text-gray-400">{cat.label}</span>
+                </div>
+              </div>
+              {/* Rows */}
+              {cat.rows.map((row, ri) => (
+                <div
+                  key={ri}
+                  className={`grid grid-cols-5 border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-colors`}
+                >
+                  <div className="px-5 py-3.5 flex items-center">
+                    <span className="text-sm font-medium text-gray-600">{row.feature}</span>
+                  </div>
+                  {row.values.map((val, vi) => (
+                    <div
+                      key={vi}
+                      className={`px-4 py-3.5 flex items-center justify-center text-center ${tiers[vi].popular ? 'bg-brand-blue/5' : ''}`}
+                    >
+                      {renderCell(val, tiers[vi].popular)}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          ))}
+
+          {/* CTA Row */}
+          <div className="grid grid-cols-5 bg-gray-50 border-t border-gray-200">
+            <div className="px-5 py-5" />
+            {tiers.map((tier, i) => (
+              <div key={i} className={`px-4 py-5 flex items-center justify-center ${tier.popular ? 'bg-brand-blue/5' : ''}`}>
+                <button
+                  onClick={() => handleCheckout(tier)}
+                  disabled={loadingTier === tier.name}
+                  className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all duration-300 focus-visible:outline-none flex items-center justify-center gap-2 ${tier.popular ? 'bg-brand-blue text-white hover:bg-blue-700 shadow-sm' : 'bg-gray-900 text-white hover:bg-brand-blue shadow-sm'} disabled:opacity-70`}
+                >
+                  {loadingTier === tier.name ? <Loader2 className="w-4 h-4 animate-spin" /> : tier.cta}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -223,14 +393,14 @@ export const Pricing = () => {
         <div className="space-y-4">
           {faqs.map((faq, i) => (
             <div key={i} className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:border-brand-blue/30 transition-colors">
-              <button 
+              <button
                 className="w-full p-6 text-left flex justify-between items-center focus-visible:outline-none focus-visible:bg-gray-50 group"
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
               >
                 <span className="font-bold text-gray-900 group-hover:text-brand-blue transition-colors">{faq.q}</span>
                 <span className={`transform transition-transform duration-300 text-gray-400 group-hover:text-brand-blue ${openFaq === i ? 'rotate-180' : ''}`}>↓</span>
               </button>
-              <div 
+              <div
                 className="grid transition-all duration-300 ease-in-out"
                 style={{ gridTemplateRows: openFaq === i ? '1fr' : '0fr' }}
               >

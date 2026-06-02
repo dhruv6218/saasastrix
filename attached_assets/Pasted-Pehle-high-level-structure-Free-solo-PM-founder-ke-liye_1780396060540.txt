@@ -1,0 +1,373 @@
+Pehle high‑level structure
+Free → solo PM / founder ke liye sandbox + proof of value.
+
+Starter → chhota team (2–3 makers) ke liye proper weekly use + limited launches.
+
+Growth → serious PM org jahan launches & outcomes core ritual hain.
+
+Scale → multi‑squad org jahan governance, analytics, aur high AI volume chahiye.
+
+Is hisaab se features split karte hain.
+
+Free plan – kya dena hai (intentionally limited)
+Goal: banda 1–2 cycles complete kare (Signals → Problem → Opportunity → Decision → Launch → Verdict), lekin scale pe use karne ke liye forced ho jaye upgrade.
+
+Allow:
+
+1 workspace
+
+1–2 makers (Owner + 1 Member)
+
+Signals: max 150–200 stored
+
+Accounts: max 30–50
+
+Problems: max 10 active
+
+Opportunities: auto-score available, but:
+
+sirf top 5 visible in list
+
+compare mode off
+
+Decisions:
+
+unlimited decisions, but sirf 3 launches ke sath link ho sakte
+
+Launches:
+
+max 1 active launch at a time
+
+total 3 completed launches lifetime
+
+Outcome reviews:
+
+full Day 7/30 flow + verdict + proof summary
+
+dashboard me “Reviews due” widget included
+
+AI:
+
+~100 AI calls / month
+
+allowed features:
+
+signal title/severity/sentiment/product area suggestions
+
+basic opportunity explanation
+
+ek‑click decision memo ya PRD skeleton generation (per decision, 1 time)
+
+Import:
+
+CSV upload allowed (signals + accounts), but:
+
+max 1 CSV per entity type (1 signals CSV + 1 accounts CSV)
+
+Settings:
+
+basic product areas, segments, members (no billing, no advanced analytics)
+
+Email:
+
+Day 7/30 reminders for that 1 launch
+
+basic workspace invite mails
+
+Support:
+
+docs + email only, no priority
+
+Hard limits jahan se upgrade push aayega:
+
+“You have reached 200 signals. To keep ingesting feedback across accounts, upgrade to Starter.”
+
+“You already have 1 active launch. Archive or upgrade to run multiple bets in parallel.”
+
+“You’ve created 3 launches. To run ASTRIX as your standard product ritual, upgrade to Starter.”
+
+Isse banda full loop ka maza le lega, par jaise hi uska real product process yahan shift hone lagega, woh free walls hit karega.
+
+Starter – $59/mo (Annual: $588)
+Audience: 1–3 PMs / founders, early-stage SaaS (10–30 log). Ye plan main bread‑and‑butter hoga.
+
+Core unlock vs Free:
+
+More scale + more launches + better AI assist.
+
+Recommend Starter features:
+
+Workspaces:
+
+1 workspace
+
+Seats:
+
+up to 3 maker seats included
+
+Signals:
+
+up to 3,000 signals
+
+Accounts:
+
+up to 500 accounts
+
+Problems:
+
+up to 50 active problems
+
+Opportunities:
+
+full list + filters + compare mode on
+
+Decisions:
+
+unlimited; link to any opportunity
+
+Launches:
+
+up to 5 active launches at a time
+
+unlimited completed launches
+
+Outcome reviews:
+
+full Day 7/30 + verdict + proof summary
+
+dashboard widgets fully enabled
+
+AI:
+
+~1,000–1,500 AI calls / month
+
+everything in Free +
+
+multi-section decision memo drafts
+
+PRD skeleton generation per decision
+
+user story list draft
+
+Import/quality of life:
+
+multiple CSV uploads
+
+auto account matching + bulk confirm UX
+
+Analytics:
+
+simple “Launches & Verdicts” summary section on dashboard
+
+solved vs not‑solved breakdown by product area
+
+Notifications:
+
+Day 7/30 + verdict due + weekly “Reviews due” email
+
+Support:
+
+standard email support
+
+Starter ko marketing mein frame karo as:
+“Run outcome‑driven product rituals for a small team.”
+
+Growth – $179/mo (Annual: $1,789)
+Audience: Series A/B SaaS, 2–6 PMs, multiple squads but abhi full enterprise complexity nahi. Pricing se clear hai ki isme serious org‑wide habit target hai.
+
+Unlock vs Starter:
+
+Zyada scale (signals, launches)
+
+Multiple workspaces
+
+Stronger analytics/governance
+
+Recommend Growth features:
+
+Workspaces:
+
+up to 3 workspaces (e.g., “Core product”, “Experiments”, “Beta product”)
+
+Seats:
+
+up to 8 maker seats included
+
+Signals:
+
+up to 15,000 signals
+
+Accounts:
+
+up to 2,000 accounts
+
+Problems:
+
+up to 150 active problems
+
+Opportunities:
+
+everything + saved views (e.g., “Enterprise ARR risk”)
+
+Decisions:
+
+unlimited; decision tags (e.g., Theme, OKR link) enabled
+
+Launches:
+
+up to 15 active launches at a time
+
+unlimited completed launches
+
+Outcome & analytics:
+
+“Accountability dashboard”:
+
+solved vs not‑solved launches over time
+
+verdict completion rate
+
+value delivered by segment/ARR band
+
+AI:
+
+~3,000–4,000 AI calls / month
+
+higher‑quality model routing (Groq tier)
+
+priority for memo/PRD/proof summary generation speed
+
+Governance:
+
+basic activity log
+
+“Required verdict” enforcement toggle (launch can’t be Completed without verdict)
+
+Notifications:
+
+weekly summary email (top opps + reviews due)
+
+per‑owner launch digest
+
+Support:
+
+priority email support
+
+quarterly check‑in call for feedback (if feasible later)
+
+Growth ko tag line:
+“Make accountability a default in your product org.”
+
+Scale – $449/mo (Annual: $4,489)
+Audience: 50–200+ log waale B2B SaaS jahan multi‑squad product org hai, layered leadership hai, aur board/executive reviews regular hoti hain.
+
+Unlock vs Growth:
+
+Practically unlimited scale
+
+Advanced analytics
+
+Strong governance controls
+
+Best AI experience
+
+Recommend Scale features:
+
+Workspaces:
+
+unlimited workspaces
+
+Seats:
+
+up to 20 maker seats included (extra per‑maker pricing add‑on possible)
+
+Signals:
+
+up to 100,000 signals
+
+Accounts:
+
+up to 10,000 accounts
+
+Problems:
+
+up to 500 active problems
+
+Opportunities:
+
+advanced analytics:
+
+custom score views (e.g., “Enterprise segment only”)
+
+export of opportunities (later CSV/PDF)
+
+Decisions & launches:
+
+unlimited active launches
+
+decision/launch templates by squad or product line
+
+Outcome analytics:
+
+“Executive & Board view” tab:
+
+bets per quarter, win/loss ratio
+
+value delivered per segment, ARR band
+
+which product areas drive most solved problems
+
+AI:
+
+~7,000–10,000 AI calls / month
+
+top‑tier models, faster latency
+
+bulk generation use‑cases (e.g., batch PRD skeletons for a set of opportunities)
+
+Governance & security:
+
+detailed activity log with filters
+
+more granular roles (Owner, Admin, Maker, Read‑only)
+
+exportable audit trail for decisions and verdicts (PDF/CSV later)
+
+Notifications:
+
+advanced notification settings per workspace
+
+exec summary email monthly
+
+Support:
+
+high‑priority support
+
+onboarding session, implementation guidance
+
+Scale headline:
+“Evidence‑backed bets and accountability, at org scale.”
+
+Extra: Free vs Paid hooks — kya purposely lock karna chahiye
+Jitni cheezein neeche hain, inko Free me ya to bilkul mat do, ya sirf taste do:
+
+Compare Opportunities: sirf paid (Starter+) me.
+
+More than 1 active launch: paywall.
+
+Advanced analytics / dashboard breakdowns: Growth+.
+
+Multiple workspaces: Growth+.
+
+High AI usage & premium models: Growth/Scale only.
+
+Activity log / governance features: Growth+.
+
+Isse flow yeh banega:
+
+Free user ko complete story milti hai, par ek hi bet / chhota volume.
+
+Jaise hi woh real team workflow shift karta hai, woh automatically Starter barrier hit karega.
+
+Growth/Scale decision usually leadership karegi jab woh dekhe ki:
+“ye tool se hum quarterly bets and outcomes board tak le ja sakte hain.”
