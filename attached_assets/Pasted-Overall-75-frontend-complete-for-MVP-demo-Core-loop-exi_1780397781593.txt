@@ -1,0 +1,100 @@
+Overall: ~75% frontend-complete for MVP demo. Core loop exists end-to-end but several screens have shell buttons, empty states, and missing sub-flows.
+
+✅ Fully Done
+Public / Marketing
+
+/ Home, /pricing (just polished), /contact, /changelog, /integrations, /privacy, /terms
+Auth
+
+/login, /signup, /forgot-password, /reset-password, /accept-invitation
+Onboarding
+
+All 3 steps: create workspace → upload data → first results
+App — Core pages exist and are substantially built:
+
+Page	What's solid
+Dashboard	KPI row, launch reviews, what changed, quick actions, opp snapshot, notifications
+Signal Explorer	Table, search, pagination, free plan banner
+Signal Detail	Metadata editing, AI summary, override form
+Accounts List + Detail	Table, search, tabs (signals, problems, health)
+Problems List	Severity filters, list view
+Problem Detail	Tabs: Overview, Evidence, Accounts
+Opportunities List	Ranked list, compare paywall, score display
+Opportunity Detail	Score breakdown bars, decision modal
+Evidence View	Signal timeline, sentiment, filters
+Decisions History	Timeline list
+Decision Detail	Rationale, artifact generation, launch logger
+Artifact Studio	Editor, typewriter effect, version dropdown, generate simulation
+Post-Launch Tracker	Launch list, upgrade modal
+Launch Detail	Verdict form, measurement window timeline, before/after metrics
+Settings	All 6 tabs: Workspace, Product Areas, Segments, Team, Billing, Audit Log
+⚠️ Partially Done — Needs Work
+Signal Explorer
+
+Filter button is a shell — no actual filter dropdown (severity, sentiment, product area, account, date range)
+"Add signal manually" button routes to /app/signals/new which doesn't exist — no form
+Bulk select → "Create problem from selected" — no bulk action row exists
+Signal Detail
+
+"Link/unlink account" action — missing UI
+"Attach to existing problem or create new problem" — missing UI
+AI suggestions have no Accept/Reject buttons — static display only
+Problem Detail
+
+No "Unlink signal" button in Evidence tab
+No "Merge problems" or "Split problem" actions (PRD requires these)
+History and Comments tabs — in replit.md as done but PRD expects them; check if placeholder
+Opportunity Detail
+
+"What-if" score adjustment tab — mentioned in README but PRD describes adjustable inputs (effort, alignment, confidence, manual adjustment)
+Compare Mode button routes to list — no actual side-by-side comparison UI built
+Decision Detail
+
+"Enter Results" buttons for Day 7/30 measurement windows are UI shells — clicking them doesn't open any form
+Assumptions, Risks, Alternatives sections — PRD requires these as separate editable sections; currently just rationale text
+Linked signals/accounts panel — missing
+Launch Detail
+
+Day 7 / Day 30 outcome measurement form fields exist in verdict section but aren't clearly separated as Baseline → Day7 → Day30 rows with their own entry forms per the PRD schema (baseline_signal_count, post_signal_count, etc.)
+Proof summary card — static/hardcoded, PRD wants AI-generated after verdict submit
+Settings
+
+Audit Log tab: shows empty mock data — no real activity entries populate
+Product Areas & Segments: CRUD is local state only — resets on page refresh (not persisted)
+Billing tab: usage bars are hardcoded free plan; upgrade buttons mock-navigate to billing settings with no actual flow
+Artifact Studio
+
+Version history resets on page refresh (local state, not persisted to mockDb)
+Post-Launch Tracker
+
+"Log New Launch" redirects to /app/decisions — PRD says launches should be loggable from the tracker too
+❌ Completely Missing
+What's Missing	PRD Reference
+Signal manual entry form (/app/signals/new)	§10.3 — "Add signal manually" is a core action
+Compare Mode UI	§10.6 — multi-select 2–3 opps → side-by-side table; paywall blocks it but even paid users see nothing
+Signal → Problem linking UI	§10.3 — "Attach to existing problem" in signal detail
+Signal trend chart	§10.2 — "simple line chart: signals over time" in dashboard below-fold
+"New workspace" guided empty state	§10.2 — "show guided CTA: Upload signals / Upload accounts / Load sample workspace" when workspace is truly empty
+Proof Summary auto-generation	§10.9 — after verdict submit, AI drafts proof summary card; currently static
+Day 7/30 separate outcome entry forms	§10.9 — Baseline row + Day7 row + Day30 row each with their own entry fields
+Priority Order to Reach 100% Frontend
+High impact, relatively quick:
+
+Signal filter dropdown — a modal/panel with severity, sentiment, product area, date filters
+"Add signal manually" form — modal with fields: title, source, raw_text, severity, sentiment, product area, link account
+Decision Detail — Assumptions/Risks/Alternatives sections — three collapsible editable text sections
+Day 7 / Day 30 separate outcome entry — restructure LaunchDetail measurement into clear Baseline → D7 → D30 rows with input forms
+Proof Summary card after verdict — auto-populated (mock) narrative card shown post-submit
+Medium priority:
+6. Signal → Problem linking in Signal Detail
+
+Compare Mode actual UI — side-by-side table for 2-3 selected opportunities
+Audit Log with real mock activities — seed the mock activity data
+Settings CRUD persistence — move Product Areas/Segments to mockDb so they survive refresh
+Post-Launch Tracker "Log Launch" modal — quick form without leaving the page
+Lower priority (polish):
+11. Signal trend chart on Dashboard
+
+Merge/Split problems UI
+Bulk select signals → create problem
+Proof summary auto-generation mock
