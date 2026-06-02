@@ -16,7 +16,9 @@ import {
   Plus,
   Rocket,
   FileText,
-  ChevronRight
+  ChevronRight,
+  Lock,
+  GitCompare
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
@@ -29,6 +31,7 @@ import {
 } from '../../lib/api';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { formatCurrency } from '../../lib/utils';
+import { usePlan } from '../../hooks/usePlan';
 
 export const Dashboard = () => {
   const { activeWorkspace } = useWorkspace();
@@ -40,6 +43,8 @@ export const Dashboard = () => {
   const { data: sigData } = useSignals(wsId);
   const { data: decData } = useDecisions(wsId);
   const { data: launchData } = useLaunches(wsId);
+
+  const { plan, limits } = usePlan();
 
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'there';
   const opportunities = oppData || [];
@@ -75,6 +80,82 @@ export const Dashboard = () => {
       title={`${getGreeting()}, ${firstName}.`} 
       subtitle={`${currentDate} • Here is what needs your attention today.`}
     >
+      {/* Free Plan Upgrade Card */}
+      {plan === 'free' && (
+        <div className="mb-6 relative overflow-hidden rounded-2xl border border-brand-blue/20 bg-gradient-to-br from-[#0f172a] to-[#1e3a5f] shadow-lg animate-slide-up">
+          {/* Decorative blobs */}
+          <div className="absolute -right-16 -top-16 w-56 h-56 bg-brand-blue/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -left-8 -bottom-8 w-40 h-40 bg-astrix-teal/10 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="relative z-10 p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-5 md:gap-8">
+            {/* Left — label + title + locked features */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-brand-blue bg-brand-blue/15 border border-brand-blue/30 px-2.5 py-1 rounded-full">Free Plan</span>
+                <span className="text-[10px] font-medium text-slate-400">· Upgrade anytime, cancel anytime</span>
+              </div>
+              <h3 className="font-heading text-lg md:text-xl font-black text-white leading-tight mb-3">
+                Unlock your full product loop — <span className="text-astrix-teal">starting at $59/mo</span>
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { icon: GitCompare, label: 'Compare Mode' },
+                  { icon: Rocket,     label: 'Multiple Launches' },
+                  { icon: Sparkles,   label: '1,500 AI calls/mo' },
+                  { icon: Lock,       label: 'Saved Views' },
+                ].map(({ icon: Icon, label }) => (
+                  <span key={label} className="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">
+                    <Icon className="w-3 h-3 text-astrix-teal shrink-0" /> {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Center — usage meters */}
+            <div className="flex flex-row md:flex-col gap-3 md:gap-2.5 md:min-w-[200px]">
+              {[
+                { label: 'Signals', used: signalsCount, max: limits.signals },
+                { label: 'Active Launches', used: launches.filter((l: any) => l.status === 'active').length, max: limits.activeLaunches },
+                { label: 'Opportunities shown', used: Math.min(opportunities.length, limits.visibleOpps), max: limits.visibleOpps },
+              ].map(({ label, used, max }) => {
+                const pct = Math.min(100, Math.round((used / max) * 100));
+                const hot = pct >= 75;
+                return (
+                  <div key={label} className="flex-1 md:flex-none">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</span>
+                      <span className={`text-[10px] font-black ${hot ? 'text-amber-400' : 'text-slate-300'}`}>{used}/{max}</span>
+                    </div>
+                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-700 ${hot ? 'bg-amber-400' : 'bg-astrix-teal'}`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Right — CTA */}
+            <div className="flex flex-row md:flex-col gap-3 shrink-0">
+              <Link
+                to="/pricing"
+                className="flex-1 md:flex-none text-center bg-brand-blue hover:bg-blue-700 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-lg shadow-brand-blue/30 flex items-center justify-center gap-2 whitespace-nowrap"
+              >
+                See all plans <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                to="/pricing"
+                className="flex-1 md:flex-none text-center bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+              >
+                Compare plans
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {reviewsDue.length > 0 && (
         <div className="mb-8 relative overflow-hidden rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm border border-amber-200/60 bg-gradient-to-br from-amber-50/90 to-orange-50/50 backdrop-blur-md animate-slide-up">
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
