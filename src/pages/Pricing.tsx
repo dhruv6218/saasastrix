@@ -77,7 +77,7 @@ export const Pricing = () => {
         "Decision tags (Theme, OKR link)",
         "Up to 15 active launches, unlimited completed",
         "~4,000 AI calls/month · higher-quality models",
-        "Accountability dashboard (verdicts, ARR)",
+        "Outcome analytics dashboard (verdicts, ARR, segments)",
         "Required verdict enforcement toggle",
         "Basic activity log",
         "Priority email support",
@@ -154,7 +154,7 @@ export const Pricing = () => {
         { feature: "Completed Launches", values: ["3 lifetime", "Unlimited", "Unlimited", "Unlimited"] },
         { feature: "Day 7 / 30 Outcome Reviews", values: [true, true, true, true] },
         { feature: "Verdict Dashboard Widgets", values: [false, true, true, true] },
-        { feature: "Accountability Dashboard", values: [false, "Basic", "Full (ARR, segments)", "Exec + Board view"] },
+        { feature: "Accountability Dashboard", values: [false, "Launch & verdict widgets", "Outcome analytics (ARR, segments, verdicts)", "Executive & board reporting view"] },
         { feature: "Required Verdict Enforcement", values: [false, false, true, true] },
         { feature: "Decision Tags (Theme, OKR)", values: [false, false, true, true] },
         { feature: "Decision & Launch Templates", values: [false, false, false, true] },
@@ -165,13 +165,20 @@ export const Pricing = () => {
       rows: [
         { feature: "AI Calls / Month", values: ["~100", "~1,500", "~4,000", "~10,000"] },
         { feature: "Signal Suggestions", values: [true, true, true, true] },
-        { feature: "Decision Memo & PRD Drafts", values: ["1× per decision", true, true, "Bulk generation"] },
+        { feature: "Decision Memo & PRD Drafts", values: ["1 draft per decision", "Standard drafts", "Bulk drafts", "Bulk drafts + premium models"] },
         { feature: "User Story Draft", values: [false, true, true, true] },
         { feature: "Model Quality", values: ["Standard", "Standard", "Higher-quality", "Top-tier"] },
       ]
     },
     {
-      label: "Governance & Security",
+      label: "Proof & Reminders",
+      rows: [
+        { feature: "Proof Summaries", values: ["Included", "Included", "Advanced", "Executive-ready"] },
+        { feature: "Outcome Reminders (Day 7 / 30)", values: [true, true, true, "Advanced controls"] },
+      ]
+    },
+    {
+      label: "Governance",
       rows: [
         { feature: "Activity Log", values: [false, false, "Basic", "Advanced + Filters"] },
         { feature: "Audit Trail Export", values: [false, false, false, true] },
@@ -179,12 +186,10 @@ export const Pricing = () => {
       ]
     },
     {
-      label: "Support",
+      label: "Support & Success",
       rows: [
         { feature: "Support Level", values: ["Docs + Email", "Email", "Priority Email", "High-Priority"] },
         { feature: "Onboarding Session", values: [false, false, false, true] },
-        { feature: "Weekly Summary Email", values: [false, false, true, true] },
-        { feature: "Quarterly Check-in", values: [false, false, false, true] },
       ]
     },
   ];
@@ -194,6 +199,7 @@ export const Pricing = () => {
     { q: "What are the user roles?", a: "We keep it simple: Owners (billing & settings), Members (editors who can create decisions and artifacts), and Viewers (free, unlimited users who can read memos and track launch progress)." },
     { q: "How do I import data?", a: "Astrix supports CSV upload and manual signal entry on all plans. You can also start with a sample workspace to explore the full product loop before importing real data." },
     { q: "Does Astrix include a sample workspace?", a: "Yes. Every plan includes a sample workspace with pre-loaded signals, problems, opportunities, a decision memo, and an active launch so you can experience the full product loop immediately." },
+    { q: "Do you send weekly summary emails?", a: "Yes — Growth and Scale plans include a weekly digest email summarising new signals, open reviews, and outcome verdicts for your workspace. Scale also includes a quarterly check-in call with an Astrix success team member to review your product loop health." },
     { q: "Is my data used to train your AI models?", a: "Absolutely not. We use enterprise APIs with strict zero-retention policies. Your workspace data is isolated and never used for training." },
     { q: "Can I cancel anytime?", a: "Yes, you can cancel your subscription at any time from the billing settings. You will retain access until the end of your current billing period." }
   ];
