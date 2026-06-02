@@ -41,7 +41,6 @@ import { ArtifactStudio } from './pages/app/ArtifactStudio';
 import { ArtifactDetail } from './pages/app/ArtifactDetail';
 import { PostLaunchTracker } from './pages/app/PostLaunchTracker';
 import { LaunchDetail } from './pages/app/LaunchDetail';
-import { Assistant } from './pages/app/Assistant';
 import { Settings } from './pages/app/Settings';
 import { AccountDetail } from './pages/app/AccountDetail';
 import { SignalDetail } from './pages/app/SignalDetail';
@@ -100,7 +99,6 @@ function App() {
               <Route path="/app/launches" element={<ProtectedRoute><PostLaunchTracker /></ProtectedRoute>} />
               <Route path="/app/launches/:id" element={<ProtectedRoute><LaunchDetail /></ProtectedRoute>} />
               
-              <Route path="/app/assistant" element={<ProtectedRoute><Assistant /></ProtectedRoute>} />
               <Route path="/app/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />

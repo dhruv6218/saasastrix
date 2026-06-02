@@ -37,11 +37,11 @@ export const Pricing = () => {
       popular: false
     },
     {
-      name: "Pro",
-      monthlyPrice: "$39",
-      annualPrice: "$29", 
-      period: "/maker/month",
-      annualBilled: "Billed $348 yearly per maker",
+      name: "Starter",
+      monthlyPrice: "$59",
+      annualPrice: "$49",
+      period: "/month",
+      annualBilled: "Billed $588 yearly",
       desc: "For early-stage startups establishing their first evidence-based product loop.",
       features: [
         "Up to 5 maker seats included",
@@ -53,15 +53,15 @@ export const Pricing = () => {
         "Priority email support"
       ],
       comingSoon: [],
-      cta: "Start with Pro",
+      cta: "Start with Starter",
       popular: true
     },
     {
-      name: "Business",
-      monthlyPrice: "$69",
-      annualPrice: "$59", 
-      period: "/maker/month",
-      annualBilled: "Billed $708 yearly per maker",
+      name: "Growth",
+      monthlyPrice: "$179",
+      annualPrice: "$149",
+      period: "/month",
+      annualBilled: "Billed $1,789 yearly",
       desc: "For scaling product teams that need deeper signal volume and analytics.",
       features: [
         "Up to 15 maker seats included",
@@ -74,27 +74,28 @@ export const Pricing = () => {
         "Higher-priority support"
       ],
       comingSoon: [],
-      cta: "Start with Business",
+      cta: "Start with Growth",
       popular: false
     },
     {
-      name: "Enterprise",
-      monthlyPrice: "Custom",
-      annualPrice: "Custom", 
-      period: "",
-      annualBilled: "Contact us for pricing",
-      desc: "For large organizations requiring maximum volume, security, and premium models.",
+      name: "Scale",
+      monthlyPrice: "$449",
+      annualPrice: "$374",
+      period: "/month",
+      annualBilled: "Billed $4,489 yearly",
+      desc: "For large organizations requiring maximum volume, security, and premium AI models.",
       features: [
         "Unlimited seats and higher limits",
         "Dedicated onboarding and support",
         "Custom integrations",
         "Security reviews & SSO",
-        "Advanced permissions"
+        "Advanced permissions",
+        "~20,000 AI calls/month"
       ],
       comingSoon: [
         "Jira Two-Way Sync"
       ],
-      cta: "Contact Sales",
+      cta: "Start with Scale",
       popular: false
     }
   ];

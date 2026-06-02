@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Search, Layers, TrendingUp, CheckCircle, 
   Settings, LogOut, Bell, Menu, X, ChevronDown, Check,
-  FileText, Rocket, Building2, Bot, Plus, Lock, Sparkles, User as UserIcon
+  FileText, Rocket, Building2, Plus, Lock, Sparkles, User as UserIcon
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -65,7 +65,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle,
     { name: 'Decisions', path: '/app/decisions', icon: CheckCircle },
     { name: 'Artifacts', path: '/app/artifacts', icon: FileText },
     { name: 'Launches', path: '/app/launches', icon: Rocket },
-    { name: 'Assistant', path: '/app/assistant', icon: Bot, pro: true },
     { name: 'Settings', path: '/app/settings', icon: Settings },
   ];
 
