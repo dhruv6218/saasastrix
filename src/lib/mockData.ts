@@ -11,7 +11,9 @@ export const MOCK_WORKSPACE = {
   name: 'Acme Corp',
   slug: 'acme',
   timezone: 'UTC',
-  logo_url: null
+  logo_url: null,
+  product_areas: ['Authentication', 'Core UI', 'API', 'Billing', 'Dashboard'],
+  segments: ['Enterprise', 'SMB', 'Growth', 'Beta']
 };
 
 export const MOCK_ACCOUNTS = [
@@ -40,11 +42,11 @@ export const MOCK_SIGNALS = [
 ];
 
 export const MOCK_DECISIONS = [
-  { id: 'dec-1', workspace_id: 'ws-1', opportunity_id: 'opp-1', problem_id: 'prob-1', title: 'SAML SSO Integration Missing', action: 'Build', rationale: 'This is blocking $2M+ in Enterprise renewals. The engineering effort is estimated at 3 sprints, which is highly justified by the ARR retention.', author_id: 'user-1', created_at: new Date(Date.now() - 86400000).toISOString(), users: { full_name: 'Demo User' } },
+  { id: 'dec-1', workspace_id: 'ws-1', opportunity_id: 'opp-1', problem_id: 'prob-1', title: 'SAML SSO Integration Missing', action: 'Build', rationale: 'This is blocking $2M+ in Enterprise renewals. The engineering effort is estimated at 3 sprints, which is highly justified by the ARR retention.', assumptions: 'Engineering team can deliver SAML 2.0 in 3 sprints.\nOkta and Azure AD are the only IdPs needed for MVP.\nIT-mandated Okta is a cross-industry trend among Enterprise buyers.', risks: 'Implementation complexity may spill into sprint 4.\nJIT provisioning adds scope — may need to be deferred.\nSSO without MFA enforcement may not satisfy all IT policies.', alternatives: 'Social login (Google/GitHub) — rejected as insufficient for Enterprise compliance.\nThird-party SSO vendor (Auth0) — adds cost and vendor dependency.\nDefer to Q3 — rejected due to immediate renewal pressure.', author_id: 'user-1', created_at: new Date(Date.now() - 86400000).toISOString(), users: { full_name: 'Demo User' } },
 ];
 
 export const MOCK_ARTIFACTS = [
-  { id: 'art-1', workspace_id: 'ws-1', decision_id: 'dec-1', title: 'Generated PRD', type: 'prd', content: '# Product Requirements Document: SAML SSO\n\n## 1. Problem Statement\nEnterprise accounts are churning due to lack of SAML SSO. IT departments are mandating Okta/Azure AD compliance.\n\n## 2. Scope\n- Implement SAML 2.0 protocol\n- Support Okta and Azure AD identity providers\n- Just-in-Time (JIT) user provisioning\n\n## 3. Success Metrics\n- 0 churns citing security compliance next quarter.\n- 100% of Enterprise tier accounts migrated to SSO within 60 days of launch.', author_id: 'user-1', external_url: null, external_id: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), decisions: { title: 'SAML SSO Integration Missing' }, users: { full_name: 'Demo User' } }
+  { id: 'art-1', workspace_id: 'ws-1', decision_id: 'dec-1', title: 'Generated PRD', type: 'prd', content: '# Product Requirements Document: SAML SSO\n\n## 1. Problem Statement\nEnterprise accounts are churning due to lack of SAML SSO. IT departments are mandating Okta/Azure AD compliance.\n\n## 2. Goals & Non-Goals\n**Goals:** Implement SAML 2.0, support Okta and Azure AD, JIT provisioning.\n**Non-Goals:** LDAP support, custom IdP connectors, MFA enforcement (v2).\n\n## 3. Scope\n- Implement SAML 2.0 protocol\n- Support Okta and Azure AD identity providers\n- Just-in-Time (JIT) user provisioning\n\n## 4. Success Metrics\n- 0 churns citing security compliance next quarter.\n- 100% of Enterprise tier accounts migrated to SSO within 60 days of launch.\n- Day 30 signal count for "SSO" drops by >80%.', author_id: 'user-1', external_url: null, external_id: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), decisions: { title: 'SAML SSO Integration Missing' }, users: { full_name: 'Demo User' } }
 ];
 
 export const MOCK_LAUNCHES = [
@@ -59,6 +61,15 @@ export const MOCK_LAUNCHES = [
     created_at: new Date().toISOString(), 
     status: 'active' as const,
     expected_outcome: 'Reduce security-related churn by 30% and unblock Enterprise renewals.',
+    target_metrics: 'SSO-related signals drop by 80% at Day 30. All Enterprise accounts migrated within 60 days.',
+    baseline_signal_count: 84,
+    baseline_arr_at_risk: 2040000,
+    d7_signal_count: 42,
+    d7_arr_at_risk: 1200000,
+    d7_notes: 'Initial adoption strong among CloudScale. TechFlow still pending IT approval.',
+    d30_signal_count: 12,
+    d30_arr_at_risk: 240000,
+    d30_notes: 'Broad adoption achieved. Remaining signals are edge cases with non-Okta IdPs.',
     before_count: 84,
     after_count: 12,
     pm_verdict: 'Solved',
@@ -68,4 +79,17 @@ export const MOCK_LAUNCHES = [
 
 export const MOCK_MEMBERS = [
   { id: 'mem-1', workspace_id: 'ws-1', user_id: 'user-1', role: 'admin', created_at: new Date().toISOString(), users: { full_name: 'Demo User', email: 'demo@astrix.ai' } }
+];
+
+export const MOCK_ACTIVITIES = [
+  { id: 'act-1', action: 'Created problem', object_type: 'Problem', object_id: 'prob-1', actor: 'Demo User', metadata: 'SAML SSO Integration Missing', time: new Date(Date.now() - 86400000 * 2).toISOString() },
+  { id: 'act-2', action: 'Committed decision', object_type: 'Decision', object_id: 'dec-1', actor: 'Demo User', metadata: 'Build · SAML SSO', time: new Date(Date.now() - 86400000 * 1).toISOString() },
+  { id: 'act-3', action: 'Generated PRD artifact', object_type: 'Artifact', object_id: 'art-1', actor: 'Demo User', metadata: 'SAML SSO PRD via AI', time: new Date(Date.now() - 86400000 * 1 + 3600000).toISOString() },
+  { id: 'act-4', action: 'Logged launch', object_type: 'Launch', object_id: 'launch-1', actor: 'Demo User', metadata: 'Enterprise SAML SSO', time: new Date(Date.now() - 86400000 * 14).toISOString() },
+  { id: 'act-5', action: 'Completed Day 7 review', object_type: 'Launch', object_id: 'launch-1', actor: 'Demo User', metadata: 'Signal count: 84 → 42', time: new Date(Date.now() - 86400000 * 7).toISOString() },
+  { id: 'act-6', action: 'Completed Day 30 review', object_type: 'Launch', object_id: 'launch-1', actor: 'Demo User', metadata: 'Signal count: 42 → 12', time: new Date(Date.now() - 86400000 * 0.5).toISOString() },
+  { id: 'act-7', action: 'Submitted verdict: Solved', object_type: 'Launch', object_id: 'launch-1', actor: 'Demo User', metadata: 'Enterprise SAML SSO → Solved', time: new Date(Date.now() - 3600000 * 2).toISOString() },
+  { id: 'act-8', action: 'Uploaded signals CSV', object_type: 'Signal', object_id: '', actor: 'Demo User', metadata: '3 signals ingested', time: new Date(Date.now() - 86400000 * 5).toISOString() },
+  { id: 'act-9', action: 'Linked signal to account', object_type: 'Signal', object_id: 'sig-1', actor: 'Demo User', metadata: 'sig-1 → CloudScale Inc', time: new Date(Date.now() - 86400000 * 3).toISOString() },
+  { id: 'act-10', action: 'Changed problem status', object_type: 'Problem', object_id: 'prob-2', actor: 'Demo User', metadata: 'API Rate Limits → Active', time: new Date(Date.now() - 86400000 * 1).toISOString() },
 ];

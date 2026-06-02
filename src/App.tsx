@@ -29,6 +29,7 @@ import { Step3Results } from './pages/onboarding/Step3Results';
 // App Pages
 import { Dashboard } from './pages/app/Dashboard';
 import { SignalExplorer } from './pages/app/SignalExplorer';
+import { SignalNew } from './pages/app/SignalNew';
 import { AccountsList } from './pages/app/AccountsList';
 import { ProblemsList } from './pages/app/ProblemsList';
 import { ProblemDetail } from './pages/app/ProblemDetail';
@@ -78,6 +79,7 @@ function App() {
               <Route path="/app/dashboard" element={<Navigate to="/app" replace />} />
               
               <Route path="/app/signals" element={<ProtectedRoute><SignalExplorer /></ProtectedRoute>} />
+              <Route path="/app/signals/new" element={<ProtectedRoute><SignalNew /></ProtectedRoute>} />
               <Route path="/app/signals/:id" element={<ProtectedRoute><SignalDetail /></ProtectedRoute>} />
               
               <Route path="/app/accounts" element={<ProtectedRoute><AccountsList /></ProtectedRoute>} />

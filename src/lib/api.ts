@@ -2,10 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import * as mocks from './mockData';
 import { Signal, Account, Problem, Opportunity, Decision, Artifact, Launch, TeamMember, WorkspaceInvite } from '../types';
 
-// Simulate network latency
 const delay = (ms = 500) => new Promise(r => setTimeout(r, ms));
 
-// Isolated Mock Database (Replaces global Zustand arrays)
 export const mockDb = {
   signals: [...mocks.MOCK_SIGNALS] as Signal[],
   accounts: [...mocks.MOCK_ACCOUNTS] as Account[],
@@ -15,13 +13,14 @@ export const mockDb = {
   artifacts: [...mocks.MOCK_ARTIFACTS] as Artifact[],
   launches: [...mocks.MOCK_LAUNCHES] as Launch[],
   members: [...mocks.MOCK_MEMBERS] as TeamMember[],
-  invites: [] as WorkspaceInvite[]
+  invites: [] as WorkspaceInvite[],
+  activities: [...mocks.MOCK_ACTIVITIES] as typeof mocks.MOCK_ACTIVITIES,
+  productAreas: [...(mocks.MOCK_WORKSPACE.product_areas)] as string[],
+  segments: [...(mocks.MOCK_WORKSPACE.segments)] as string[],
 };
 
-// Global event to trigger refetches across hooks (simulates React Query invalidateQueries)
 export const triggerUpdate = () => window.dispatchEvent(new Event('data-updated'));
 
-// Simulated Supabase API Layer
 export const api = {
   signals: {
     list: async (wsId: string, opts?: any) => {
@@ -29,8 +28,16 @@ export const api = {
       let res = mockDb.signals.filter(s => s.workspace_id === wsId);
       if (opts?.globalFilter) {
         const q = opts.globalFilter.toLowerCase();
-        res = res.filter(s => s.raw_text.toLowerCase().includes(q) || s.accounts?.name.toLowerCase().includes(q));
+        res = res.filter(s =>
+          s.raw_text?.toLowerCase().includes(q) ||
+          s.accounts?.name?.toLowerCase().includes(q) ||
+          s.product_area?.toLowerCase().includes(q)
+        );
       }
+      if (opts?.severity) res = res.filter(s => s.severity_label === opts.severity);
+      if (opts?.sentiment) res = res.filter(s => s.sentiment_label === opts.sentiment);
+      if (opts?.product_area) res = res.filter(s => s.product_area === opts.product_area);
+      if (opts?.account_id) res = res.filter(s => s.account_id === opts.account_id);
       if (opts?.sorting?.length > 0) {
         const sort = opts.sorting[0];
         res.sort((a: any, b: any) => {
@@ -48,8 +55,13 @@ export const api = {
     },
     create: async (data: Partial<Signal>) => {
       await delay();
-      const newItem = { ...data, id: `sig-${Date.now()}`, created_at: new Date().toISOString() } as Signal;
+      const account = data.account_id ? mockDb.accounts.find(a => a.id === data.account_id) || null : null;
+      const newItem = { ...data, id: `sig-${Date.now()}`, created_at: new Date().toISOString(), accounts: account } as Signal;
       mockDb.signals = [newItem, ...mockDb.signals];
+      mockDb.activities = [
+        { id: `act-${Date.now()}`, action: 'Added signal manually', object_type: 'Signal', object_id: newItem.id, actor: 'Demo User', metadata: data.raw_text?.substring(0, 50) || '', time: new Date().toISOString() },
+        ...mockDb.activities
+      ];
       triggerUpdate();
       return newItem;
     },
@@ -63,7 +75,14 @@ export const api = {
       await delay();
       const idx = mockDb.signals.findIndex(s => s.id === id);
       if (idx === -1) throw new Error('Signal not found');
-      mockDb.signals[idx] = { ...mockDb.signals[idx], ...data };
+      const account = data.account_id !== undefined
+        ? (data.account_id ? mockDb.accounts.find(a => a.id === data.account_id) || null : null)
+        : mockDb.signals[idx].accounts;
+      mockDb.signals[idx] = { ...mockDb.signals[idx], ...data, accounts: account as Account };
+      mockDb.activities = [
+        { id: `act-${Date.now()}`, action: 'Updated signal classification', object_type: 'Signal', object_id: id, actor: 'Demo User', metadata: `Severity: ${data.severity_label || 'unchanged'}`, time: new Date().toISOString() },
+        ...mockDb.activities
+      ];
       triggerUpdate();
       return mockDb.signals[idx];
     }
@@ -102,7 +121,7 @@ export const api = {
       await delay();
       const account = mockDb.accounts.find(a => a.id === id);
       const signals = mockDb.signals.filter(s => s.account_id === id);
-      const problems = mockDb.problems.filter(p => signals.some(s => s.normalized_text?.includes(p.title))); // Simple mock relation
+      const problems = mockDb.problems.filter(p => signals.some(s => s.normalized_text?.includes(p.title)));
       return { account, signals, problems };
     }
   },
@@ -114,16 +133,29 @@ export const api = {
     get: async (id: string) => {
       await delay();
       const problem = mockDb.problems.find(p => p.id === id);
-      const signals = mockDb.signals.slice(0, 3); // Mock relation
-      const accounts = mockDb.accounts.slice(0, 2); // Mock relation
+      const signals = mockDb.signals.filter(s => {
+        if (id === 'prob-1') return s.product_area === 'Authentication';
+        if (id === 'prob-2') return s.product_area === 'API';
+        if (id === 'prob-3') return s.product_area === 'Core UI';
+        return false;
+      });
+      const accounts = mockDb.accounts.slice(0, 2);
       return { problem, signals, accounts };
     },
     create: async (data: Partial<Problem>) => {
       await delay();
       const newItem = { ...data, id: `prob-${Date.now()}`, created_at: new Date().toISOString(), evidence_count: 0, affected_arr: 0, status: 'Active', trend: 'Stable' } as Problem;
       mockDb.problems = [newItem, ...mockDb.problems];
+      mockDb.activities = [
+        { id: `act-${Date.now()}`, action: 'Created problem', object_type: 'Problem', object_id: newItem.id, actor: 'Demo User', metadata: data.title || '', time: new Date().toISOString() },
+        ...mockDb.activities
+      ];
       triggerUpdate();
       return newItem;
+    },
+    unlinkSignal: async (problemId: string, signalId: string) => {
+      await delay(300);
+      triggerUpdate();
     }
   },
   opportunities: {
@@ -149,8 +181,17 @@ export const api = {
       await delay();
       const newItem = { ...data, id: `dec-${Date.now()}`, created_at: new Date().toISOString(), users: { full_name: 'Demo User' } } as Decision;
       mockDb.decisions = [newItem, ...mockDb.decisions];
+      mockDb.activities = [
+        { id: `act-${Date.now()}`, action: 'Committed decision', object_type: 'Decision', object_id: newItem.id, actor: 'Demo User', metadata: `${data.action} · ${data.title}`, time: new Date().toISOString() },
+        ...mockDb.activities
+      ];
       triggerUpdate();
       return newItem;
+    },
+    update: async (id: string, data: Partial<Decision>) => {
+      await delay();
+      mockDb.decisions = mockDb.decisions.map(d => d.id === id ? { ...d, ...data } : d);
+      triggerUpdate();
     }
   },
   artifacts: {
@@ -162,6 +203,10 @@ export const api = {
       await delay();
       const newItem = { ...data, id: `art-${Date.now()}`, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), users: { full_name: 'Demo User' } } as Artifact;
       mockDb.artifacts = [newItem, ...mockDb.artifacts];
+      mockDb.activities = [
+        { id: `act-${Date.now()}`, action: 'Generated artifact', object_type: 'Artifact', object_id: newItem.id, actor: 'Demo User', metadata: `${data.type} via AI`, time: new Date().toISOString() },
+        ...mockDb.activities
+      ];
       triggerUpdate();
       return newItem;
     },
@@ -184,12 +229,22 @@ export const api = {
       await delay();
       const newItem = { ...data, id: `launch-${Date.now()}`, created_at: new Date().toISOString(), status: 'active' } as Launch;
       mockDb.launches = [newItem, ...mockDb.launches];
+      mockDb.activities = [
+        { id: `act-${Date.now()}`, action: 'Logged launch', object_type: 'Launch', object_id: newItem.id, actor: 'Demo User', metadata: data.title || '', time: new Date().toISOString() },
+        ...mockDb.activities
+      ];
       triggerUpdate();
       return newItem;
     },
     update: async (id: string, data: Partial<Launch>) => {
       await delay();
       mockDb.launches = mockDb.launches.map(l => l.id === id ? { ...l, ...data } : l);
+      if (data.pm_verdict) {
+        mockDb.activities = [
+          { id: `act-${Date.now()}`, action: `Submitted verdict: ${data.pm_verdict}`, object_type: 'Launch', object_id: id, actor: 'Demo User', metadata: data.pm_verdict, time: new Date().toISOString() },
+          ...mockDb.activities
+        ];
+      }
       triggerUpdate();
     }
   },
@@ -197,14 +252,18 @@ export const api = {
     list: async (wsId: string) => {
       await delay();
       return {
-         members: mockDb.members.filter(m => m.workspace_id === wsId),
-         invites: mockDb.invites.filter(i => i.workspace_id === wsId)
+        members: mockDb.members.filter(m => m.workspace_id === wsId),
+        invites: mockDb.invites.filter(i => i.workspace_id === wsId)
       };
     },
     invite: async (wsId: string, email: string, role: string) => {
       await delay();
       const newInv = { id: `inv-${Date.now()}`, workspace_id: wsId, email, role, token: `tok-${Date.now()}`, created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 86400000).toISOString() };
       mockDb.invites = [...mockDb.invites, newInv];
+      mockDb.activities = [
+        { id: `act-${Date.now()}`, action: 'Invited team member', object_type: 'Member', object_id: '', actor: 'Demo User', metadata: `${email} as ${role}`, time: new Date().toISOString() },
+        ...mockDb.activities
+      ];
       triggerUpdate();
     },
     removeMember: async (id: string) => {
@@ -212,10 +271,34 @@ export const api = {
       mockDb.members = mockDb.members.filter(m => m.id !== id);
       triggerUpdate();
     }
+  },
+  activities: {
+    list: async (wsId: string) => {
+      await delay(200);
+      return mockDb.activities;
+    }
+  },
+  workspace: {
+    updateAreas: async (areas: string[]) => {
+      await delay(300);
+      mockDb.productAreas = [...areas];
+      triggerUpdate();
+    },
+    updateSegments: async (segments: string[]) => {
+      await delay(300);
+      mockDb.segments = [...segments];
+      triggerUpdate();
+    },
+    getAreas: async () => {
+      await delay(200);
+      return [...mockDb.productAreas];
+    },
+    getSegments: async () => {
+      await delay(200);
+      return [...mockDb.segments];
+    }
   }
 };
-
-// --- REACT SERVER-STATE HOOKS ---
 
 export function useQuery<T>(fetcher: () => Promise<T>, deps: any[]) {
   const [data, setData] = useState<T | null>(null);
@@ -249,11 +332,11 @@ export const useSignals = (wsId?: string, opts?: any) => {
 };
 
 export const useSignal = (id?: string) => {
-  const { data, isLoading } = useQuery(async () => {
+  const { data, isLoading, refetch } = useQuery(async () => {
     if (!id) return null;
     return api.signals.get(id);
   }, [id]);
-  return { data, isLoading };
+  return { data, isLoading, refetch };
 };
 
 export const useAccounts = (wsId?: string, opts?: any) => {
@@ -281,11 +364,11 @@ export const useProblems = (wsId?: string) => {
 };
 
 export const useProblem = (id?: string) => {
-  const { data, isLoading } = useQuery(async () => {
+  const { data, isLoading, refetch } = useQuery(async () => {
     if (!id) return null;
     return api.problems.get(id);
   }, [id]);
-  return { data, isLoading };
+  return { data, isLoading, refetch };
 };
 
 export const useOpportunities = (wsId?: string) => {
@@ -313,19 +396,19 @@ export const useDecisions = (wsId?: string) => {
 };
 
 export const useDecision = (id?: string) => {
-  const { data, isLoading } = useQuery(async () => {
+  const { data, isLoading, refetch } = useQuery(async () => {
     if (!id) return null;
     return api.decisions.get(id);
   }, [id]);
-  return { data, isLoading };
+  return { data, isLoading, refetch };
 };
 
 export const useArtifacts = (wsId?: string) => {
-  const { data, isLoading } = useQuery(async () => {
+  const { data, isLoading, refetch } = useQuery(async () => {
     if (!wsId) return [];
     return api.artifacts.list(wsId);
   }, [wsId]);
-  return { data: data || [], isLoading };
+  return { data: data || [], isLoading, refetch };
 };
 
 export const useArtifact = (id?: string) => {
@@ -337,17 +420,39 @@ export const useArtifact = (id?: string) => {
 };
 
 export const useLaunches = (wsId?: string) => {
-  const { data, isLoading } = useQuery(async () => {
+  const { data, isLoading, refetch } = useQuery(async () => {
     if (!wsId) return [];
     return api.launches.list(wsId);
   }, [wsId]);
-  return { data: data || [], isLoading };
+  return { data: data || [], isLoading, refetch };
 };
 
 export const useTeam = (wsId?: string) => {
-  const { data, isLoading } = useQuery(async () => {
+  const { data, isLoading, refetch } = useQuery(async () => {
     if (!wsId) return { members: [], invites: [] };
     return api.team.list(wsId);
   }, [wsId]);
-  return { data: data || { members: [], invites: [] }, isLoading };
+  return { data: data || { members: [], invites: [] }, isLoading, refetch };
+};
+
+export const useActivities = (wsId?: string) => {
+  const { data, isLoading, refetch } = useQuery(async () => {
+    if (!wsId) return [];
+    return api.activities.list(wsId);
+  }, [wsId]);
+  return { data: data || [], isLoading, refetch };
+};
+
+export const useProductAreas = () => {
+  const { data, isLoading, refetch } = useQuery(async () => {
+    return api.workspace.getAreas();
+  }, []);
+  return { data: data || [], isLoading, refetch };
+};
+
+export const useSegments = () => {
+  const { data, isLoading, refetch } = useQuery(async () => {
+    return api.workspace.getSegments();
+  }, []);
+  return { data: data || [], isLoading, refetch };
 };

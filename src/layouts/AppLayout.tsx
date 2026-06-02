@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Search, Layers, TrendingUp, CheckCircle,
   Settings, LogOut, Bell, Menu, X, ChevronDown, Check,
   FileText, Rocket, Building2, Lock, Sparkles, User as UserIcon,
-  Timer, AlertCircle, BadgeCheck, Signal, Activity, CheckCircle2,
+  Timer, AlertCircle, BadgeCheck, Signal, Activity, CheckCircle2, Plus,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -53,6 +53,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle,
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
+  const [showNewWsModal, setShowNewWsModal] = useState(false);
 
   const workspaceDropdownRef = useRef<HTMLDivElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
@@ -270,6 +271,18 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle,
                     {activeWorkspace?.id === ws.id && <Check className="w-3.5 h-3.5 text-astrix-teal shrink-0" />}
                   </button>
                 ))}
+                <div className="border-t border-slate-700/60 mt-1 pt-1">
+                  <button
+                    onClick={() => { setIsWorkspaceDropdownOpen(false); setShowNewWsModal(true); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-colors text-left group"
+                  >
+                    <div className="w-5 h-5 rounded-md bg-slate-700/80 border border-slate-600 flex items-center justify-center shrink-0">
+                      <Plus className="w-3 h-3 text-slate-400 group-hover:text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-slate-500 group-hover:text-slate-300">New Workspace</span>
+                    <Lock className="w-3 h-3 text-slate-600 ml-auto" />
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -502,6 +515,65 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle,
       </main>
 
       <CsvUploadModal />
+
+      {/* ── New Workspace — free-plan gate modal ─────────────────── */}
+      {showNewWsModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowNewWsModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-[fadeIn_0.2s_ease-out]">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-amber-100 rounded-xl">
+                  <Lock className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h2 className="font-heading text-lg font-black text-gray-900">Multiple Workspaces</h2>
+                  <p className="text-xs text-gray-500 font-medium">Starter plan required</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowNewWsModal(false)}
+                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 font-medium mb-5 leading-relaxed">
+              Multiple workspaces let you manage separate products, teams, or clients — each with their own signals, opportunities, and decisions.
+            </p>
+
+            <div className="space-y-2.5 mb-6">
+              {[
+                'Unlimited workspaces',
+                'Separate signal streams per workspace',
+                'Cross-workspace reporting & roll-ups',
+              ].map((feat) => (
+                <div key={feat} className="flex items-center gap-2.5 text-sm font-medium text-gray-700">
+                  <CheckCircle2 className="w-4 h-4 text-astrix-teal shrink-0" />
+                  {feat}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <Link
+                to="/pricing"
+                onClick={() => setShowNewWsModal(false)}
+                className="flex-1 bg-astrix-teal hover:bg-astrix-darkTeal text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md shadow-astrix-teal/20"
+              >
+                <Sparkles className="w-4 h-4" /> Upgrade to Starter
+              </Link>
+              <button
+                onClick={() => setShowNewWsModal(false)}
+                className="px-5 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
