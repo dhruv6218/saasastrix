@@ -1,0 +1,273 @@
+Sabse pehle kya sahi hai
+Left sidebar clean hai aur core pages visible hain, jo good SaaS information architecture ka important part hota hai.
+
+“Launch Reviews Due” top pe rakhna bilkul sahi decision hai, kyunki ASTRIX ka hero feature launch review + verdict loop hi hai.
+
+Quick actions row useful hai; Add Signal, New Problem, Log Launch, Import CSV practical lag rahe hain.
+
+Kya hatana ya change karna chahiye
+1. “Artifacts” sidebar se abhi hata de ya niche secondary me daal
+Dashboard nav me Artifacts abhi first-order object jaisa lag raha hai, but tumhare product loop me artifacts supporting layer hai, primary workflow object nahi. MVP focus ke hisaab se primary nav me sirf woh items hone chahiye jo core loop strengthen karein.
+
+Better:
+
+Dashboard
+
+Signals
+
+Accounts
+
+Problems
+
+Opportunities
+
+Decisions
+
+Launches
+
+Settings
+
+Artifacts ko:
+
+Decision detail page ke andar tab/section bana do
+
+ya “More” / secondary nav me daalo
+
+2. “Decision Alpha 100% / Proof Accuracy” stat card hata do
+Yeh metric impressive lagne ki koshish kar raha hai, but user ke liye immediately meaningful nahi hai. SaaS dashboard best practices vanity ya unclear metrics avoid karne ko kehti hain; stats tabhi useful hote hain jab user action ya outcome se linked ho.
+
+Replace it with:
+
+Active launches
+
+Verdict completion rate
+
+Reviews overdue
+
+Linked signals ratio
+
+Problems created this week
+
+3. “Signals Processed” card weak hai
+“3 signals processed” low-value metric lag raha hai, aur uske niche progress bar ka meaning clear nahi hai. Agar free plan limit dikhani hai, to usko explicit banao:
+
+3 / 200 signals used
+
+small caption: “197 remaining on Free plan”
+
+Ye both pricing hook aur utility dono dega. Pricing pages aur packaging best practices bhi clear usage framing recommend karte hain.
+
+4. “Max Opportunity Score 92” useful hai, but incomplete
+Number acha lag raha hai, but context missing hai. Isko card ki jagah opportunity snapshot banao:
+
+Top Opportunity: “Billing export issues”
+
+Score: 92
+
+Affected ARR: $18.2k
+
+CTA: View opportunity
+
+Ye zyada product-like lagega, sirf analytics-like nahi.
+
+Visual/UI polish jo karni chahiye
+5. Top banner thoda zyada pale / washed out lag raha hai
+“Launch Reviews Due” card ka background aur border bohot soft hai, jis wajah se urgency feel weak ho rahi hai. Since this is your most important widget, ise thoda stronger visual weight do:
+
+slightly darker warm tint
+
+left accent strip or icon block
+
+review count badge
+
+due timing chip: “Day 7 due today”
+
+Action-focused dashboard design me critical widgets ko clearer emphasis diya jata hai.
+
+6. Typography hierarchy tighten karo
+Heading “Good afternoon, Demo.” thik hai, but cards ke labels aur numbers me font mismatch feel aa raha hai. Especially stat cards me:
+
+number should be heavier and cleaner
+
+label smaller and more muted
+
+helper text even smaller
+
+Abhi kuch places par decorative font / stylized numerals serious product feel ko thoda damage kar rahe hain. B2B SaaS dashboards clarity-first type hierarchy se better perform karte hain.
+
+7. Spacing thodi inconsistent hai
+Cards ke andar icon, badge, number, label, helper text ke beech spacing perfectly even nahi lag rahi. Ye chhota point hai, but isi se UI “template” ya “custom product” lagta hai.
+
+Checklist:
+
+card padding same rakho
+
+icon top spacing same
+
+metric baseline align karo
+
+action row aur card row ke beech thoda more breathing room do
+
+8. Sidebar account switcher thoda bulky hai
+“Acme Corp / Free plan” block acha hai, but it takes a lot of visual weight. Agar MVP me multi-workspace actual heavy use case nahi hai, to isko slimmer bana sakte ho:
+
+smaller workspace chip
+
+plan badge subtle
+
+less vertical height
+
+Yeh sidebar ko aur breathable karega.
+
+Functional changes jo add karni chahiye
+9. Dashboard me “What changed since last visit?” widget add karo
+Ye bahut powerful rahega aur tumhare product ke habit loop ko strong karega. PRD me bhi tumhara retention mechanism isi type ka hai.
+
+Example:
+
+12 new signals
+
+2 problems created
+
+1 opportunity moved into top 3
+
+1 launch review overdue
+
+Ye static dashboard ko living workspace bana dega.
+
+10. “Unmatched Signals” ko stat card se actionable list banao
+Abhi “0 unmatched signals” card thik hai, lekin jab real data aayega tab better version hoga:
+
+Unmatched signals: 8
+
+top reasons: no account match / no problem assigned
+
+CTA: Review unmatched
+
+Ye triage workflow ko directly support karega.
+
+11. “Quick actions” ko context-sensitive karo
+Abhi actions generic hain. Better:
+
+If no signals: primary action = Import Signals CSV
+
+If signals exist but no accounts: Upload Accounts
+
+If problems exist but no decisions: Create Decision
+
+If decision exists but no launch: Log Launch
+
+This is classic progressive guidance and reduces confusion in SaaS onboarding.
+
+12. Dashboard me Recent Decisions ya Active Launches preview missing lag raha hai
+Screenshot ke fold ke neeche shayad ho, but above-the-fold me at least one compact preview hona chahiye:
+
+2 active launches
+
+3 recent decisions
+
+This helps users see continuity, not just counts.
+
+Chhote but important removals
+13. “Made with Replit” hatao
+Yeh obvious hai but bolna zaroori hai — product credibility direct hit leti hai. For B2B SaaS dashboard, external builder branding trust reduce karti hai.
+
+14. Right side floating button / little purple widget clutter lag raha hai
+Agar yeh help/chat/floating tool hai to current placement distracting hai. Clean dashboard me floating secondary controls minimal hone chahiye.
+
+15. Notification bell thoda lonely lag raha hai
+Bell hai, but uske aas-paas ecosystem missing hai. Either:
+
+bell + small notifications panel
+
+ya abhi temporarily remove until fully working
+
+Half-present notification UX kabhi kabhi incomplete feel deta hai.
+
+Exact recommended dashboard structure
+Mere hisaab se final dashboard order yeh hona chahiye:
+
+Header
+
+greeting
+
+date
+
+upgrade
+
+notifications
+
+Priority strip
+
+Reviews due
+
+overdue / due today / due this week chips
+
+KPI row
+
+Signals used
+
+Unmatched signals
+
+Active launches
+
+Verdict completion rate
+
+Quick actions
+
+Import signals
+
+Review unmatched
+
+Create problem
+
+Log launch
+
+Top opportunities
+
+with score + ARR + accounts + CTA
+
+Active launches
+
+owner + next review due + status
+
+Recent decisions / what changed since last visit
+
+Ye structure dashboard best-practice hierarchy ke sath bhi fit baithta hai aur tumhare product loop ke sath bhi.
+
+Meri blunt verdict
+Add:
+
+What changed since last visit
+
+Active launches widget
+
+Recent decisions
+
+actionable unmatched signals
+
+clearer usage/limit display
+
+Remove / demote:
+
+Artifacts from primary sidebar
+
+Decision Alpha card
+
+vague progress bar
+
+Replit badge
+
+floating clutter
+
+Polish:
+
+stronger urgency styling on review banner
+
+tighter spacing
+
+cleaner metric typography
+
+clearer card semantics
+
+Sach bolun to design direction sahi ja rahi hai, bas abhi dashboard thoda “pretty admin UI” lag raha hai, jabki ise “operator cockpit” feel dena chahiye.

@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AppLayout } from '../../layouts/AppLayout';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Rocket, Clock, Plus, ChevronRight } from 'lucide-react';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useLaunches } from '../../lib/api';
+import { usePlan } from '../../hooks/usePlan';
+import { UpgradeModal } from '../../components/modals/UpgradeModal';
 
 export const PostLaunchTracker = () => {
   const { activeWorkspace } = useWorkspace();
   const { data: launches, isLoading } = useLaunches(activeWorkspace?.id);
+  const { limits } = usePlan();
+  const navigate = useNavigate();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const formatDate = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
@@ -17,9 +22,19 @@ export const PostLaunchTracker = () => {
       title="Post-Launch Tracker"
       subtitle="Close the loop between decision and outcome"
       actions={
-        <Link to="/app/decisions" className="bg-astrix-teal text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-astrix-darkTeal transition-colors shadow-sm flex items-center gap-2">
+        <button
+          onClick={() => {
+            const activeLaunchCount = launches.filter((l: any) => l.status === 'active').length;
+            if (activeLaunchCount >= limits.activeLaunches) {
+              setShowUpgradeModal(true);
+            } else {
+              navigate('/app/decisions');
+            }
+          }}
+          className="bg-astrix-teal text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-astrix-darkTeal transition-colors shadow-sm flex items-center gap-2"
+        >
           <Plus className="w-4 h-4" /> Log New Launch
-        </Link>
+        </button>
       }
     >
       {isLoading ? (
@@ -56,6 +71,20 @@ export const PostLaunchTracker = () => {
           ))}
         </div>
       )}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        feature="Run Multiple Launches in Parallel"
+        description="Free plan allows 1 active launch at a time. Upgrade to Starter to track up to 5 bets simultaneously and build an ongoing outcome ritual for your team."
+        requiredPlan="Starter"
+        bullets={[
+          "Up to 5 active launches running in parallel",
+          "Unlimited completed launches over time",
+          "Full Day 7 / 30 outcome reviews and verdicts",
+          "Launch & verdict dashboard widgets",
+        ]}
+      />
+
     </AppLayout>
   );
 };

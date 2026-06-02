@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AppLayout } from '../../layouts/AppLayout';
-import { Filter, ArrowRight, Target, GitCompare, X, CheckCircle2, Loader2 } from 'lucide-react';
+import { Filter, ArrowRight, Target, GitCompare, X, CheckCircle2, Loader2, Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useOpportunities, api } from '../../lib/api';
@@ -8,6 +8,8 @@ import { Opportunity } from '../../types';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { usePlan } from '../../hooks/usePlan';
+import { UpgradeModal } from '../../components/modals/UpgradeModal';
 
 export const OpportunitiesList = () => {
   const navigate = useNavigate();
@@ -15,9 +17,11 @@ export const OpportunitiesList = () => {
   const { activeWorkspace } = useWorkspace();
   const { data: opportunities, isLoading, refetch } = useOpportunities(activeWorkspace?.id);
   const { addToast } = useToast();
+  const { limits } = usePlan();
 
   const [isCompareMode, setIsCompareMode] = useState(false);
   const [selectedOpps, setSelectedOpps] = useState<string[]>([]);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
 
   const [isDecisionModalOpen, setIsDecisionModalOpen] = useState(false);
@@ -164,8 +168,13 @@ export const OpportunitiesList = () => {
               </button>
             </>
           ) : (
-            <button onClick={() => setIsCompareMode(true)} className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2">
-              <GitCompare className="w-4 h-4" /> Compare Mode
+            <button
+              onClick={() => limits.compareMode ? setIsCompareMode(true) : setShowUpgradeModal(true)}
+              className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2"
+            >
+              <GitCompare className="w-4 h-4" />
+              Compare Mode
+              {!limits.compareMode && <Lock className="w-3.5 h-3.5 text-gray-400" />}
             </button>
           )}
         </div>
@@ -184,36 +193,56 @@ export const OpportunitiesList = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {opportunities.map((opp) => (
-            <div key={opp.id} className={`bg-white border rounded-2xl p-6 shadow-sm transition-all duration-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group ${selectedOpps.includes(opp.id) ? 'border-astrix-teal bg-teal-50/10' : 'border-gray-200 hover:shadow-md'}`}>
-              
-              <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto">
-                {isCompareMode && (
-                  <input type="checkbox" checked={selectedOpps.includes(opp.id)} onChange={() => toggleOpp(opp.id)} className="w-5 h-5 accent-astrix-teal cursor-pointer" />
-                )}
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center font-heading font-black text-2xl shrink-0 ${opp.opportunity_score >= 80 ? 'bg-astrix-teal text-white shadow-md' : opp.opportunity_score >= 60 ? 'bg-astrix-gold text-gray-900' : 'bg-gray-100 text-gray-500'}`}>
-                  {opp.opportunity_score}
-                </div>
-                <div>
-                  <h3 className="font-heading text-xl font-bold text-gray-900 mb-1">{opp.problems?.title}</h3>
-                  <div className="flex items-center gap-3 text-xs font-mono font-medium text-gray-500">
-                    <span className="px-2 py-0.5 rounded uppercase tracking-wider font-bold bg-gray-100 text-gray-700 capitalize">{opp.recommended_action || 'Review'}</span>
-                    <span>{opp.problems?.evidence_count || 0} Signals</span>
-                    <span>•</span>
-                    <span className="text-gray-900 font-bold">{formatCurrency(opp.problems?.affected_arr || 0)} ARR</span>
+          {opportunities.map((opp, idx) => {
+            const isLocked = idx >= limits.visibleOpps;
+            return (
+              <div key={opp.id} className="relative">
+                <div className={`bg-white border rounded-2xl p-6 shadow-sm transition-all duration-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group ${isLocked ? 'opacity-40 pointer-events-none select-none blur-[2px]' : selectedOpps.includes(opp.id) ? 'border-astrix-teal bg-teal-50/10' : 'border-gray-200 hover:shadow-md'}`}>
+                  <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto">
+                    {isCompareMode && !isLocked && (
+                      <input type="checkbox" checked={selectedOpps.includes(opp.id)} onChange={() => toggleOpp(opp.id)} className="w-5 h-5 accent-astrix-teal cursor-pointer" />
+                    )}
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center font-heading font-black text-2xl shrink-0 ${opp.opportunity_score >= 80 ? 'bg-astrix-teal text-white shadow-md' : opp.opportunity_score >= 60 ? 'bg-astrix-gold text-gray-900' : 'bg-gray-100 text-gray-500'}`}>
+                      {opp.opportunity_score}
+                    </div>
+                    <div>
+                      <h3 className="font-heading text-xl font-bold text-gray-900 mb-1">{opp.problems?.title}</h3>
+                      <div className="flex items-center gap-3 text-xs font-mono font-medium text-gray-500">
+                        <span className="px-2 py-0.5 rounded uppercase tracking-wider font-bold bg-gray-100 text-gray-700 capitalize">{opp.recommended_action || 'Review'}</span>
+                        <span>{opp.problems?.evidence_count || 0} Signals</span>
+                        <span>•</span>
+                        <span className="text-gray-900 font-bold">{formatCurrency(opp.problems?.affected_arr || 0)} ARR</span>
+                      </div>
+                    </div>
                   </div>
+                  {!isCompareMode && !isLocked && (
+                    <div className="w-full md:w-auto flex justify-end shrink-0">
+                      <button onClick={() => openDecisionModal(opp)} className="bg-white border border-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-bold hover:border-astrix-teal hover:text-astrix-teal transition-colors flex items-center gap-2">
+                        Make Decision <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
-
-              {!isCompareMode && (
-                <div className="w-full md:w-auto flex justify-end shrink-0">
-                  <button onClick={() => openDecisionModal(opp)} className="bg-white border border-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-bold hover:border-astrix-teal hover:text-astrix-teal transition-colors flex items-center gap-2">
-                    Make Decision <ArrowRight className="w-4 h-4" />
+                {/* Lock overlay for items beyond free limit */}
+                {isLocked && (
+                  <button
+                    onClick={() => setShowUpgradeModal(true)}
+                    className="absolute inset-0 flex items-center justify-center rounded-2xl group/lock"
+                  >
+                    <div className="bg-white border border-gray-200 shadow-lg rounded-xl px-5 py-3 flex items-center gap-3 group-hover/lock:border-brand-blue transition-colors">
+                      <div className="w-8 h-8 bg-brand-blue rounded-lg flex items-center justify-center">
+                        <Lock className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <div className="text-sm font-black text-gray-900">Upgrade to see all opportunities</div>
+                        <div className="text-xs text-gray-500 font-medium">Free plan shows top 5 only</div>
+                      </div>
+                    </div>
                   </button>
-                </div>
-              )}
-            </div>
-          ))}
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -312,6 +341,20 @@ export const OpportunitiesList = () => {
           </div>
         </div>
       )}
+
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        feature="Compare Opportunities"
+        description="Compare up to 3 opportunities side-by-side to make faster, more confident decisions backed by signal data, ARR impact, and AI recommendations."
+        requiredPlan="Starter"
+        bullets={[
+          "Full opportunity list with all scores",
+          "Compare Mode: side-by-side analysis of up to 3 opportunities",
+          "Up to 5 active launches at a time",
+          "~1,500 AI calls/month — memo, PRD & user story drafts",
+        ]}
+      />
 
     </AppLayout>
   );

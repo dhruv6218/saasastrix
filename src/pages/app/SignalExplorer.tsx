@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { AppLayout } from '../../layouts/AppLayout';
 import { Search, Hash, MessageCircle, Github, AlertCircle, FileSpreadsheet, Database, UploadCloud, Plus, Loader2, ChevronRight, Filter } from 'lucide-react';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useNavigate } from 'react-router-dom';
 import { useSignals, useAccounts, api } from '../../lib/api';
+import { usePlan } from '../../hooks/usePlan';
 import { Signal } from '../../types';
 import { TableSkeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../contexts/ToastContext';
@@ -20,6 +21,7 @@ export const SignalExplorer = () => {
   const { activeWorkspace } = useWorkspace();
   const { addToast } = useToast();
   const navigate = useNavigate();
+  const { limits } = usePlan();
   
   const [globalFilter, setGlobalFilter] = useState('');
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -98,6 +100,39 @@ export const SignalExplorer = () => {
         </div>
       }
     >
+      {/* Free plan signal usage banner */}
+      {!isLoading && (() => {
+        const total = data.total;
+        const limit = limits.signals;
+        const pct = Math.min(100, Math.round((total / limit) * 100));
+        const nearLimit = pct >= 75;
+        const atLimit = pct >= 100;
+        return (
+          <div className={`mb-5 rounded-2xl border px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${atLimit ? 'bg-red-50 border-red-200' : nearLimit ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'}`}>
+            <div className="flex-1">
+              <div className={`text-xs font-black uppercase tracking-widest mb-1 ${atLimit ? 'text-red-600' : nearLimit ? 'text-amber-700' : 'text-blue-600'}`}>
+                {atLimit ? 'Signal Limit Reached' : nearLimit ? 'Approaching Signal Limit' : 'Free Plan · Signal Usage'}
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-2 bg-white rounded-full overflow-hidden border border-black/5">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${atLimit ? 'bg-red-500' : nearLimit ? 'bg-amber-400' : 'bg-brand-blue'}`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <span className={`text-sm font-black shrink-0 ${atLimit ? 'text-red-700' : nearLimit ? 'text-amber-800' : 'text-blue-700'}`}>
+                  {total.toLocaleString()} / {limit.toLocaleString()} signals
+                </span>
+              </div>
+              {atLimit && <p className="text-xs text-red-600 font-medium mt-1.5">You've reached the 200-signal limit. Upgrade to Starter to keep ingesting feedback.</p>}
+            </div>
+            <a href="/pricing" className={`shrink-0 text-sm font-bold px-4 py-2 rounded-xl transition-colors whitespace-nowrap ${atLimit ? 'bg-red-600 text-white hover:bg-red-700' : nearLimit ? 'bg-amber-500 text-white hover:bg-amber-600' : 'bg-brand-blue text-white hover:bg-blue-700'}`}>
+              Upgrade to Starter →
+            </a>
+          </div>
+        );
+      })()}
+
       <div className="flex flex-col md:flex-row gap-3 mb-6">
         <div className="bg-white border border-gray-200 rounded-xl p-2 flex items-center shadow-sm focus-within:ring-2 focus-within:ring-astrix-teal transition-all flex-1">
           <Search className="w-5 h-5 text-gray-400 ml-2 mr-3 shrink-0" />
