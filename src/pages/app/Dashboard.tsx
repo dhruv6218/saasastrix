@@ -1,33 +1,41 @@
 import React from 'react';
 import { AppLayout } from '../../layouts/AppLayout';
-import { 
-  TrendingUp, 
-  ArrowRight, 
-  UploadCloud, 
-  Activity, 
-  Database, 
-  CheckCircle2, 
-  Layers, 
-  Clock, 
-  AlertCircle, 
+import {
+  TrendingUp,
+  ArrowRight,
+  UploadCloud,
+  Activity,
+  Database,
+  CheckCircle2,
+  Layers,
+  Clock,
+  AlertCircle,
   Zap,
   Sparkles,
-  PieChart,
   Plus,
   Rocket,
   FileText,
   ChevronRight,
   Lock,
-  GitCompare
+  GitCompare,
+  Signal,
+  Target,
+  BarChart3,
+  Users,
+  FlameKindling,
+  Timer,
+  BadgeCheck,
+  TrendingDown,
+  RefreshCw,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { 
-  useSignals, 
-  useOpportunities, 
-  useDecisions, 
-  useLaunches 
+import {
+  useSignals,
+  useOpportunities,
+  useDecisions,
+  useLaunches,
 } from '../../lib/api';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { formatCurrency } from '../../lib/utils';
@@ -52,57 +60,110 @@ export const Dashboard = () => {
   const decisions = decData || [];
   const launches = launchData || [];
 
+  const topOpp = opportunities[0];
   const topOpportunities = opportunities.slice(0, 5);
   const recentDecisions = decisions.slice(0, 4);
-  
-  const activeLaunches = launches.filter(l => l.status === 'active' || l.status === 'pending_review');
-  const reviewsDue = activeLaunches.filter(l => {
-    const launchDate = new Date(l.launched_at);
-    const daysSinceLaunch = (Date.now() - launchDate.getTime()) / (1000 * 3600 * 24);
-    return daysSinceLaunch >= 7; 
+
+  const activeLaunches = launches.filter(
+    (l) => l.status === 'active' || l.status === 'pending_review'
+  );
+  const reviewsDue = activeLaunches.filter((l) => {
+    const daysSince =
+      (Date.now() - new Date(l.launched_at).getTime()) / (1000 * 3600 * 24);
+    return daysSince >= 7;
   });
-  
+
   const unmatchedSignals = Math.max(0, Math.floor(signalsCount * 0.15));
-  const solvedLaunches = launches.filter(l => l.pm_verdict === 'Solved').length;
-  const decisionAlpha = launches.length > 0 ? Math.round((solvedLaunches / launches.length) * 100) : 0;
+  const solvedLaunches = launches.filter((l) => l.pm_verdict === 'Solved').length;
+  const verdictRate =
+    launches.length > 0 ? Math.round((solvedLaunches / launches.length) * 100) : 0;
 
   const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 18) return 'Good afternoon';
     return 'Good evening';
   };
 
-  const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const signalPct = Math.min(100, Math.round((signalsCount / limits.signals) * 100));
+
+  const getContextActions = () => {
+    if (signalsCount === 0)
+      return [
+        { icon: UploadCloud, label: 'Import Signals CSV', primary: true, onClick: () => window.dispatchEvent(new CustomEvent('open-upload-modal')) },
+        { icon: Plus, label: 'Add Signal', primary: false, onClick: () => navigate('/app/signals') },
+        { icon: Layers, label: 'View Problems', primary: false, onClick: () => navigate('/app/problems') },
+      ];
+    if (unmatchedSignals > 0)
+      return [
+        { icon: AlertCircle, label: `Review ${unmatchedSignals} Unmatched`, primary: true, onClick: () => navigate('/app/signals') },
+        { icon: Layers, label: 'New Problem', primary: false, onClick: () => navigate('/app/problems') },
+        { icon: UploadCloud, label: 'Import CSV', primary: false, onClick: () => window.dispatchEvent(new CustomEvent('open-upload-modal')) },
+        { icon: Rocket, label: 'Log Launch', primary: false, onClick: () => navigate('/app/launches') },
+      ];
+    if (opportunities.length > 0 && decisions.length === 0)
+      return [
+        { icon: BadgeCheck, label: 'Create Decision', primary: true, onClick: () => navigate('/app/decisions') },
+        { icon: TrendingUp, label: 'View Opportunities', primary: false, onClick: () => navigate('/app/opportunities') },
+        { icon: UploadCloud, label: 'Import CSV', primary: false, onClick: () => window.dispatchEvent(new CustomEvent('open-upload-modal')) },
+      ];
+    if (decisions.length > 0 && activeLaunches.length === 0)
+      return [
+        { icon: Rocket, label: 'Log a Launch', primary: true, onClick: () => navigate('/app/launches') },
+        { icon: Layers, label: 'New Problem', primary: false, onClick: () => navigate('/app/problems') },
+        { icon: UploadCloud, label: 'Import CSV', primary: false, onClick: () => window.dispatchEvent(new CustomEvent('open-upload-modal')) },
+      ];
+    return [
+      { icon: Plus, label: 'Add Signal', primary: false, onClick: () => navigate('/app/signals') },
+      { icon: Layers, label: 'New Problem', primary: false, onClick: () => navigate('/app/problems') },
+      { icon: Rocket, label: 'Log Launch', primary: false, onClick: () => navigate('/app/launches') },
+      { icon: UploadCloud, label: 'Import CSV', primary: true, onClick: () => window.dispatchEvent(new CustomEvent('open-upload-modal')) },
+    ];
+  };
+
+  const contextActions = getContextActions();
+
+  const whatChanged = [
+    { icon: Signal, text: `${signalsCount} signal${signalsCount !== 1 ? 's' : ''} ingested`, color: 'text-brand-blue' },
+    ...(unmatchedSignals > 0 ? [{ icon: AlertCircle, text: `${unmatchedSignals} unmatched signal${unmatchedSignals !== 1 ? 's' : ''}`, color: 'text-amber-600' }] : []),
+    ...(opportunities.length > 0 ? [{ icon: TrendingUp, text: `"${topOpp?.problems?.title?.split(' ').slice(0, 3).join(' ')}…" at #1`, color: 'text-astrix-teal' }] : []),
+    ...(reviewsDue.length > 0 ? [{ icon: Timer, text: `${reviewsDue.length} review${reviewsDue.length !== 1 ? 's' : ''} overdue`, color: 'text-red-500' }] : []),
+    ...(decisions.length > 0 ? [{ icon: BadgeCheck, text: `${decisions.length} decision${decisions.length !== 1 ? 's' : ''} logged`, color: 'text-green-600' }] : []),
+    { icon: RefreshCw, text: 'Signals re-clustered', color: 'text-slate-400' },
+  ];
 
   return (
-    <AppLayout 
-      title={`${getGreeting()}, ${firstName}.`} 
-      subtitle={`${currentDate} • Here is what needs your attention today.`}
+    <AppLayout
+      title={`${getGreeting()}, ${firstName}.`}
+      subtitle={`${currentDate} · Here is what needs your attention today.`}
     >
-      {/* Free Plan Upgrade Card */}
+      {/* ── Free Plan Upgrade Card ─────────────────────────────────── */}
       {plan === 'free' && (
         <div className="mb-6 relative overflow-hidden rounded-2xl border border-brand-blue/20 bg-gradient-to-br from-[#0f172a] to-[#1e3a5f] shadow-lg animate-slide-up">
-          {/* Decorative blobs */}
           <div className="absolute -right-16 -top-16 w-56 h-56 bg-brand-blue/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -left-8 -bottom-8 w-40 h-40 bg-astrix-teal/10 rounded-full blur-2xl pointer-events-none" />
-
           <div className="relative z-10 p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-5 md:gap-8">
-            {/* Left — label + title + locked features */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-[10px] font-black uppercase tracking-widest text-brand-blue bg-brand-blue/15 border border-brand-blue/30 px-2.5 py-1 rounded-full">Free Plan</span>
                 <span className="text-[10px] font-medium text-slate-400">· Upgrade anytime, cancel anytime</span>
               </div>
               <h3 className="font-heading text-lg md:text-xl font-black text-white leading-tight mb-3">
-                Unlock your full product loop — <span className="text-astrix-teal">starting at $59/mo</span>
+                Unlock your full product loop —{' '}
+                <span className="text-astrix-teal">starting at $59/mo</span>
               </h3>
               <div className="flex flex-wrap gap-2">
                 {[
                   { icon: GitCompare, label: 'Compare Mode' },
-                  { icon: Rocket,     label: 'Multiple Launches' },
-                  { icon: Sparkles,   label: '1,500 AI calls/mo' },
-                  { icon: Lock,       label: 'Saved Views' },
+                  { icon: Rocket, label: 'Multiple Launches' },
+                  { icon: Sparkles, label: '1,500 AI calls/mo' },
+                  { icon: Lock, label: 'Saved Views' },
                 ].map(({ icon: Icon, label }) => (
                   <span key={label} className="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">
                     <Icon className="w-3 h-3 text-astrix-teal shrink-0" /> {label}
@@ -110,12 +171,10 @@ export const Dashboard = () => {
                 ))}
               </div>
             </div>
-
-            {/* Center — usage meters */}
             <div className="flex flex-row md:flex-col gap-3 md:gap-2.5 md:min-w-[200px]">
               {[
                 { label: 'Signals', used: signalsCount, max: limits.signals },
-                { label: 'Active Launches', used: launches.filter((l: any) => l.status === 'active').length, max: limits.activeLaunches },
+                { label: 'Active Launches', used: activeLaunches.length, max: limits.activeLaunches },
                 { label: 'Opportunities shown', used: Math.min(opportunities.length, limits.visibleOpps), max: limits.visibleOpps },
               ].map(({ label, used, max }) => {
                 const pct = Math.min(100, Math.round((used / max) * 100));
@@ -127,28 +186,17 @@ export const Dashboard = () => {
                       <span className={`text-[10px] font-black ${hot ? 'text-amber-400' : 'text-slate-300'}`}>{used}/{max}</span>
                     </div>
                     <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all duration-700 ${hot ? 'bg-amber-400' : 'bg-astrix-teal'}`}
-                        style={{ width: `${pct}%` }}
-                      />
+                      <div className={`h-full rounded-full transition-all duration-700 ${hot ? 'bg-amber-400' : 'bg-astrix-teal'}`} style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 );
               })}
             </div>
-
-            {/* Right — CTA */}
             <div className="flex flex-row md:flex-col gap-3 shrink-0">
-              <Link
-                to="/pricing"
-                className="flex-1 md:flex-none text-center bg-brand-blue hover:bg-blue-700 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-lg shadow-brand-blue/30 flex items-center justify-center gap-2 whitespace-nowrap"
-              >
+              <Link to="/pricing" className="flex-1 md:flex-none text-center bg-brand-blue hover:bg-blue-700 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-lg shadow-brand-blue/30 flex items-center justify-center gap-2 whitespace-nowrap">
                 See all plans <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link
-                to="/pricing"
-                className="flex-1 md:flex-none text-center bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
-              >
+              <Link to="/pricing" className="flex-1 md:flex-none text-center bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
                 Compare plans
               </Link>
             </div>
@@ -156,206 +204,364 @@ export const Dashboard = () => {
         </div>
       )}
 
+      {/* ── Launch Reviews Due Banner (stronger) ──────────────────── */}
       {reviewsDue.length > 0 && (
-        <div className="mb-8 relative overflow-hidden rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm border border-amber-200/60 bg-gradient-to-br from-amber-50/90 to-orange-50/50 backdrop-blur-md animate-slide-up">
-          <div className="absolute -right-20 -top-20 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="flex items-start sm:items-center gap-4 text-amber-900 relative z-10">
-            <div className="p-3 bg-white/60 backdrop-blur-sm rounded-xl shrink-0 shadow-sm border border-amber-100/50">
-              <Clock className="w-5 h-5 text-amber-600 animate-pulse-slow" />
-            </div>
-            <div>
-              <h3 className="font-heading text-lg font-bold tracking-tight">Launch Reviews Due</h3>
-              <p className="text-sm font-medium text-amber-700/80 mt-0.5">
-                You have {reviewsDue.length} launch{reviewsDue.length > 1 ? 'es' : ''} pending outcome measurement.
-              </p>
+        <div className="mb-6 relative overflow-hidden rounded-2xl animate-slide-up">
+          <div className="absolute inset-y-0 left-0 w-1 bg-orange-500 rounded-l-2xl" />
+          <div className="bg-gradient-to-r from-orange-100 to-amber-50 border border-orange-200 rounded-2xl p-5 md:p-6 pl-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="p-2.5 bg-orange-500 rounded-xl shrink-0 shadow-md">
+                  <Clock className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-heading text-base font-black text-orange-900 tracking-tight">Launch Reviews Due</h3>
+                    <span className="bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">
+                      {reviewsDue.length} pending
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-orange-800/80">Outcome measurement overdue — your verdict loop is incomplete.</p>
+                  <div className="flex flex-wrap gap-2 mt-2.5">
+                    {reviewsDue.slice(0, 3).map((l) => {
+                      const days = Math.floor((Date.now() - new Date(l.launched_at).getTime()) / (1000 * 3600 * 24));
+                      return (
+                        <Link key={l.id} to={`/app/launches/${l.id}`} className="flex items-center gap-1.5 bg-white border border-orange-200 px-2.5 py-1 rounded-lg text-xs font-bold text-orange-800 hover:border-orange-400 transition-colors">
+                          <Timer className="w-3 h-3 text-orange-500" />
+                          {l.title} · <span className="text-orange-500">Day {days}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              <Link to="/app/launches" className="shrink-0 w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-orange-200 flex items-center justify-center gap-2 transition-colors group">
+                Review Outcomes <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </div>
           </div>
-          <Link to="/app/launches" className="relative z-10 bg-white text-amber-700 border border-amber-200/50 px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:shadow-md hover:bg-amber-50/50 hover:border-amber-300 transition-all duration-300 shrink-0 w-full sm:w-auto text-center flex items-center justify-center gap-2 group">
-            Review Outcomes <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-slide-up stagger-1">
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-default">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-2 bg-blue-50 rounded-lg border border-blue-100 text-brand-blue"><PieChart className="w-4 h-4" /></div>
-            <span className="text-[10px] font-bold text-brand-blue uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded border border-blue-100">Free Plan</span>
+      {/* ── What Changed Since Last Visit ─────────────────────────── */}
+      <div className="mb-6 bg-white border border-gray-200 rounded-2xl px-4 py-3 flex items-center gap-3 overflow-x-auto hide-scrollbar shadow-sm animate-slide-up">
+        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest shrink-0 flex items-center gap-1.5">
+          <RefreshCw className="w-3 h-3" /> Since last visit
+        </span>
+        <div className="w-px h-4 bg-gray-200 shrink-0" />
+        <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar">
+          {whatChanged.map(({ icon: Icon, text, color }, i) => (
+            <span key={i} className={`flex items-center gap-1.5 text-xs font-bold whitespace-nowrap ${color}`}>
+              <Icon className="w-3.5 h-3.5 shrink-0" />
+              {text}
+              {i < whatChanged.length - 1 && <span className="text-gray-200 ml-2">·</span>}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── KPI Row ───────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 animate-slide-up stagger-1">
+
+        {/* Signals used */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-blue-50 rounded-lg border border-blue-100 text-brand-blue"><Signal className="w-4 h-4" /></div>
+            <span className="text-[9px] font-black text-brand-blue uppercase tracking-widest bg-blue-50 border border-blue-100 px-2 py-0.5 rounded">Free · {limits.signals} cap</span>
           </div>
-          <div className="text-3xl font-heading font-black text-gray-900">{signalsCount}</div>
-          <div className="text-xs font-medium text-gray-500 mt-1">Signals Processed</div>
-          <div className="w-full bg-gray-100 rounded-full h-1.5 mt-4 overflow-hidden">
-            <div className="bg-brand-blue h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${Math.min(100, (signalsCount / 200) * 100)}%` }}></div>
+          <div className="flex items-end gap-1 mb-0.5">
+            <span className="text-3xl font-heading font-black text-gray-900 leading-none">{signalsCount}</span>
+            <span className="text-sm font-bold text-gray-400 mb-0.5">/ {limits.signals}</span>
           </div>
+          <div className="text-xs font-medium text-gray-500 mb-3">Signals used</div>
+          <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-1000 ease-out ${signalPct >= 100 ? 'bg-red-500' : signalPct >= 75 ? 'bg-amber-400' : 'bg-brand-blue'}`}
+              style={{ width: `${signalPct}%` }}
+            />
+          </div>
+          <p className="text-[10px] text-gray-400 font-medium mt-1.5">{limits.signals - signalsCount} remaining on Free plan</p>
         </div>
 
-        <Link to="/app/signals" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-1 hover:border-amber-200 transition-all duration-300 block">
-          <div className="flex justify-between items-start mb-4">
+        {/* Unmatched signals */}
+        <Link to="/app/signals" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 hover:border-amber-200 transition-all duration-300 block">
+          <div className="flex items-center justify-between mb-3">
             <div className="p-2 bg-amber-50 rounded-lg border border-amber-100 text-amber-600"><AlertCircle className="w-4 h-4" /></div>
-          </div>
-          <div className="text-3xl font-heading font-black text-gray-900">{unmatchedSignals}</div>
-          <div className="text-xs font-medium text-gray-500 mt-1">Unmatched Signals</div>
-          <div className="text-[10px] font-bold text-amber-600 mt-4 flex items-center gap-1 group-hover:underline"><ArrowRight className="w-3 h-3" /> Needs Triage</div>
-        </Link>
-
-        <Link to="/app/opportunities" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-1 hover:border-astrix-teal/30 transition-all duration-300 block">
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-astrix-teal/5 rounded-full blur-2xl group-hover:bg-astrix-teal/10 transition-colors"></div>
-          <div className="flex justify-between items-start mb-4 relative z-10">
-            <div className="p-2 bg-teal-50 rounded-lg border border-teal-100 text-astrix-teal"><Zap className="w-4 h-4" /></div>
-          </div>
-          <div className="text-3xl font-heading font-black text-astrix-teal relative z-10">{opportunities[0]?.opportunity_score || 0}</div>
-          <div className="text-xs font-medium text-gray-500 mt-1 relative z-10">Max Opportunity Score</div>
-          <div className="text-[10px] font-bold text-gray-400 mt-4 relative z-10">Highest priority index</div>
-        </Link>
-
-        <Link to="/app/launches" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-1 hover:border-green-200 transition-all duration-300 block">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-2 bg-green-50 rounded-lg border border-green-100 text-green-600"><CheckCircle2 className="w-4 h-4" /></div>
-          </div>
-          <div className="text-3xl font-heading font-black text-gray-900">{decisionAlpha}%</div>
-          <div className="text-xs font-medium text-gray-500 mt-1">Decision Alpha</div>
-          <div className="text-[10px] font-bold text-green-600 mt-4 flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Proof Accuracy</div>
-        </Link>
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-2xl p-2.5 mb-8 shadow-sm flex flex-wrap sm:flex-nowrap gap-2 items-center justify-between animate-slide-up stagger-2">
-        <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
-          <button onClick={() => navigate('/app/signals/new')} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:text-gray-900 transition-all hover:shadow-sm">
-            <Plus className="w-4 h-4" /> Add Signal
-          </button>
-          <button onClick={() => navigate('/app/problems')} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:text-gray-900 transition-all hover:shadow-sm">
-            <Layers className="w-4 h-4" /> New Problem
-          </button>
-          <button onClick={() => navigate('/app/decisions')} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:text-gray-900 transition-all hover:shadow-sm">
-            <Rocket className="w-4 h-4" /> Log Launch
-          </button>
-        </div>
-        <button onClick={() => window.dispatchEvent(new CustomEvent('open-upload-modal'))} className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-astrix-teal hover:bg-astrix-darkTeal text-white rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md">
-          <UploadCloud className="w-4 h-4" /> Import CSV
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-12">
-        <div className="xl:col-span-2 flex flex-col animate-slide-up stagger-3">
-          <div className="flex items-center justify-between mb-4 px-1">
-            <h2 className="font-heading text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-astrix-teal" /> Ranked Opportunities
-            </h2>
-            <Link to="/app/opportunities" className="text-xs font-bold text-astrix-teal hover:text-astrix-darkTeal transition-colors uppercase tracking-widest flex items-center gap-1">
-              View all <ChevronRight className="w-3 h-3" />
-            </Link>
-          </div>
-          
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex-1 flex flex-col">
-            {oppLoading ? (
-              <div className="p-6 space-y-4">
-                <Skeleton className="w-full h-16 rounded-xl" />
-                <Skeleton className="w-full h-16 rounded-xl" />
-                <Skeleton className="w-full h-16 rounded-xl" />
-              </div>
-            ) : topOpportunities.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center p-8 bg-gray-50/50">
-                <Database className="w-12 h-12 text-gray-300 mb-4" />
-                <h3 className="text-base font-bold text-gray-900 mb-2">No opportunities found</h3>
-                <p className="text-sm text-gray-500 font-medium max-w-sm">Upload customer signals and run AI clustering to generate your first ranked opportunities.</p>
-                <button onClick={() => navigate('/app/problems')} className="mt-6 bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-gray-50">Go to Problems</button>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-100 flex-1">
-                {topOpportunities.map((opp, index) => (
-                  <div key={opp.id} className={`relative p-5 hover:bg-gray-50 transition-all duration-200 group flex items-center justify-between gap-4 ${index === 0 ? 'bg-teal-50/10' : ''}`}>
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-heading font-black text-lg shrink-0 shadow-sm transition-transform group-hover:scale-105 ${index === 0 ? 'bg-astrix-teal text-white' : index === 1 ? 'bg-gray-200 text-gray-700' : index === 2 ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-500'}`}>
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0 pr-4">
-                        <Link to={`/app/opportunities/${opp.id}`} className="font-bold text-gray-900 text-base mb-1 truncate block group-hover:text-astrix-teal transition-colors">
-                          {opp.problems?.title || 'Unknown Problem'}
-                        </Link>
-                        <div className="flex items-center gap-3 text-xs font-mono text-gray-500">
-                          <span className={`px-2 py-0.5 rounded uppercase tracking-wider font-bold ${opp.recommended_action === 'Build' ? 'bg-blue-50 text-blue-700' : opp.recommended_action === 'Fix' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-700'}`}>
-                            {opp.recommended_action || 'Review'}
-                          </span>
-                          <span className="truncate">{formatCurrency(opp.problems?.affected_arr || 0)} ARR at risk</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6 shrink-0">
-                      <Link to={`/app/opportunities/${opp.id}`} className="hidden md:flex opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300 bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:border-astrix-teal hover:text-astrix-teal items-center gap-1">
-                        Decide <ArrowRight className="w-3 h-3" />
-                      </Link>
-                      <div className="flex flex-col items-end">
-                        <div className="text-2xl font-heading font-black text-gray-900">{opp.opportunity_score}</div>
-                        <div className="w-16 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
-                          <div className={`h-full rounded-full ${opp.opportunity_score >= 80 ? 'bg-astrix-teal' : 'bg-astrix-gold'}`} style={{ width: `${opp.opportunity_score}%` }}></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {unmatchedSignals > 0 && (
+              <span className="text-[9px] font-black text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded uppercase tracking-widest">Action needed</span>
             )}
           </div>
+          <div className="text-3xl font-heading font-black text-gray-900 leading-none mb-0.5">{unmatchedSignals}</div>
+          <div className="text-xs font-medium text-gray-500 mb-3">Unmatched signals</div>
+          {unmatchedSignals > 0 ? (
+            <div className="text-[10px] font-bold text-amber-600 flex items-center gap-1 group-hover:gap-2 transition-all">
+              <ArrowRight className="w-3 h-3" /> No account match · Review triage
+            </div>
+          ) : (
+            <div className="text-[10px] font-bold text-green-600 flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" /> All signals matched
+            </div>
+          )}
+        </Link>
+
+        {/* Active launches */}
+        <Link to="/app/launches" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 hover:border-blue-200 transition-all duration-300 block">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-indigo-50 rounded-lg border border-indigo-100 text-indigo-600"><Rocket className="w-4 h-4" /></div>
+            {reviewsDue.length > 0 && (
+              <span className="text-[9px] font-black text-orange-700 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded uppercase tracking-widest">{reviewsDue.length} overdue</span>
+            )}
+          </div>
+          <div className="text-3xl font-heading font-black text-gray-900 leading-none mb-0.5">{activeLaunches.length}</div>
+          <div className="text-xs font-medium text-gray-500 mb-3">Active launches</div>
+          <div className={`text-[10px] font-bold flex items-center gap-1 ${activeLaunches.length >= limits.activeLaunches ? 'text-amber-600' : 'text-gray-400'}`}>
+            {activeLaunches.length >= limits.activeLaunches
+              ? <><Lock className="w-3 h-3" /> Limit reached · Upgrade to add more</>
+              : <><Activity className="w-3 h-3" /> {limits.activeLaunches - activeLaunches.length} slot{limits.activeLaunches - activeLaunches.length !== 1 ? 's' : ''} remaining</>}
+          </div>
+        </Link>
+
+        {/* Verdict completion rate */}
+        <Link to="/app/launches" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 hover:border-green-200 transition-all duration-300 block">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-green-50 rounded-lg border border-green-100 text-green-600"><BarChart3 className="w-4 h-4" /></div>
+          </div>
+          <div className="text-3xl font-heading font-black text-gray-900 leading-none mb-0.5">
+            {launches.length === 0 ? '—' : `${verdictRate}%`}
+          </div>
+          <div className="text-xs font-medium text-gray-500 mb-3">Verdict completion</div>
+          <div className="flex items-center gap-1 text-[10px] font-bold text-green-600">
+            <TrendingUp className="w-3 h-3" />
+            {launches.length === 0 ? 'No launches yet' : `${solvedLaunches} of ${launches.length} solved`}
+          </div>
+        </Link>
+      </div>
+
+      {/* ── Context-Sensitive Quick Actions ───────────────────────── */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-3 mb-6 shadow-sm flex flex-wrap gap-2 items-center animate-slide-up stagger-2">
+        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 hidden sm:block">Next action</span>
+        {contextActions.map(({ icon: Icon, label, primary, onClick }) => (
+          <button
+            key={label}
+            onClick={onClick}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:shadow-sm ${
+              primary
+                ? 'bg-astrix-teal text-white hover:bg-astrix-darkTeal shadow-sm'
+                : 'bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 hover:text-gray-900'
+            }`}
+          >
+            <Icon className="w-4 h-4" /> {label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Main Content Grid ─────────────────────────────────────── */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-12">
+
+        {/* Left col — top opp hero + ranked list */}
+        <div className="xl:col-span-2 flex flex-col gap-5 animate-slide-up stagger-3">
+
+          {/* Hero: #1 Opportunity snapshot */}
+          {!oppLoading && topOpp && (
+            <div className="relative overflow-hidden rounded-2xl border border-astrix-teal/20 bg-gradient-to-br from-teal-50 to-white p-5 shadow-sm">
+              <div className="absolute -right-12 -top-12 w-40 h-40 bg-astrix-teal/8 rounded-full blur-3xl pointer-events-none" />
+              <div className="flex items-start justify-between gap-4 relative z-10">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-astrix-teal bg-teal-100 border border-teal-200 px-2.5 py-1 rounded-full flex items-center gap-1">
+                      <FlameKindling className="w-2.5 h-2.5" /> #1 Priority
+                    </span>
+                    <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${topOpp.recommended_action === 'Build' ? 'bg-blue-50 text-blue-700 border-blue-200' : topOpp.recommended_action === 'Fix' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                      {topOpp.recommended_action}
+                    </span>
+                  </div>
+                  <h3 className="font-heading text-lg font-black text-gray-900 mb-2 leading-tight">{topOpp.problems?.title}</h3>
+                  <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-gray-600">
+                    <span className="flex items-center gap-1.5"><Target className="w-4 h-4 text-red-400" />{formatCurrency(topOpp.problems?.affected_arr || 0)} ARR at risk</span>
+                    <span className="flex items-center gap-1.5"><Users className="w-4 h-4 text-gray-400" />{topOpp.problems?.evidence_count || 0} signals</span>
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="text-5xl font-heading font-black text-astrix-teal leading-none">{topOpp.opportunity_score}</div>
+                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">opp. score</div>
+                  <div className="w-24 h-2 bg-gray-100 rounded-full mt-2 overflow-hidden ml-auto">
+                    <div className="h-full bg-astrix-teal rounded-full" style={{ width: `${topOpp.opportunity_score}%` }} />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-teal-100 flex items-center justify-between relative z-10">
+                <div className="flex gap-2">
+                  <span className="text-[10px] font-bold text-gray-500">Pain <strong className="text-gray-800">{topOpp.pain_score}</strong></span>
+                  <span className="text-gray-300">·</span>
+                  <span className="text-[10px] font-bold text-gray-500">Demand <strong className="text-gray-800">{topOpp.demand_score}</strong></span>
+                  <span className="text-gray-300">·</span>
+                  <span className="text-[10px] font-bold text-gray-500">ARR <strong className="text-gray-800">{topOpp.arr_score}</strong></span>
+                </div>
+                <Link to={`/app/opportunities/${topOpp.id}`} className="flex items-center gap-1.5 text-xs font-black text-astrix-teal hover:text-astrix-darkTeal transition-colors">
+                  View opportunity <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Ranked opportunity list */}
+          <div>
+            <div className="flex items-center justify-between mb-3 px-1">
+              <h2 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-astrix-teal" /> All Opportunities
+              </h2>
+              <Link to="/app/opportunities" className="text-xs font-bold text-astrix-teal hover:text-astrix-darkTeal transition-colors flex items-center gap-1 uppercase tracking-widest">
+                View all <ChevronRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              {oppLoading ? (
+                <div className="p-6 space-y-3">
+                  <Skeleton className="w-full h-14 rounded-xl" />
+                  <Skeleton className="w-full h-14 rounded-xl" />
+                  <Skeleton className="w-full h-14 rounded-xl" />
+                </div>
+              ) : topOpportunities.length === 0 ? (
+                <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-8 bg-gray-50/50">
+                  <Database className="w-10 h-10 text-gray-300 mb-3" />
+                  <h3 className="text-sm font-bold text-gray-900 mb-1">No opportunities yet</h3>
+                  <p className="text-xs text-gray-500 font-medium max-w-xs">Import signals and run AI clustering to surface ranked opportunities.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {topOpportunities.map((opp, index) => (
+                    <Link key={opp.id} to={`/app/opportunities/${opp.id}`} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors group">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-heading font-black text-sm shrink-0 ${index === 0 ? 'bg-astrix-teal text-white' : index === 1 ? 'bg-slate-200 text-slate-600' : index === 2 ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-400'}`}>
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-sm text-gray-900 truncate group-hover:text-astrix-teal transition-colors">{opp.problems?.title}</div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border ${opp.recommended_action === 'Build' ? 'bg-blue-50 text-blue-700 border-blue-100' : opp.recommended_action === 'Fix' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                            {opp.recommended_action}
+                          </span>
+                          <span className="text-[10px] text-gray-400 font-medium">{formatCurrency(opp.problems?.affected_arr || 0)} ARR</span>
+                        </div>
+                      </div>
+                      <div className="shrink-0 flex flex-col items-end gap-1">
+                        <span className="font-heading font-black text-xl text-gray-900">{opp.opportunity_score}</span>
+                        <div className="w-12 h-1 bg-gray-100 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full ${opp.opportunity_score >= 80 ? 'bg-astrix-teal' : 'bg-astrix-gold'}`} style={{ width: `${opp.opportunity_score}%` }} />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="xl:col-span-1 flex flex-col gap-8 animate-slide-up stagger-4">
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between mb-4 px-1">
+        {/* Right col — active launches + recent decisions */}
+        <div className="xl:col-span-1 flex flex-col gap-5 animate-slide-up stagger-4">
+
+          {/* Active Launches */}
+          <div>
+            <div className="flex items-center justify-between mb-3 px-1">
               <h2 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-widest flex items-center gap-2">
                 <Activity className="w-4 h-4 text-brand-blue" /> Active Launches
               </h2>
               <Link to="/app/launches" className="text-xs font-bold text-gray-400 hover:text-brand-blue transition-colors">View all</Link>
             </div>
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               {activeLaunches.length === 0 ? (
-                <div className="text-center py-8 bg-gray-50/50 rounded-xl border border-gray-100 border-dashed">
-                  <p className="text-sm text-gray-500 font-medium">No active launches.</p>
+                <div className="flex flex-col items-center justify-center py-10 px-4 text-center bg-gray-50/50">
+                  <Rocket className="w-8 h-8 text-gray-200 mb-2" />
+                  <p className="text-xs text-gray-400 font-medium">No active launches yet.</p>
+                  <button onClick={() => navigate('/app/launches')} className="mt-3 text-xs font-bold text-brand-blue hover:underline">+ Log a launch</button>
                 </div>
               ) : (
-                <div className="relative pl-4 border-l-2 border-gray-100 space-y-6">
-                  {activeLaunches.slice(0, 3).map((launch) => (
-                    <div key={launch.id} className="relative group">
-                      <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 bg-white border-2 border-brand-blue rounded-full group-hover:scale-125 group-hover:bg-brand-blue transition-all"></div>
-                      <Link to={`/app/launches/${launch.id}`} className="block pl-2">
-                        <div className="text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-brand-blue transition-colors">{launch.title}</div>
-                        <div className="text-xs text-gray-500 font-medium mt-1 flex items-center gap-1.5">
-                          <Rocket className="w-3 h-3" /> Launched {new Date(launch.launched_at).toLocaleDateString()}
+                <div className="divide-y divide-gray-100">
+                  {activeLaunches.slice(0, 3).map((launch) => {
+                    const days = Math.floor((Date.now() - new Date(launch.launched_at).getTime()) / (1000 * 3600 * 24));
+                    const overdue = days >= 7;
+                    return (
+                      <Link key={launch.id} to={`/app/launches/${launch.id}`} className="flex items-start gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors group">
+                        <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${overdue ? 'bg-orange-500' : 'bg-brand-blue'}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-brand-blue transition-colors">{launch.title}</div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[10px] text-gray-400 font-medium flex items-center gap-1"><Rocket className="w-2.5 h-2.5" /> Day {days}</span>
+                            {overdue && <span className="text-[9px] font-black text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded uppercase tracking-widest">Review due</span>}
+                          </div>
                         </div>
                       </Link>
-                    </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Recent Decisions */}
+          <div>
+            <div className="flex items-center justify-between mb-3 px-1">
+              <h2 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                <FileText className="w-4 h-4 text-gray-500" /> Recent Decisions
+              </h2>
+              <Link to="/app/decisions" className="text-xs font-bold text-gray-400 hover:text-gray-900 transition-colors">History</Link>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              {recentDecisions.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 px-4 text-center bg-gray-50/50">
+                  <FileText className="w-8 h-8 text-gray-200 mb-2" />
+                  <p className="text-xs text-gray-400 font-medium">No decisions logged yet.</p>
+                  <button onClick={() => navigate('/app/decisions')} className="mt-3 text-xs font-bold text-astrix-teal hover:underline">+ Make a decision</button>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {recentDecisions.map((dec) => (
+                    <Link key={dec.id} to={`/app/decisions/${dec.id}`} className="flex items-start gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors group">
+                      <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${dec.action === 'Build' ? 'bg-blue-500' : dec.action === 'Fix' ? 'bg-yellow-500' : 'bg-gray-400'}`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-astrix-teal transition-colors">{dec.title}</div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${dec.action === 'Build' ? 'bg-blue-50 text-blue-700' : dec.action === 'Fix' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>
+                            {dec.action}
+                          </span>
+                          <span className="text-[10px] text-gray-400 font-mono">{new Date(dec.created_at).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </Link>
                   ))}
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between mb-4 px-1">
+          {/* Problems summary */}
+          <div>
+            <div className="flex items-center justify-between mb-3 px-1">
               <h2 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-widest flex items-center gap-2">
-                <FileText className="w-4 h-4 text-gray-500" /> Recent Decisions
+                <Layers className="w-4 h-4 text-purple-500" /> Open Problems
               </h2>
-              <Link to="/app/decisions" className="text-xs font-bold text-gray-400 hover:text-gray-900 transition-colors">History</Link>
+              <Link to="/app/problems" className="text-xs font-bold text-gray-400 hover:text-purple-600 transition-colors">View all</Link>
             </div>
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col">
-              {recentDecisions.length === 0 ? (
-                <div className="text-center py-8 bg-gray-50/50 rounded-xl border border-gray-100 border-dashed">
-                  <p className="text-sm text-gray-500 font-medium">No decisions logged.</p>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              {oppLoading ? (
+                <div className="p-4 space-y-2">
+                  <Skeleton className="w-full h-10 rounded-lg" />
+                  <Skeleton className="w-full h-10 rounded-lg" />
                 </div>
+              ) : opportunities.length === 0 ? (
+                <div className="py-8 text-center text-xs text-gray-400 font-medium">No problems yet.</div>
               ) : (
-                <div className="relative pl-4 border-l-2 border-gray-100 space-y-6">
-                  {recentDecisions.map((dec) => (
-                    <div key={dec.id} className="relative group">
-                      <div className={`absolute -left-[21px] top-1 w-2.5 h-2.5 bg-white border-2 rounded-full group-hover:scale-125 transition-all ${dec.action === 'Build' ? 'border-blue-500 group-hover:bg-blue-500' : dec.action === 'Fix' ? 'border-yellow-500 group-hover:bg-yellow-500' : 'border-gray-400 group-hover:bg-gray-400'}`}></div>
-                      <Link to={`/app/decisions/${dec.id}`} className="block pl-2">
-                        <div className="text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-astrix-teal transition-colors">{dec.title}</div>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${dec.action === 'Build' ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
-                            {dec.action}
-                          </span>
-                          <span className="text-[10px] text-gray-400 font-mono">{new Date(dec.created_at).toLocaleDateString()}</span>
-                        </div>
-                      </Link>
-                    </div>
+                <div className="divide-y divide-gray-100">
+                  {opportunities.slice(0, 3).map((opp) => (
+                    <Link key={opp.id} to={`/app/problems/${opp.problem_id}`} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-gray-50 transition-colors group">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-gray-800 line-clamp-1 group-hover:text-purple-600 transition-colors">{opp.problems?.title}</div>
+                        <div className="text-[10px] text-gray-400 font-medium mt-0.5">{opp.problems?.severity} · {opp.problems?.evidence_count} signals</div>
+                      </div>
+                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border shrink-0 ${opp.problems?.severity === 'Critical' ? 'bg-red-50 text-red-700 border-red-200' : opp.problems?.severity === 'High' ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                        {opp.problems?.severity}
+                      </span>
+                    </Link>
                   ))}
                 </div>
               )}

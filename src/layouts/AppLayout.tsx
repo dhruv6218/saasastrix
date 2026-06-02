@@ -56,15 +56,18 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle,
     navigate('/login');
   };
 
-  const navItems = [
+  const primaryNav = [
     { name: 'Dashboard', path: '/app', icon: LayoutDashboard },
     { name: 'Signals', path: '/app/signals', icon: Search },
     { name: 'Accounts', path: '/app/accounts', icon: Building2 },
     { name: 'Problems', path: '/app/problems', icon: Layers },
     { name: 'Opportunities', path: '/app/opportunities', icon: TrendingUp },
     { name: 'Decisions', path: '/app/decisions', icon: CheckCircle },
-    { name: 'Artifacts', path: '/app/artifacts', icon: FileText },
     { name: 'Launches', path: '/app/launches', icon: Rocket },
+  ];
+
+  const secondaryNav = [
+    { name: 'Artifacts', path: '/app/artifacts', icon: FileText },
     { name: 'Settings', path: '/app/settings', icon: Settings },
   ];
 
@@ -137,26 +140,41 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle,
           )}
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-1 hide-scrollbar">
-          {navItems.map((item) => {
+        <nav className="flex-1 overflow-y-auto px-3 py-2 hide-scrollbar flex flex-col gap-0.5">
+          {primaryNav.map((item) => {
             const isActive = location.pathname === item.path || (item.path !== '/app' && location.pathname.startsWith(item.path));
             return (
               <Link
                 key={item.name}
                 to={item.path}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
-                  isActive 
-                    ? 'bg-sidebar-active text-white shadow-md' 
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
+                  isActive
+                    ? 'bg-sidebar-active text-white shadow-md'
                     : 'text-slate-400 hover:bg-sidebar-hover hover:text-white'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
-                  {item.name}
-                </div>
-                {item.pro && (
-                  <span className="bg-gradient-to-r from-astrix-teal to-blue-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">PRO</span>
-                )}
+                <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
+                {item.name}
+              </Link>
+            );
+          })}
+
+          <div className="mx-1 my-2 border-t border-slate-800/60" />
+
+          {secondaryNav.map((item) => {
+            const isActive = location.pathname === item.path || location.pathname.startsWith(item.path);
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group ${
+                  isActive
+                    ? 'bg-sidebar-active text-white shadow-md'
+                    : 'text-slate-500 hover:bg-sidebar-hover hover:text-white'
+                }`}
+              >
+                <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-white'}`} />
+                {item.name}
               </Link>
             );
           })}
