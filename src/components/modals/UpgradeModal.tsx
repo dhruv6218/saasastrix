@@ -7,7 +7,7 @@ export interface UpgradeModalProps {
   onClose: () => void;
   feature: string;
   description: string;
-  requiredPlan?: 'Starter' | 'Growth' | 'Scale';
+  requiredPlan?: 'Pro' | 'Business' | 'Enterprise';
   bullets: string[];
 }
 
@@ -16,7 +16,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   onClose,
   feature,
   description,
-  requiredPlan = 'Starter',
+  requiredPlan = 'Pro',
   bullets,
 }) => {
   const navigate = useNavigate();
@@ -24,12 +24,12 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   if (!isOpen) return null;
 
   const planColors: Record<string, string> = {
-    Starter: 'from-brand-blue to-blue-500',
-    Growth: 'from-purple-600 to-purple-400',
-    Scale: 'from-astrix-teal to-emerald-400',
+    Pro: 'from-brand-blue to-blue-500',
+    Business: 'from-purple-600 to-purple-400',
+    Enterprise: 'from-astrix-teal to-emerald-400',
   };
 
-  const gradient = planColors[requiredPlan] || planColors['Starter'];
+  const gradient = planColors[requiredPlan] || planColors['Pro'];
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">

@@ -1,10 +1,10 @@
-export type Plan = 'free' | 'starter' | 'growth' | 'scale';
+export type Plan = 'free' | 'pro' | 'business' | 'enterprise';
 
 const PLAN_RANK: Record<Plan, number> = {
   free: 0,
-  starter: 1,
-  growth: 2,
-  scale: 3,
+  pro: 1,
+  business: 2,
+  enterprise: 3,
 };
 
 export const PLAN_LIMITS: Record<Plan, {
@@ -29,9 +29,9 @@ export const PLAN_LIMITS: Record<Plan, {
     aiCalls: 100,
     multipleWorkspaces: false,
   },
-  starter: {
-    signals: 3000,
-    accounts: 500,
+  pro: {
+    signals: 5000,
+    accounts: 1000,
     problems: 50,
     visibleOpps: Infinity,
     compareMode: true,
@@ -40,10 +40,10 @@ export const PLAN_LIMITS: Record<Plan, {
     aiCalls: 1500,
     multipleWorkspaces: false,
   },
-  growth: {
-    signals: 15000,
-    accounts: 2000,
-    problems: 150,
+  business: {
+    signals: 25000,
+    accounts: 5000,
+    problems: 200,
     visibleOpps: Infinity,
     compareMode: true,
     activeLaunches: 15,
@@ -51,10 +51,10 @@ export const PLAN_LIMITS: Record<Plan, {
     aiCalls: 4000,
     multipleWorkspaces: true,
   },
-  scale: {
-    signals: 100000,
-    accounts: 10000,
-    problems: 500,
+  enterprise: {
+    signals: Infinity,
+    accounts: Infinity,
+    problems: Infinity,
     visibleOpps: Infinity,
     compareMode: true,
     activeLaunches: Infinity,
@@ -65,8 +65,6 @@ export const PLAN_LIMITS: Record<Plan, {
 };
 
 export const usePlan = () => {
-  // In production this would come from billing/auth context.
-  // For this prototype every session is Free.
   const plan: Plan = 'free';
   const limits = PLAN_LIMITS[plan];
   const isAtLeast = (required: Plan) => PLAN_RANK[plan] >= PLAN_RANK[required];

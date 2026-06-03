@@ -97,6 +97,12 @@ export const api = {
         const q = opts.globalFilter.toLowerCase();
         res = res.filter(a => a.name.toLowerCase().includes(q) || (a.domain && a.domain.toLowerCase().includes(q)));
       }
+      if (opts?.plan) res = res.filter(a => a.plan === opts.plan);
+      if (opts?.arr_min !== undefined) res = res.filter(a => a.arr >= opts.arr_min);
+      if (opts?.arr_max !== undefined) res = res.filter(a => a.arr <= opts.arr_max);
+      if (opts?.health === 'healthy') res = res.filter(a => parseInt(a.health_score || '0') >= 75);
+      else if (opts?.health === 'warning') res = res.filter(a => { const s = parseInt(a.health_score || '0'); return s >= 50 && s < 75; });
+      else if (opts?.health === 'at_risk') res = res.filter(a => parseInt(a.health_score || '0') < 50 && parseInt(a.health_score || '0') > 0);
       if (opts?.sorting?.length > 0) {
         const sort = opts.sorting[0];
         res.sort((a: any, b: any) => {
@@ -163,7 +169,17 @@ export const api = {
   opportunities: {
     list: async (wsId: string) => {
       await delay();
-      return mockDb.opportunities.filter(o => o.workspace_id === wsId);
+      const opps = mockDb.opportunities.filter(o => o.workspace_id === wsId);
+      return opps.map(opp => {
+        const prob = mockDb.problems.find(p => p.id === opp.problem_id);
+        const relSignals = mockDb.signals.filter(s => s.product_area === prob?.product_area);
+        const accountIds = [...new Set(relSignals.map(s => s.account_id).filter(Boolean))] as string[];
+        const topAccounts = accountIds.slice(0, 3)
+          .map(id => mockDb.accounts.find(a => a.id === id))
+          .filter(Boolean)
+          .map(a => ({ name: a!.name, arr: a!.arr }));
+        return { ...opp, top_accounts: topAccounts };
+      });
     },
     get: async (id: string) => {
       await delay();

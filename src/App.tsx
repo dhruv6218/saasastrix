@@ -45,6 +45,8 @@ import { LaunchDetail } from './pages/app/LaunchDetail';
 import { Settings } from './pages/app/Settings';
 import { AccountDetail } from './pages/app/AccountDetail';
 import { SignalDetail } from './pages/app/SignalDetail';
+import { Assistant } from './pages/app/Assistant';
+import { IntegrationsHub } from './pages/app/IntegrationsHub';
 
 function App() {
   return (
@@ -100,6 +102,9 @@ function App() {
               
               <Route path="/app/launches" element={<ProtectedRoute><PostLaunchTracker /></ProtectedRoute>} />
               <Route path="/app/launches/:id" element={<ProtectedRoute><LaunchDetail /></ProtectedRoute>} />
+              
+              <Route path="/app/ask" element={<ProtectedRoute><Assistant /></ProtectedRoute>} />
+              <Route path="/app/integrations" element={<ProtectedRoute><IntegrationsHub /></ProtectedRoute>} />
               
               <Route path="/app/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               

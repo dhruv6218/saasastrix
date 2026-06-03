@@ -142,8 +142,8 @@ export const PostLaunchTracker = () => {
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         feature="Run Multiple Launches in Parallel"
-        description="Free plan allows 1 active launch at a time. Upgrade to Starter to track up to 5 bets simultaneously."
-        requiredPlan="Starter"
+        description="Free plan allows 1 active launch at a time. Upgrade to Pro to track up to 5 bets simultaneously."
+        requiredPlan="Pro"
         bullets={[
           "Up to 5 active launches running in parallel",
           "Unlimited completed launches over time",

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { AppLayout } from '../../layouts/AppLayout';
-import { Building2, Plus, UploadCloud, X, Loader2, Search, HeartPulse } from 'lucide-react';
+import { Building2, Plus, UploadCloud, X, Loader2, Search, HeartPulse, Filter, ChevronDown } from 'lucide-react';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useAccounts, api } from '../../lib/api';
 import { useToast } from '../../contexts/ToastContext';
@@ -13,6 +13,21 @@ import {
   PaginationState,
   useReactTable,
 } from '@tanstack/react-table';
+
+const ARR_RANGES = [
+  { label: 'All ARR', value: '' },
+  { label: 'Under $100k', value: 'under100k' },
+  { label: '$100k – $500k', value: '100k-500k' },
+  { label: '$500k+', value: 'over500k' },
+];
+
+const PLAN_OPTIONS = ['', 'Enterprise', 'Growth', 'Pro', 'SMB', 'Standard'];
+const HEALTH_OPTIONS = [
+  { label: 'All Health', value: '' },
+  { label: '🟢 Healthy (75+)', value: 'healthy' },
+  { label: '🟡 Warning (50–74)', value: 'warning' },
+  { label: '🔴 At Risk (<50)', value: 'at_risk' },
+];
 
 export const AccountsList = () => {
   const { activeWorkspace } = useWorkspace();
@@ -29,13 +44,36 @@ export const AccountsList = () => {
   const pagination = useMemo(() => ({ pageIndex, pageSize }), [pageIndex, pageSize]);
 
   const [globalFilter, setGlobalFilter] = useState('');
+  const [filterPlan, setFilterPlan] = useState('');
+  const [filterArrRange, setFilterArrRange] = useState('');
+  const [filterHealth, setFilterHealth] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+
+  const activeFilterCount = [filterPlan, filterArrRange, filterHealth].filter(Boolean).length;
+
+  const arrOpts = useMemo(() => {
+    const r = filterArrRange;
+    return {
+      arr_min: r === '100k-500k' ? 100000 : r === 'over500k' ? 500000 : undefined,
+      arr_max: r === 'under100k' ? 99999 : r === '100k-500k' ? 499999 : undefined,
+    };
+  }, [filterArrRange]);
 
   const { data, isLoading } = useAccounts(activeWorkspace?.id, {
     page: pageIndex + 1,
     limit: pageSize,
     globalFilter,
-    sorting
+    sorting,
+    plan: filterPlan || undefined,
+    health: filterHealth || undefined,
+    ...arrOpts,
   });
+
+  const clearFilters = () => {
+    setFilterPlan('');
+    setFilterArrRange('');
+    setFilterHealth('');
+  };
 
   const handleSaveAccount = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +114,14 @@ export const AccountsList = () => {
       header: 'ARR', 
       cell: info => <span className="font-mono font-bold text-astrix-teal">{formatCurrency(info.getValue() || 0)}</span> 
     }),
+    columnHelper.accessor('plan', {
+      header: 'Plan',
+      cell: info => {
+        const p = info.getValue() || 'Standard';
+        const cls = p === 'Enterprise' ? 'bg-purple-50 text-purple-700 border-purple-200' : p === 'Pro' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-gray-100 text-gray-600 border-gray-200';
+        return <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${cls}`}>{p}</span>;
+      }
+    }),
     columnHelper.accessor('domain', { 
       header: 'Domain', 
       cell: info => <span className="text-gray-500 font-medium">{info.getValue() || '--'}</span> 
@@ -85,7 +131,7 @@ export const AccountsList = () => {
       cell: info => {
         const score = parseInt(info.getValue() || '0');
         let color = 'text-gray-400';
-        if (score >= 80) color = 'text-green-500';
+        if (score >= 75) color = 'text-green-500';
         else if (score >= 50) color = 'text-yellow-500';
         else if (score > 0) color = 'text-red-500';
         return (
@@ -129,16 +175,86 @@ export const AccountsList = () => {
         </div>
       }
     >
-      <div className="bg-white border border-gray-200 rounded-xl p-2 mb-6 flex items-center shadow-sm focus-within:ring-2 focus-within:ring-astrix-teal transition-all">
-        <Search className="w-5 h-5 text-gray-400 ml-2 mr-3 shrink-0" />
-        <input 
-          type="text" 
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Search accounts by name or domain..." 
-          className="w-full bg-transparent border-none outline-none text-sm text-gray-900 placeholder-gray-400 py-1"
-        />
+      {/* Search + Filter bar */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <div className="flex-1 bg-white border border-gray-200 rounded-xl p-2 flex items-center shadow-sm focus-within:ring-2 focus-within:ring-astrix-teal transition-all">
+          <Search className="w-5 h-5 text-gray-400 ml-2 mr-3 shrink-0" />
+          <input 
+            type="text" 
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Search accounts by name or domain..." 
+            className="w-full bg-transparent border-none outline-none text-sm text-gray-900 placeholder-gray-400 py-1"
+          />
+          {globalFilter && (
+            <button onClick={() => setGlobalFilter('')} className="mr-2 text-gray-400 hover:text-gray-700"><X className="w-4 h-4" /></button>
+          )}
+        </div>
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-colors ${showFilters || activeFilterCount > 0 ? 'bg-astrix-teal text-white border-astrix-teal' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
+        >
+          <Filter className="w-4 h-4" />
+          Filters
+          {activeFilterCount > 0 && (
+            <span className={`w-5 h-5 rounded-full text-xs font-black flex items-center justify-center ${showFilters ? 'bg-white text-astrix-teal' : 'bg-astrix-teal text-white'}`}>{activeFilterCount}</span>
+          )}
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+        </button>
       </div>
+
+      {/* Filter row */}
+      {showFilters && (
+        <div className="flex flex-wrap gap-3 mb-4 p-4 bg-gray-50 border border-gray-200 rounded-xl animate-[fadeIn_0.2s_ease-out]">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Plan Tier</span>
+            <select
+              value={filterPlan}
+              onChange={e => setFilterPlan(e.target.value)}
+              className="bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-800 px-3 py-2 outline-none focus:ring-2 focus:ring-astrix-teal cursor-pointer min-w-[140px]"
+            >
+              <option value="">All Plans</option>
+              {PLAN_OPTIONS.filter(Boolean).map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">ARR Range</span>
+            <select
+              value={filterArrRange}
+              onChange={e => setFilterArrRange(e.target.value)}
+              className="bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-800 px-3 py-2 outline-none focus:ring-2 focus:ring-astrix-teal cursor-pointer min-w-[160px]"
+            >
+              {ARR_RANGES.map(r => (
+                <option key={r.value} value={r.value}>{r.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Health Status</span>
+            <select
+              value={filterHealth}
+              onChange={e => setFilterHealth(e.target.value)}
+              className="bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-800 px-3 py-2 outline-none focus:ring-2 focus:ring-astrix-teal cursor-pointer min-w-[180px]"
+            >
+              {HEALTH_OPTIONS.map(h => (
+                <option key={h.value} value={h.value}>{h.label}</option>
+              ))}
+            </select>
+          </div>
+          {activeFilterCount > 0 && (
+            <div className="flex flex-col gap-1 justify-end">
+              <button
+                onClick={clearFilters}
+                className="px-3 py-2 text-sm font-bold text-red-600 hover:text-red-800 border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1"
+              >
+                <X className="w-3.5 h-3.5" /> Clear All
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden min-h-[400px] flex flex-col">
         {isLoading ? (
@@ -147,7 +263,10 @@ export const AccountsList = () => {
           <div className="text-center py-20 text-gray-500 flex flex-col items-center">
             <Building2 className="w-12 h-12 text-gray-300 mb-4" />
             <h3 className="text-lg font-bold text-gray-900 mb-1">No accounts found</h3>
-            <p className="text-sm mb-4">Upload a CSV or add an account manually to inject ARR context.</p>
+            <p className="text-sm mb-4">{activeFilterCount > 0 ? 'Try adjusting your filters.' : 'Upload a CSV or add an account manually to inject ARR context.'}</p>
+            {activeFilterCount > 0 && (
+              <button onClick={clearFilters} className="text-sm font-bold text-astrix-teal hover:underline">Clear filters</button>
+            )}
           </div>
         ) : (
           <>
@@ -182,6 +301,8 @@ export const AccountsList = () => {
             <div className="md:hidden flex flex-col gap-3 p-4">
               {accountTable.getRowModel().rows.map(row => {
                 const acc = row.original;
+                const healthScore = parseInt(acc.health_score || '0');
+                const healthColor = healthScore >= 75 ? 'text-green-500' : healthScore >= 50 ? 'text-yellow-500' : healthScore > 0 ? 'text-red-500' : 'text-gray-400';
                 return (
                   <div key={row.id} className="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex flex-col gap-3">
                     <div className="flex justify-between items-start">
@@ -190,7 +311,12 @@ export const AccountsList = () => {
                     </div>
                     <div className="flex justify-between items-center text-xs">
                       <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md font-bold">{acc.plan || 'Standard'}</span>
-                      <span className="text-gray-500 font-bold">{acc.signal_count || 0} Signals</span>
+                      <div className="flex items-center gap-1.5">
+                        <HeartPulse className={`w-3.5 h-3.5 ${healthColor}`} />
+                        <span className={`font-bold ${healthColor}`}>{healthScore || '--'}</span>
+                        <span className="text-gray-400 ml-2">·</span>
+                        <span className="text-gray-500 font-bold">{acc.signal_count || 0} Signals</span>
+                      </div>
                     </div>
                   </div>
                 );
@@ -200,6 +326,7 @@ export const AccountsList = () => {
             <div className="flex items-center justify-between p-4 border-t border-gray-100 bg-gray-50 mt-auto">
               <span className="text-sm text-gray-500 font-medium">
                 Showing {accountTable.getRowModel().rows.length} of {data.total} accounts
+                {activeFilterCount > 0 && <span className="ml-2 text-astrix-teal font-bold">({activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''} active)</span>}
               </span>
               <div className="flex gap-2">
                 <button onClick={() => accountTable.previousPage()} disabled={!accountTable.getCanPreviousPage()} className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-700 disabled:opacity-50 hover:bg-gray-50">Prev</button>
@@ -226,8 +353,8 @@ export const AccountsList = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-1">ARR ($) *</label>
-                  <input type="number" required min="0" value={accArr} onChange={e => setAccArr(e.target.value)} className="w-full bg-gray-50 border border-gray-200 text-sm rounded-xl p-3 outline-none focus:ring-2 focus:ring-astrix-teal" />
+                  <label className="block text-sm font-bold text-gray-900 mb-1">ARR ($)</label>
+                  <input type="number" min="0" value={accArr} onChange={e => setAccArr(e.target.value)} className="w-full bg-gray-50 border border-gray-200 text-sm rounded-xl p-3 outline-none focus:ring-2 focus:ring-astrix-teal" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-1">Plan Tier</label>
@@ -235,6 +362,8 @@ export const AccountsList = () => {
                     <option>Standard</option>
                     <option>Pro</option>
                     <option>Enterprise</option>
+                    <option>SMB</option>
+                    <option>Growth</option>
                   </select>
                 </div>
               </div>

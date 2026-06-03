@@ -330,7 +330,7 @@ export const LaunchDetail = () => {
                 <CheckCircle2 className="w-5 h-5 text-astrix-teal" /> Final Verdict
               </h3>
               <button
-                onClick={() => addToast('Advanced AI Review requires Growth or Scale plan.', 'warning')}
+                onClick={() => addToast('Advanced AI Review requires Business or Enterprise plan.', 'warning')}
                 className="hidden sm:flex items-center gap-1.5 bg-gradient-to-r from-astrix-teal to-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm"
               >
                 <Sparkles className="w-3.5 h-3.5" /> AI Review <Lock className="w-3 h-3 opacity-70 ml-1" />

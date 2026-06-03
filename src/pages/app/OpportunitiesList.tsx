@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { AppLayout } from '../../layouts/AppLayout';
-import { Filter, ArrowRight, Target, GitCompare, X, CheckCircle2, Loader2, Lock } from 'lucide-react';
+import { Filter, ArrowRight, Target, GitCompare, X, CheckCircle2, Loader2, Lock, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useOpportunities, api } from '../../lib/api';
@@ -347,7 +347,7 @@ export const OpportunitiesList = () => {
         onClose={() => setShowUpgradeModal(false)}
         feature="Compare Opportunities"
         description="Compare up to 3 opportunities side-by-side to make faster, more confident decisions backed by signal data, ARR impact, and AI recommendations."
-        requiredPlan="Starter"
+        requiredPlan="Pro"
         bullets={[
           "Full opportunity list with all scores",
           "Compare Mode: side-by-side analysis of up to 3 opportunities",

@@ -40,15 +40,15 @@ export const Pricing = () => {
       popular: false
     },
     {
-      name: "Starter",
-      monthlyPrice: "$59",
-      annualPrice: "$49",
+      name: "Pro",
+      monthlyPrice: "$39",
+      annualPrice: "$29",
       period: "/month",
-      annualBilled: "Billed $588 yearly",
+      annualBilled: "Billed $348 yearly",
       desc: "Run outcome-driven product rituals for a small team.",
       features: [
         "1 workspace · 3 maker seats",
-        "Up to 3,000 signals & 500 accounts",
+        "Up to 5,000 signals & 1,000 accounts",
         "Up to 50 active problems",
         "Full opportunity list + compare mode",
         "Up to 5 active launches, unlimited completed",
@@ -59,20 +59,20 @@ export const Pricing = () => {
         "Email support",
       ],
       comingSoon: [],
-      cta: "Start with Starter",
+      cta: "Start with Pro",
       popular: true
     },
     {
-      name: "Growth",
-      monthlyPrice: "$179",
-      annualPrice: "$149",
+      name: "Business",
+      monthlyPrice: "$69",
+      annualPrice: "$59",
       period: "/month",
-      annualBilled: "Billed $1,789 yearly",
+      annualBilled: "Billed $708 yearly",
       desc: "Make accountability a default in your product org.",
       features: [
         "Up to 3 workspaces · 8 maker seats",
-        "Up to 15,000 signals & 2,000 accounts",
-        "Up to 150 active problems",
+        "Up to 25,000 signals & 5,000 accounts",
+        "Up to 200 active problems",
         "Opportunity saved views & filters",
         "Decision tags (Theme, OKR link)",
         "Up to 15 active launches, unlimited completed",
@@ -83,20 +83,20 @@ export const Pricing = () => {
         "Priority email support",
       ],
       comingSoon: [],
-      cta: "Start with Growth",
+      cta: "Start with Business",
       popular: false
     },
     {
-      name: "Scale",
-      monthlyPrice: "$449",
-      annualPrice: "$374",
-      period: "/month",
-      annualBilled: "Billed $4,489 yearly",
+      name: "Enterprise",
+      monthlyPrice: "Custom",
+      annualPrice: "Custom",
+      period: "",
+      annualBilled: "Talk to our team",
       desc: "Evidence-backed bets and accountability, at org scale.",
       features: [
-        "Unlimited workspaces · 20 maker seats",
-        "Up to 100,000 signals & 10,000 accounts",
-        "Up to 500 active problems",
+        "Unlimited workspaces · unlimited seats",
+        "Unlimited signals & accounts",
+        "Unlimited active problems",
         "Custom score views + opportunity export",
         "Decision & launch templates by squad",
         "Unlimited active launches",
@@ -104,12 +104,12 @@ export const Pricing = () => {
         "Executive & Board view (bets, win/loss, ARR)",
         "Granular roles (Owner, Admin, Maker, Read-only)",
         "Advanced activity log + audit trail export",
-        "High-priority support + onboarding session",
+        "Dedicated success manager + onboarding",
       ],
       comingSoon: [
         "Jira Two-Way Sync"
       ],
-      cta: "Start with Scale",
+      cta: "Contact Sales",
       popular: false
     }
   ];
@@ -130,9 +130,9 @@ export const Pricing = () => {
     {
       label: "Signals & Data",
       rows: [
-        { feature: "Signals", values: ["200", "3,000", "15,000", "100,000"] },
-        { feature: "Accounts", values: ["50", "500", "2,000", "10,000"] },
-        { feature: "Active Problems", values: ["10", "50", "150", "500"] },
+        { feature: "Signals", values: ["200", "5,000", "25,000", "Unlimited"] },
+        { feature: "Accounts", values: ["50", "1,000", "5,000", "Unlimited"] },
+        { feature: "Active Problems", values: ["10", "50", "200", "Unlimited"] },
         { feature: "CSV Uploads", values: ["1 per type", "Multiple", "Multiple", "Multiple"] },
         { feature: "Auto Account Matching", values: [false, true, true, true] },
       ]
@@ -163,7 +163,7 @@ export const Pricing = () => {
     {
       label: "AI",
       rows: [
-        { feature: "AI Calls / Month", values: ["~100", "~1,500", "~4,000", "~10,000"] },
+        { feature: "AI Calls / Month", values: ["~100", "~1,500", "~4,000", "~10,000+"] },
         { feature: "Signal Suggestions", values: [true, true, true, true] },
         { feature: "Decision Memo & PRD Drafts", values: ["1 draft per decision", "Standard drafts", "Bulk drafts", "Bulk drafts + premium models"] },
         { feature: "User Story Draft", values: [false, true, true, true] },
@@ -199,7 +199,7 @@ export const Pricing = () => {
     { q: "What are the user roles?", a: "We keep it simple: Owners (billing & settings), Members (editors who can create decisions and artifacts), and Viewers (free, unlimited users who can read memos and track launch progress)." },
     { q: "How do I import data?", a: "Astrix supports CSV upload and manual signal entry on all plans. You can also start with a sample workspace to explore the full product loop before importing real data." },
     { q: "Does Astrix include a sample workspace?", a: "Yes. Every plan includes a sample workspace with pre-loaded signals, problems, opportunities, a decision memo, and an active launch so you can experience the full product loop immediately." },
-    { q: "Do you send weekly summary emails?", a: "Yes — Growth and Scale plans include a weekly digest email summarising new signals, open reviews, and outcome verdicts for your workspace. Scale also includes a quarterly check-in call with an Astrix success team member to review your product loop health." },
+    { q: "Do you send weekly summary emails?", a: "Yes — Business and Enterprise plans include a weekly digest email summarising new signals, open reviews, and outcome verdicts for your workspace. Enterprise also includes a quarterly check-in call with an Astrix success manager to review your product loop health." },
     { q: "Is my data used to train your AI models?", a: "Absolutely not. We use enterprise APIs with strict zero-retention policies. Your workspace data is isolated and never used for training." },
     { q: "Can I cancel anytime?", a: "Yes, you can cancel your subscription at any time from the billing settings. You will retain access until the end of your current billing period." }
   ];
@@ -207,6 +207,10 @@ export const Pricing = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const handleCheckout = async (tier: any) => {
+    if (tier.name === 'Enterprise') {
+      navigate('/contact');
+      return;
+    }
     if (!activeWorkspace) {
       addToast("Please log in or create an account to upgrade.", "warning");
       navigate('/signup');

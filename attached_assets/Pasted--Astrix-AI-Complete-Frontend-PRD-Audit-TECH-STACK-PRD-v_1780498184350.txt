@@ -1,0 +1,186 @@
+🔍 Astrix AI — Complete Frontend PRD Audit
+❶ TECH STACK — PRD vs Reality
+PRD Specifies	Actually Built
+Next.js (App Router)	Vite + React Router DOM
+shadcn/ui components	Custom Tailwind components
+Supabase Auth (real)	100% Mock Auth
+Yeh sabse bada deviation hai. PRD mein Next.js ke API routes ka assumption hai. Backend mein jaane se pehle yeh decide karna hoga ki Vite rahega ya Next.js pe migrate karenge — kyunki dono ka backend integration approach alag hota hai.
+
+❷ ROUTES AUDIT
+✅ Sab required routes implement hain:
+
+/login  /signup  /forgot-password  /reset-password  /accept-invitation
+/onboarding/step-1, 2, 3
+/app (dashboard)
+/app/signals  /app/signals/:id  /app/signals/new
+/app/accounts  /app/accounts/:id
+/app/problems  /app/problems/:id
+/app/opportunities  /app/opportunities/:id
+/app/decisions  /app/decisions/:id
+/app/artifacts  /app/artifacts/:id
+/app/launches  /app/launches/:id
+/app/settings
+/pricing  /privacy  /terms
+
+⚠️ replit.md mein listed hain par App.tsx router mein NAHI hain:
+
+/app/ask (AskAssistant) — PRD says "optional MVP" toh acceptable
+/app/integrations (IntegrationsHub) — PRD says "out of scope MVP" toh fine
+➕ Extra routes (PRD mein nahi hain, frontend ne add kiye):
+
+/app/evidence/:problemId — PRD mein yeh feature problem detail ke Signals tab ke andar hai, separate page nahi. Fine addition though.
+/changelog /contact — PRD mein MVP ke liye mention nahi
+❸ PAGE-BY-PAGE FEATURE AUDIT
+🟢 DASHBOARD — 85% Complete
+PRD Requires	Status
+Top Opportunities 3-5 cards (score, ARR, severity, accounts)	✅ topOpportunities.slice(0,5) computed and rendered
+Reviews Due widget (Day 7/30 pending)	✅ reviewsDue calculated and shown
+Active Launches	✅ Present
+Recent Decisions	✅ Present
+Signal trend chart	✅ Present (ECharts, last 7 days)
+Unmatched Signals prompt	✅ Present
+Quick Stats	✅ KPI cards
+New workspace guided CTA	✅ Context-sensitive actions
+"What changed since last visit" panel	✅ Activity ticker present
+Free plan usage bars	✅ Present
+Minor gap: PRD says "key account names" on top opportunity cards — frontend shows score/ARR/severity but account names visibility is unclear.
+
+🟢 SIGNALS — 95% Complete
+PRD Requires	Status
+Columns: Title, Account, Severity, Sentiment, Product Area, Created_at	✅
+Search (title, raw_text)	✅
+Filters: severity, sentiment, product area, account	✅
+Filter: date range	⚠️ Not visible in filter list
+Bulk select	✅
+Upload CSV	✅
+Add signal manually	✅
+Create problem from selected	✅
+Empty state	✅
+Signal detail: left raw text + right editable metadata	✅
+AI suggestions with Accept/Edit/Reject	✅
+Link/unlink account	✅
+Attach to problem	✅
+🟡 ACCOUNTS — 70% Complete
+PRD Requires	Status
+List: name, ARR, plan, segment, churn_risk, renewal_date, #signals, #active problems	⚠️ Most shown, some missing
+Filters: segment, plan, churn_risk, ARR ranges, renewal window	⚠️ Only domain search visible
+Upload CSV	✅
+Account Detail — Tab: Signals	⚠️ Shown as flat list, not tab
+Account Detail — Tab: Problems & Opportunities	⚠️ Shown as flat list, not tab
+Account Detail — Tab: Launches	❌ MISSING — no launches tab in account detail
+Kya karna hoga: AccountDetail page mein proper 3 tabs banana hoga (Signals, Problems & Opportunities, Launches) per PRD.
+
+🟢 PROBLEMS — 85% Complete
+PRD Requires	Status
+List: title, severity, status, signal_count, #accounts, ARR, last_seen	✅ (grid cards mein)
+PRD wants table/list view	⚠️ Grid cards implemented instead (UX deviation)
+Filters: status, severity, product area, date range	✅ Status tabs present, severity filters present
+Problem Detail — Description (editable)	✅
+Problem Detail — Signals tab (Evidence)	✅
+Problem Detail — Accounts tab	✅
+Problem Detail — Metrics tab (signal trend chart)	❌ MISSING
+Move signals between problems	✅ Unlink signal present
+Merge problems	✅ Merge modal present
+Change status/severity	✅
+AI clustering suggestions (user approves)	✅
+History tab	✅ (bonus, not in PRD tabs)
+Comments tab	✅ (bonus — PRD said no collaborative editing but simple comments fine)
+🟢 OPPORTUNITIES — 95% Complete
+PRD Requires	Status
+Default sort: score desc	✅
+Columns: score, ARR, severity, #accounts, recommended action	✅
+Filters: product area, segment, score range, severity	⚠️ Partial
+Compare Mode (2-3 side-by-side)	✅
+Create Decision from opportunity	✅
+Detail: Score breakdown (bars)	✅
+Detail: Problem summary	✅
+Detail: Key accounts	✅
+Detail: What-if sliders (effort, alignment, confidence, manual adjust)	✅
+AI explain why opportunity matters	✅ (simulated)
+Free plan: top 5 lock	✅
+🟢 DECISIONS — 90% Complete
+PRD Requires	Status
+List: action, problem, opportunity, author, date, has_launch	✅
+Filters: action type, date, author, product area	✅ Search/filter present
+Detail: Rationale	✅
+Detail: Assumptions, Risks, Alternatives	✅ Collapsible sections
+Detail: Linked signals/accounts	✅
+Detail: Artifacts section	✅
+Detail: Launch (if exists)	✅
+AI draft: rationale, assumptions, risks, alternatives	✅ (simulated)
+🟢 ARTIFACTS — 90% Complete
+PRD Requires	Status
+Types: Decision Memo, PRD Skeleton, User Stories	✅
+Markdown with live preview	✅
+AI "Generate draft" button	✅ (typewriter effect)
+Version dropdown (last 3)	✅
+Copy to clipboard	✅
+PDF export	❌ PRD says NOT in MVP — correctly skipped
+🟢 LAUNCHES — 90% Complete
+PRD Requires	Status
+List: title, status, owner, launch date, verdict, next review due	✅
+Filters: status, owner, product area, date range	✅
+Detail: Expected outcome & target metrics (editable)	✅
+Detail: Timeline (Decision → Launch → D7 → D30 → Verdict)	✅
+Detail: Outcome reviews (Baseline, Day 7, Day 30)	✅
+Final Verdict (required to complete)	✅
+Proof summary card	✅
+AI: suggest expected outcome / target metrics	✅ (simulated, locked)
+AI: draft proof summary after verdict	✅ (simulated, locked)
+Day 7/30 reminder banners	✅ "Review Due" alerts
+🟢 SETTINGS — 95% Complete
+PRD Requires	Status
+Workspace: name, timezone	✅
+Product Areas: CRUD	✅
+Segments: CRUD	✅
+Team: invite by email, roles (Owner/Member)	✅
+Billing: current plan, usage bars, upgrade buttons	✅
+Billing: hard limits at 100%	✅ Usage bars present
+Activity log	✅
+❹ PRICING PAGE — ⚠️ PLAN NAMES & PRICES DON'T MATCH PRD
+Yeh ek important mismatch hai:
+
+PRD	Frontend
+Free — $0	Free — $0 ✅
+Pro — $29/yr, $39/mo	Starter — $49/yr, $59/mo ❌
+Business — $59/yr, $69/mo	Growth — $149/yr, $179/mo ❌
+Enterprise — Custom	Scale — $374/yr, $449/mo ❌
+—	Scale has no "Contact Sales" Enterprise option
+Limits bhi alag hain:
+
+PRD ka Pro: 5,000 signals → Frontend Starter: 3,000 signals
+PRD ka Pro: 1,000 accounts → Frontend Starter: 500 accounts
+PRD ka Business: 25,000 signals → Frontend Growth: 15,000 signals
+FAQ mein bhi inconsistency: FAQ kehta hai "Viewers (free, unlimited)" lekin PRD mein Viewer role mention nahi hai.
+
+No Enterprise / Contact Sales tier on the pricing page.
+
+❺ ONBOARDING — 75% Complete
+PRD Requires	Status
+Create workspace (name, timezone)	✅ Step 1
+"Start from scratch" vs "Load sample workspace" choice	❌ MISSING — Step 2 shows data source selection (Slack/Discord/Intercom), not sample workspace option
+Sample workspace seeds: accounts, signals, 2-3 problems, 1 decision, 1 launch with verdict	⚠️ Mock data exists but onboarding flow doesn't offer explicit "Load sample" button
+❻ SECURITY AUDIT
+Issue	Severity	Detail
+🔴 Source path exposure in DOM	HIGH	vite.config.ts mein __dualiteSourceLoc Babel plugin hai jo production build mein bhi har JSX element pe data-ds="src/pages/app/Dashboard.tsx:234:6" attribute add karta hai. Koi bhi browser inspect karre toh poori source file structure visible hogi
+🟡 Mock auth accepts anything	MEDIUM	signIn() koi bhi email/password accept karta hai. Yeh intentional for now, but backend transition pe complete replace karna hoga
+🟢 ProtectedRoute correct	OK	/app/* routes properly guard hain, login redirect, workspace check — all correct
+🟢 No client-side secrets	OK	Koi API key, token hardcoded nahi
+🟢 No external API calls	OK	Purely mock — no real data leaves the app
+🟡 Workspace isolation	MEDIUM	Frontend mein sab mock data shared hai — koi real tenant isolation nahi. Backend pe RLS implement karna mandatory hoga
+❼ OVERALL VERDICT
+Frontend Completion vs PRD: ~82-85%
+
+Kya backend ki taraf ja sakte hain? — Haan, lekin pehle yeh 5 cheezein clear kar lo:
+
+🔴 data-ds attributes — vite.config.ts se __dualiteSourceLoc Babel plugin hata do ya sirf development mode mein chalao. Yeh source paths production mein expose hona security risk hai.
+
+🟡 Tech stack decision — PRD mein Next.js likha hai, implemented Vite hai. Supabase dono ke saath kaam karta hai, but Next.js App Router mein server components/API routes ka advantage milta. Yeh ek conscious choice hai — decide karo aur PRD update karo.
+
+🟡 Pricing page — Plan names (Free/Starter/Growth/Scale) aur prices PRD se completely alag hain. Yeh confusing hoga jab billing integrate karoge. Ya toh PRD update karo ya frontend fix karo — dono alag hain.
+
+🟡 Account Detail tabs missing — Launches tab abhi nahi hai account detail mein.
+
+🟡 Problem Detail Metrics tab missing — Signal trend chart tab abhi nahi hai.
+
+Baaki sab (signals, problems, opportunities, decisions, artifacts, launches, settings) — sab PRD ke according properly build hue hain, correct routes, correct data shapes, correct UI flows.

@@ -528,7 +528,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle,
                 </div>
                 <div>
                   <h2 className="font-heading text-lg font-black text-gray-900">Multiple Workspaces</h2>
-                  <p className="text-xs text-gray-500 font-medium">Starter plan required</p>
+                  <p className="text-xs text-gray-500 font-medium">Pro plan required</p>
                 </div>
               </div>
               <button
@@ -562,7 +562,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle,
                 onClick={() => setShowNewWsModal(false)}
                 className="flex-1 bg-astrix-teal hover:bg-astrix-darkTeal text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md shadow-astrix-teal/20"
               >
-                <Sparkles className="w-4 h-4" /> Upgrade to Starter
+                <Sparkles className="w-4 h-4" /> Upgrade to Pro
               </Link>
               <button
                 onClick={() => setShowNewWsModal(false)}

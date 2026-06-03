@@ -535,6 +535,9 @@ export const Dashboard = () => {
                           </span>
                           <span className="text-[10px] text-gray-400 font-medium">{formatCurrency(opp.problems?.affected_arr || 0)} ARR</span>
                         </div>
+                        {(opp as any).top_accounts && (opp as any).top_accounts.length > 0 && (
+                          <div className="text-[10px] text-gray-400 font-medium mt-0.5 truncate">{(opp as any).top_accounts.slice(0, 2).map((a: any) => a.name).join(' · ')}</div>
+                        )}
                       </div>
                       <div className="shrink-0 flex flex-col items-end gap-1">
                         <span className="font-heading font-black text-xl text-gray-900">{opp.opportunity_score}</span>
