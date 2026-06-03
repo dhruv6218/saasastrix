@@ -38,6 +38,8 @@ export const api = {
       if (opts?.sentiment) res = res.filter(s => s.sentiment_label === opts.sentiment);
       if (opts?.product_area) res = res.filter(s => s.product_area === opts.product_area);
       if (opts?.account_id) res = res.filter(s => s.account_id === opts.account_id);
+      if (opts?.date_from) res = res.filter(s => new Date(s.created_at) >= new Date(opts.date_from));
+      if (opts?.date_to) res = res.filter(s => new Date(s.created_at) <= new Date(opts.date_to + 'T23:59:59'));
       if (opts?.sorting?.length > 0) {
         const sort = opts.sorting[0];
         res.sort((a: any, b: any) => {

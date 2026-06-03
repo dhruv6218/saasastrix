@@ -37,9 +37,11 @@ export const SignalExplorer = () => {
   const [filterSentiment, setFilterSentiment] = useState('');
   const [filterArea, setFilterArea] = useState('');
   const [filterAccount, setFilterAccount] = useState('');
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState('');
   const filterRef = useRef<HTMLDivElement>(null);
 
-  const activeFilterCount = [filterSeverity, filterSentiment, filterArea, filterAccount].filter(Boolean).length;
+  const activeFilterCount = [filterSeverity, filterSentiment, filterArea, filterAccount, filterDateFrom, filterDateTo].filter(Boolean).length;
 
   // Bulk select
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -49,8 +51,9 @@ export const SignalExplorer = () => {
 
   const opts = useMemo(() => ({
     page: pageIndex + 1, limit: pageSize, globalFilter, sorting,
-    severity: filterSeverity, sentiment: filterSentiment, product_area: filterArea, account_id: filterAccount
-  }), [pageIndex, pageSize, globalFilter, JSON.stringify(sorting), filterSeverity, filterSentiment, filterArea, filterAccount]);
+    severity: filterSeverity, sentiment: filterSentiment, product_area: filterArea, account_id: filterAccount,
+    date_from: filterDateFrom, date_to: filterDateTo,
+  }), [pageIndex, pageSize, globalFilter, JSON.stringify(sorting), filterSeverity, filterSentiment, filterArea, filterAccount, filterDateFrom, filterDateTo]);
 
   const { data, isLoading } = useSignals(activeWorkspace?.id, opts);
   const { data: accountsData } = useAccounts(activeWorkspace?.id);
@@ -65,7 +68,7 @@ export const SignalExplorer = () => {
     return () => document.removeEventListener('mousedown', handle);
   }, []);
 
-  const clearFilters = () => { setFilterSeverity(''); setFilterSentiment(''); setFilterArea(''); setFilterAccount(''); };
+  const clearFilters = () => { setFilterSeverity(''); setFilterSentiment(''); setFilterArea(''); setFilterAccount(''); setFilterDateFrom(''); setFilterDateTo(''); };
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
@@ -301,6 +304,28 @@ export const SignalExplorer = () => {
                   <option value="">All accounts</option>
                   {accounts.map((a: any) => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Date Range</label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="date"
+                    value={filterDateFrom}
+                    onChange={e => setFilterDateFrom(e.target.value)}
+                    className="flex-1 bg-gray-50 border border-gray-200 text-xs rounded-lg p-2 outline-none focus:ring-2 focus:ring-astrix-teal"
+                    placeholder="From"
+                  />
+                  <span className="text-gray-400 text-xs font-bold shrink-0">→</span>
+                  <input
+                    type="date"
+                    value={filterDateTo}
+                    onChange={e => setFilterDateTo(e.target.value)}
+                    min={filterDateFrom}
+                    className="flex-1 bg-gray-50 border border-gray-200 text-xs rounded-lg p-2 outline-none focus:ring-2 focus:ring-astrix-teal"
+                    placeholder="To"
+                  />
+                </div>
               </div>
             </div>
           )}
