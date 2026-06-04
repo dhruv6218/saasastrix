@@ -22,8 +22,8 @@ const INTEGRATIONS = [
   { id: 'gong', name: 'Gong', category: 'Feedback', desc: 'Extract customer pain points and product feedback from recorded sales calls automatically.', status: 'available', pro: true, icon: '🔔', popular: true },
   { id: 'chorus', name: 'Chorus.ai', category: 'Feedback', desc: 'Import conversation intelligence from sales and CS calls as structured product signals.', status: 'available', pro: true, icon: '🎵', popular: false },
   { id: 'notion', name: 'Notion', category: 'Data', desc: 'Push decision memos and PRDs to your Notion workspace. Keep your docs in sync with Astrix artifacts.', status: 'available', pro: false, icon: '📝', popular: true },
-  { id: 'jira', name: 'Jira', category: 'Data', desc: 'Two-way sync with Jira — create tickets from Astrix decisions and track implementation progress.', status: 'coming_soon', pro: true, icon: '🔵', popular: true },
-  { id: 'linear', name: 'Linear', category: 'Data', desc: 'Link Astrix decisions directly to Linear projects and track from decision to shipped feature.', status: 'coming_soon', pro: true, icon: '🟣', popular: false },
+  { id: 'jira', name: 'Jira', category: 'Data', desc: 'Two-way sync with Jira — create tickets from Astrix decisions and track implementation progress.', status: 'available', pro: true, icon: '🔵', popular: true },
+  { id: 'linear', name: 'Linear', category: 'Data', desc: 'Link Astrix decisions directly to Linear projects and track from decision to shipped feature.', status: 'available', pro: true, icon: '🟣', popular: false },
   { id: 'github', name: 'GitHub', category: 'Data', desc: 'Attach pull requests and issues to Astrix decisions for a full evidence-to-code trail.', status: 'coming_soon', pro: false, icon: '⚫', popular: false },
 ];
 

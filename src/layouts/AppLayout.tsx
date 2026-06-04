@@ -9,6 +9,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { CsvUploadModal } from '../components/modals/CsvUploadModal';
+import { OnboardingChecklist } from '../components/ui/OnboardingChecklist';
 import { useSignals, useLaunches } from '../lib/api';
 
 interface AppLayoutProps {
@@ -576,6 +577,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle,
           </div>
         </div>
       )}
+      <OnboardingChecklist />
     </div>
   );
 };

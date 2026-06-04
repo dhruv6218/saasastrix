@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from '../../layouts/AppLayout';
-import { Building2, Users, CreditCard, Loader2, Trash2, Plus, X, Box, Target, ShieldCheck, Eye, Activity, Check } from 'lucide-react';
+import { Building2, Users, CreditCard, Loader2, Trash2, Plus, X, Box, Target, ShieldCheck, Eye, Activity, Check, Bell, Mail, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { Link } from 'react-router-dom';
@@ -42,8 +42,58 @@ export const Settings = () => {
     { id: 'segments', name: 'Segments', icon: Target },
     { id: 'team', name: 'Team Members', icon: Users },
     { id: 'billing', name: 'Billing & Quotas', icon: CreditCard },
+    { id: 'notifications', name: 'Notifications', icon: Bell },
+    { id: 'digest', name: 'Email Digest', icon: Mail },
     { id: 'activity', name: 'Audit Log', icon: Activity },
   ];
+
+  const NOTIF_STORAGE_KEY = 'astrix_notification_prefs';
+  const DIGEST_STORAGE_KEY = 'astrix_digest_prefs';
+
+  const defaultNotifPrefs = {
+    email_weekly_digest: true,
+    email_day7_reminder: true,
+    email_day30_reminder: true,
+    email_high_priority_signal: true,
+    email_new_decision: false,
+    inapp_score_change: true,
+    inapp_team_decisions: true,
+    inapp_daily_triage: false,
+    inapp_verdict_due: true,
+  };
+
+  const defaultDigestPrefs = {
+    enabled: true,
+    day: 'Monday',
+    include_signals: true,
+    include_opportunities: true,
+    include_reviews_due: true,
+    include_decisions: true,
+    frequency: 'weekly',
+  };
+
+  const [notifPrefs, setNotifPrefs] = React.useState(() => {
+    try { return { ...defaultNotifPrefs, ...JSON.parse(localStorage.getItem(NOTIF_STORAGE_KEY) || '{}') }; }
+    catch { return defaultNotifPrefs; }
+  });
+  const [digestPrefs, setDigestPrefs] = React.useState(() => {
+    try { return { ...defaultDigestPrefs, ...JSON.parse(localStorage.getItem(DIGEST_STORAGE_KEY) || '{}') }; }
+    catch { return defaultDigestPrefs; }
+  });
+
+  const updateNotif = (key: string, val: boolean) => {
+    const updated = { ...notifPrefs, [key]: val };
+    setNotifPrefs(updated);
+    localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(updated));
+    addToast('Notification preference saved', 'success');
+  };
+
+  const updateDigest = (key: string, val: any) => {
+    const updated = { ...digestPrefs, [key]: val };
+    setDigestPrefs(updated);
+    localStorage.setItem(DIGEST_STORAGE_KEY, JSON.stringify(updated));
+    addToast('Digest preference saved', 'success');
+  };
 
   useEffect(() => {
     if (activeWorkspace) {
@@ -337,6 +387,177 @@ export const Settings = () => {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          )}
+
+          {/* NOTIFICATIONS */}
+          {activeTab === 'notifications' && (
+            <div className="animate-[fadeIn_0.3s_ease-out]">
+              <h3 className="font-heading text-xl font-bold text-gray-900 mb-2 border-b border-gray-100 pb-4">Notification Preferences</h3>
+              <p className="text-sm text-gray-500 font-medium mb-6">Control which emails and in-app alerts you receive from Astrix.</p>
+
+              {/* Email notifications */}
+              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mb-5">
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+                  <Mail className="w-4 h-4 text-astrix-teal" />
+                  <span className="font-bold text-sm text-gray-900">Email Notifications</span>
+                </div>
+                {[
+                  { key: 'email_weekly_digest', label: 'Weekly Digest', desc: 'Top signals, opportunities, and reviews due every Monday.' },
+                  { key: 'email_day7_reminder', label: 'Day 7 Launch Reminder', desc: 'Reminder to complete your 7-day outcome review.' },
+                  { key: 'email_day30_reminder', label: 'Day 30 Launch Reminder', desc: 'Reminder to submit your final verdict at Day 30.' },
+                  { key: 'email_high_priority_signal', label: 'High-Priority Signal Alert', desc: 'Instant email when a Critical signal is ingested.' },
+                  { key: 'email_new_decision', label: 'New Team Decision', desc: 'Notify you when a teammate logs a new decision.' },
+                ].map(item => (
+                  <div key={item.key} className="flex items-center justify-between px-5 py-4 border-b last:border-0 border-gray-100 hover:bg-gray-50/50 transition-colors">
+                    <div>
+                      <div className="text-sm font-bold text-gray-900">{item.label}</div>
+                      <div className="text-xs text-gray-400 font-medium mt-0.5">{item.desc}</div>
+                    </div>
+                    <button onClick={() => updateNotif(item.key, !(notifPrefs as any)[item.key])} className="shrink-0 ml-4">
+                      {(notifPrefs as any)[item.key]
+                        ? <ToggleRight className="w-8 h-8 text-astrix-teal" />
+                        : <ToggleLeft className="w-8 h-8 text-gray-300" />
+                      }
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* In-app notifications */}
+              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+                  <Bell className="w-4 h-4 text-brand-blue" />
+                  <span className="font-bold text-sm text-gray-900">In-App Notifications</span>
+                </div>
+                {[
+                  { key: 'inapp_score_change', label: 'Opportunity Score Change', desc: 'Alert when an opportunity score shifts by 10+ points.' },
+                  { key: 'inapp_team_decisions', label: 'Team Activity', desc: 'Show when teammates log decisions or submit verdicts.' },
+                  { key: 'inapp_verdict_due', label: 'Verdict Due Reminder', desc: 'In-app banner when a launch verdict is overdue.' },
+                  { key: 'inapp_daily_triage', label: 'Daily Triage Prompt', desc: 'Remind you to review unmatched signals each day.' },
+                ].map(item => (
+                  <div key={item.key} className="flex items-center justify-between px-5 py-4 border-b last:border-0 border-gray-100 hover:bg-gray-50/50 transition-colors">
+                    <div>
+                      <div className="text-sm font-bold text-gray-900">{item.label}</div>
+                      <div className="text-xs text-gray-400 font-medium mt-0.5">{item.desc}</div>
+                    </div>
+                    <button onClick={() => updateNotif(item.key, !(notifPrefs as any)[item.key])} className="shrink-0 ml-4">
+                      {(notifPrefs as any)[item.key]
+                        ? <ToggleRight className="w-8 h-8 text-astrix-teal" />
+                        : <ToggleLeft className="w-8 h-8 text-gray-300" />
+                      }
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* EMAIL DIGEST */}
+          {activeTab === 'digest' && (
+            <div className="animate-[fadeIn_0.3s_ease-out]">
+              <h3 className="font-heading text-xl font-bold text-gray-900 mb-2 border-b border-gray-100 pb-4">Weekly Email Digest</h3>
+              <p className="text-sm text-gray-500 font-medium mb-6">A curated summary of your product intelligence — delivered to your inbox every week.</p>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Settings panel */}
+                <div className="space-y-4">
+                  <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                    <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                      <span className="font-bold text-sm text-gray-900">Digest Settings</span>
+                      <button onClick={() => updateDigest('enabled', !digestPrefs.enabled)}>
+                        {digestPrefs.enabled
+                          ? <ToggleRight className="w-8 h-8 text-astrix-teal" />
+                          : <ToggleLeft className="w-8 h-8 text-gray-300" />
+                        }
+                      </button>
+                    </div>
+                    <div className="p-5 space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-600 mb-2">Send on</label>
+                        <div className="flex flex-wrap gap-2">
+                          {['Monday','Tuesday','Wednesday','Thursday','Friday'].map(day => (
+                            <button key={day} onClick={() => updateDigest('day', day)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${digestPrefs.day === day ? 'bg-astrix-teal text-white border-astrix-teal' : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-astrix-teal'}`}>
+                              {day}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-600 mb-2">Include in digest</label>
+                        {[
+                          { key: 'include_signals', label: 'New signals summary' },
+                          { key: 'include_opportunities', label: 'Top opportunities' },
+                          { key: 'include_reviews_due', label: 'Reviews due' },
+                          { key: 'include_decisions', label: 'Recent decisions' },
+                        ].map(item => (
+                          <div key={item.key} className="flex items-center justify-between py-2 border-b last:border-0 border-gray-50">
+                            <span className="text-sm text-gray-700 font-medium">{item.label}</span>
+                            <button onClick={() => updateDigest(item.key, !(digestPrefs as any)[item.key])}>
+                              {(digestPrefs as any)[item.key]
+                                ? <ToggleRight className="w-7 h-7 text-astrix-teal" />
+                                : <ToggleLeft className="w-7 h-7 text-gray-300" />
+                              }
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Email preview */}
+                <div>
+                  <div className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Preview</div>
+                  <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden text-sm">
+                    <div className="bg-gray-900 text-white px-5 py-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-6 h-6 rounded-md bg-astrix-teal flex items-center justify-center text-[10px] font-black">A</div>
+                        <span className="font-bold text-sm">Astrix AI</span>
+                      </div>
+                      <div className="text-xs text-gray-400">Your weekly product intelligence digest</div>
+                    </div>
+                    <div className="p-5 space-y-4 bg-gray-50">
+                      <div className="text-base font-bold text-gray-900">Good {digestPrefs.day} — here's your week in product intelligence</div>
+                      {digestPrefs.include_signals && (
+                        <div className="bg-white rounded-xl p-3 border border-gray-200">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">📡 New Signals</div>
+                          <div className="text-sm font-bold text-gray-900">12 new signals this week</div>
+                          <div className="text-xs text-gray-500 mt-1">3 Critical · 5 High · 4 Medium</div>
+                        </div>
+                      )}
+                      {digestPrefs.include_opportunities && (
+                        <div className="bg-white rounded-xl p-3 border border-gray-200">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">🎯 Top Opportunity</div>
+                          <div className="text-sm font-bold text-gray-900">Mobile Export Flow — Score 87</div>
+                          <div className="text-xs text-gray-500 mt-1">$142K ARR at risk · Recommended: Build</div>
+                        </div>
+                      )}
+                      {digestPrefs.include_reviews_due && (
+                        <div className="bg-white rounded-xl p-3 border border-orange-200 border-l-4 border-l-orange-500">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-orange-500 mb-2">⏰ Reviews Due</div>
+                          <div className="text-sm font-bold text-gray-900">2 launches need your review</div>
+                          <div className="text-xs text-gray-500 mt-1">Dashboard Redesign · API Rate Limiting</div>
+                        </div>
+                      )}
+                      {digestPrefs.include_decisions && (
+                        <div className="bg-white rounded-xl p-3 border border-gray-200">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">✅ Recent Decisions</div>
+                          <div className="text-sm font-bold text-gray-900">3 decisions logged this week</div>
+                          <div className="text-xs text-gray-500 mt-1">Build · Experiment · Defer</div>
+                        </div>
+                      )}
+                      <div className="text-center pt-2">
+                        <div className="inline-block bg-astrix-teal text-white text-xs font-bold px-4 py-2 rounded-lg">Open Astrix Dashboard →</div>
+                      </div>
+                    </div>
+                    <div className="px-5 py-3 bg-gray-100 text-center text-[10px] text-gray-400 font-medium">
+                      Astrix AI · Unsubscribe · Manage preferences
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

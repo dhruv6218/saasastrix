@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { AppLayout } from '../../layouts/AppLayout';
-import { Building2, Plus, UploadCloud, X, Loader2, Search, HeartPulse, Filter, ChevronDown } from 'lucide-react';
+import { Building2, Plus, UploadCloud, X, Loader2, Search, HeartPulse, Filter, ChevronDown, Download } from 'lucide-react';
+import { exportToCsv } from '../../utils/csvExport';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useAccounts, api } from '../../lib/api';
 import { useToast } from '../../contexts/ToastContext';
@@ -190,6 +191,18 @@ export const AccountsList = () => {
             <button onClick={() => setGlobalFilter('')} className="mr-2 text-gray-400 hover:text-gray-700"><X className="w-4 h-4" /></button>
           )}
         </div>
+        <button
+          onClick={() => {
+            const { data: accs } = { data: (window as any).__astrix_accounts_export || [] };
+            exportToCsv(accounts?.data || [], [
+              { key: 'name', label: 'Account Name' }, { key: 'domain', label: 'Domain' },
+              { key: 'arr', label: 'ARR ($)' }, { key: 'plan_type', label: 'Plan' },
+              { key: 'health_score', label: 'Health Score' }, { key: 'signal_count', label: 'Signals' },
+            ], 'astrix_accounts');
+          }}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border bg-white text-gray-700 border-gray-200 hover:bg-gray-50 transition-colors">
+          <Download className="w-4 h-4" /> Export CSV
+        </button>
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-colors ${showFilters || activeFilterCount > 0 ? 'bg-astrix-teal text-white border-astrix-teal' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}

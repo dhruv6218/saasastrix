@@ -630,6 +630,57 @@ export const Dashboard = () => {
             </div>
           </div>
 
+          {/* Decision Win Rate */}
+          <div>
+            <div className="flex items-center justify-between mb-3 px-1">
+              <h2 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-astrix-teal" /> Decision Win Rate
+              </h2>
+              <Link to="/app/decisions" className="text-xs font-bold text-gray-400 hover:text-astrix-teal transition-colors">All decisions</Link>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-4">
+              {decisions.length === 0 ? (
+                <div className="py-4 text-center text-xs text-gray-400 font-medium">
+                  <BadgeCheck className="w-8 h-8 text-gray-200 mx-auto mb-2" />
+                  Log decisions to track your win rate.
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-end gap-4 mb-4">
+                    <div>
+                      <div className="text-4xl font-heading font-black text-gray-900 leading-none">{verdictRate}%</div>
+                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Win Rate</div>
+                    </div>
+                    <div className="flex-1 text-right">
+                      <div className="text-2xl font-heading font-black text-gray-700 leading-none">{decisions.length}</div>
+                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Total Decisions</div>
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2 mb-4">
+                    <div className="bg-astrix-teal h-2 rounded-full transition-all duration-500" style={{ width: `${verdictRate}%` }} />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(['Build','Fix','Experiment'] as const).map(action => {
+                      const count = decisions.filter((d: any) => d.action === action).length;
+                      return (
+                        <div key={action} className="bg-gray-50 rounded-xl p-2.5 text-center border border-gray-100">
+                          <div className="text-lg font-heading font-black text-gray-900">{count}</div>
+                          <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{action}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {solvedLaunches > 0 && (
+                    <div className="mt-3 flex items-center gap-2 bg-green-50 border border-green-100 rounded-xl p-2.5">
+                      <BadgeCheck className="w-4 h-4 text-green-600 shrink-0" />
+                      <span className="text-xs font-bold text-green-700">{solvedLaunches} launch{solvedLaunches !== 1 ? 'es' : ''} marked Solved</span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
           {/* Problems summary */}
           <div>
             <div className="flex items-center justify-between mb-3 px-1">

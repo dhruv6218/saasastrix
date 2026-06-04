@@ -2,8 +2,10 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { AppLayout } from '../../layouts/AppLayout';
 import {
   Search, Hash, MessageCircle, Github, AlertCircle, FileSpreadsheet, Database,
-  UploadCloud, Plus, Loader2, ChevronRight, Filter, X, Check, ChevronDown, Layers
+  UploadCloud, Plus, Loader2, ChevronRight, Filter, X, Check, ChevronDown, Layers,
+  Download, Bookmark, BookmarkCheck
 } from 'lucide-react';
+import { exportToCsv } from '../../utils/csvExport';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useNavigate } from 'react-router-dom';
 import { useSignals, useAccounts, useProblems, api } from '../../lib/api';
@@ -42,6 +44,54 @@ export const SignalExplorer = () => {
   const filterRef = useRef<HTMLDivElement>(null);
 
   const activeFilterCount = [filterSeverity, filterSentiment, filterArea, filterAccount, filterDateFrom, filterDateTo].filter(Boolean).length;
+
+  // Saved filter presets
+  const PRESETS_KEY = 'astrix_signal_presets';
+  const [savedPresets, setSavedPresets] = useState<Array<{ name: string; filters: Record<string, string> }>>(() => {
+    try { return JSON.parse(localStorage.getItem(PRESETS_KEY) || '[]'); } catch { return []; }
+  });
+  const [showSavePreset, setShowSavePreset] = useState(false);
+  const [presetName, setPresetName] = useState('');
+
+  const currentFilters = { filterSeverity, filterSentiment, filterArea, filterAccount, filterDateFrom, filterDateTo };
+  const hasActiveFilters = activeFilterCount > 0;
+
+  const handleSavePreset = () => {
+    if (!presetName.trim()) return;
+    const updated = [...savedPresets, { name: presetName.trim(), filters: currentFilters }];
+    setSavedPresets(updated);
+    localStorage.setItem(PRESETS_KEY, JSON.stringify(updated));
+    setPresetName('');
+    setShowSavePreset(false);
+  };
+
+  const handleLoadPreset = (preset: typeof savedPresets[0]) => {
+    setFilterSeverity(preset.filters.filterSeverity || '');
+    setFilterSentiment(preset.filters.filterSentiment || '');
+    setFilterArea(preset.filters.filterArea || '');
+    setFilterAccount(preset.filters.filterAccount || '');
+    setFilterDateFrom(preset.filters.filterDateFrom || '');
+    setFilterDateTo(preset.filters.filterDateTo || '');
+  };
+
+  const handleDeletePreset = (name: string) => {
+    const updated = savedPresets.filter(p => p.name !== name);
+    setSavedPresets(updated);
+    localStorage.setItem(PRESETS_KEY, JSON.stringify(updated));
+  };
+
+  const handleExport = async () => {
+    const allSignals = await api.signals.list(activeWorkspace?.id || '', { page: 1, limit: 9999, globalFilter, sorting: [], severity: filterSeverity, sentiment: filterSentiment, product_area: filterArea, account_id: filterAccount, date_from: filterDateFrom, date_to: filterDateTo });
+    exportToCsv(allSignals.data, [
+      { key: 'id', label: 'ID' },
+      { key: 'source', label: 'Source' },
+      { key: 'severity', label: 'Severity' },
+      { key: 'sentiment', label: 'Sentiment' },
+      { key: 'product_area', label: 'Product Area' },
+      { key: 'created_at', label: 'Date' },
+      { key: 'content', label: 'Content' },
+    ], 'astrix_signals');
+  };
 
   // Bulk select
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -234,6 +284,38 @@ export const SignalExplorer = () => {
         </div>
       )}
 
+      {/* Saved Presets row */}
+      {(savedPresets.length > 0 || hasActiveFilters) && (
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          {savedPresets.length > 0 && <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Presets:</span>}
+          {savedPresets.map(p => (
+            <div key={p.name} className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1">
+              <button onClick={() => handleLoadPreset(p)} className="text-xs font-bold text-gray-700 hover:text-astrix-teal transition-colors flex items-center gap-1">
+                <BookmarkCheck className="w-3 h-3" />{p.name}
+              </button>
+              <button onClick={() => handleDeletePreset(p.name)} className="text-gray-400 hover:text-red-500 transition-colors ml-1">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+          {hasActiveFilters && (
+            showSavePreset ? (
+              <div className="flex items-center gap-1">
+                <input autoFocus value={presetName} onChange={e => setPresetName(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSavePreset()}
+                  placeholder="Preset name…" className="text-xs border border-gray-200 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-astrix-teal w-28 bg-white" />
+                <button onClick={handleSavePreset} className="text-xs font-bold text-white bg-astrix-teal px-2 py-1 rounded-lg">Save</button>
+                <button onClick={() => setShowSavePreset(false)} className="text-xs text-gray-400 hover:text-gray-700 px-1">✕</button>
+              </div>
+            ) : (
+              <button onClick={() => setShowSavePreset(true)} className="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-astrix-teal transition-colors border border-dashed border-gray-300 rounded-lg px-2 py-1">
+                <Bookmark className="w-3 h-3" /> Save preset
+              </button>
+            )
+          )}
+        </div>
+      )}
+
       {/* Search + Filter row */}
       <div className="flex flex-col md:flex-row gap-3 mb-6">
         <div className="bg-white border border-gray-200 rounded-xl p-2 flex items-center shadow-sm focus-within:ring-2 focus-within:ring-astrix-teal transition-all flex-1">
@@ -248,6 +330,9 @@ export const SignalExplorer = () => {
           {globalFilter && <button onClick={() => setGlobalFilter('')} className="text-gray-400 hover:text-gray-700 mr-1"><X className="w-4 h-4" /></button>}
         </div>
 
+        <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-bold bg-white border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm transition-all">
+          <Download className="w-4 h-4" /> Export CSV
+        </button>
         <div className="relative" ref={filterRef}>
           <button
             onClick={() => setShowFilters(v => !v)}

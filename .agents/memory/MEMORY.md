@@ -1,1 +1,1 @@
-- [Frontend completion state](frontend-completion.md) — all 38 routes wired, all filters live, plan names Free/Pro/Business/Enterprise everywhere
+- [Frontend completion state](frontend-completion.md) — all 38 routes wired, all 7 new features built (Jun 2026), PRD created

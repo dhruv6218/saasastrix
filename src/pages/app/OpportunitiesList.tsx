@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { AppLayout } from '../../layouts/AppLayout';
-import { Filter, ArrowRight, Target, GitCompare, X, CheckCircle2, Loader2, Lock, ChevronDown } from 'lucide-react';
+import { Filter, ArrowRight, Target, GitCompare, X, CheckCircle2, Loader2, Lock, ChevronDown, Download, Bookmark, BookmarkCheck } from 'lucide-react';
+import { exportToCsv } from '../../utils/csvExport';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useOpportunities, api } from '../../lib/api';
@@ -37,6 +38,33 @@ export const OpportunitiesList = () => {
   const [filterAction, setFilterAction] = useState('');
   const [filterScore, setFilterScore] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+
+  // Saved filter presets
+  const OPP_PRESETS_KEY = 'astrix_opp_presets';
+  const [oppPresets, setOppPresets] = useState<Array<{ name: string; action: string; score: string }>>(() => {
+    try { return JSON.parse(localStorage.getItem(OPP_PRESETS_KEY) || '[]'); } catch { return []; }
+  });
+  const [showOppPresetSave, setShowOppPresetSave] = useState(false);
+  const [oppPresetName, setOppPresetName] = useState('');
+
+  const saveOppPreset = () => {
+    if (!oppPresetName.trim()) return;
+    const updated = [...oppPresets, { name: oppPresetName.trim(), action: filterAction, score: filterScore }];
+    setOppPresets(updated);
+    localStorage.setItem(OPP_PRESETS_KEY, JSON.stringify(updated));
+    setOppPresetName(''); setShowOppPresetSave(false);
+  };
+
+  const handleExportOpps = () => {
+    exportToCsv(filteredOpportunities, [
+      { key: 'problems.title', label: 'Problem' },
+      { key: 'opportunity_score', label: 'Score' },
+      { key: 'recommended_action', label: 'Recommended Action' },
+      { key: 'problems.affected_arr', label: 'Affected ARR ($)' },
+      { key: 'problems.evidence_count', label: 'Signal Count' },
+      { key: 'problems.severity', label: 'Severity' },
+    ], 'astrix_opportunities');
+  };
 
   const filteredOpportunities = useMemo(() => {
     return opportunities.filter(opp => {
@@ -196,9 +224,44 @@ export const OpportunitiesList = () => {
         </div>
       }
     >
+      {/* Opportunity presets row */}
+      {(oppPresets.length > 0 || (filterAction || filterScore)) && (
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          {oppPresets.length > 0 && <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Presets:</span>}
+          {oppPresets.map(p => (
+            <div key={p.name} className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1">
+              <button onClick={() => { setFilterAction(p.action); setFilterScore(p.score); }}
+                className="text-xs font-bold text-gray-700 hover:text-astrix-teal transition-colors flex items-center gap-1">
+                <BookmarkCheck className="w-3 h-3" />{p.name}
+              </button>
+              <button onClick={() => { const u = oppPresets.filter(x => x.name !== p.name); setOppPresets(u); localStorage.setItem(OPP_PRESETS_KEY, JSON.stringify(u)); }}
+                className="text-gray-400 hover:text-red-500 ml-1"><X className="w-3 h-3" /></button>
+            </div>
+          ))}
+          {(filterAction || filterScore) && (
+            showOppPresetSave ? (
+              <div className="flex items-center gap-1">
+                <input autoFocus value={oppPresetName} onChange={e => setOppPresetName(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && saveOppPreset()}
+                  placeholder="Preset name…" className="text-xs border border-gray-200 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-astrix-teal w-28 bg-white" />
+                <button onClick={saveOppPreset} className="text-xs font-bold text-white bg-astrix-teal px-2 py-1 rounded-lg">Save</button>
+                <button onClick={() => setShowOppPresetSave(false)} className="text-xs text-gray-400 hover:text-gray-700 px-1">✕</button>
+              </div>
+            ) : (
+              <button onClick={() => setShowOppPresetSave(true)} className="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-astrix-teal transition-colors border border-dashed border-gray-300 rounded-lg px-2 py-1">
+                <Bookmark className="w-3 h-3" /> Save preset
+              </button>
+            )
+          )}
+        </div>
+      )}
+
       {/* Filter bar */}
       {!isCompareMode && opportunities.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-4">
+          <button onClick={handleExportOpps} className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold border bg-white text-gray-700 border-gray-200 hover:bg-gray-50 shadow-sm transition-colors">
+            <Download className="w-4 h-4" /> Export CSV
+          </button>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold border transition-colors ${showFilters || activeFilterCount > 0 ? 'bg-astrix-teal text-white border-astrix-teal' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 shadow-sm'}`}

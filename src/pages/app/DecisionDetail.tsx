@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppLayout } from '../../layouts/AppLayout';
-import { CheckCircle2, FileText, Activity, Clock, Loader2, Copy, Edit2, Save, ChevronDown, ChevronRight, AlertTriangle, ListChecks, GitBranch, Link as LinkIcon } from 'lucide-react';
+import { CheckCircle2, FileText, Activity, Clock, Loader2, Copy, Edit2, Save, ChevronDown, ChevronRight, AlertTriangle, ListChecks, GitBranch, Link as LinkIcon, ExternalLink } from 'lucide-react';
+import { JiraLinearModal } from '../../components/modals/JiraLinearModal';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useDecision, useArtifacts, useLaunches, api } from '../../lib/api';
 import { Skeleton } from '../../components/ui/Skeleton';
@@ -37,6 +38,7 @@ export const DecisionDetail = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
+  const [showJiraLinearModal, setShowJiraLinearModal] = useState(false);
 
   const [showLaunchForm, setShowLaunchForm] = useState(false);
   const [launchDate, setLaunchDate] = useState('');
@@ -355,6 +357,17 @@ export const DecisionDetail = () => {
         </div>
 
         <div className="lg:col-span-1 space-y-6">
+
+          {/* Push to Jira / Linear */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+            <h3 className="font-heading text-xs font-bold text-gray-900 mb-3 uppercase tracking-widest">Push to Project Manager</h3>
+            <p className="text-xs text-gray-400 font-medium mb-4">Create a Jira or Linear issue from this decision in one click.</p>
+            <button onClick={() => setShowJiraLinearModal(true)}
+              className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-astrix-teal transition-colors shadow-sm">
+              <ExternalLink className="w-4 h-4" /> Push to Jira / Linear
+            </button>
+          </div>
+
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
             <h3 className="font-heading text-sm font-bold text-gray-900 mb-4 uppercase tracking-widest">Metadata</h3>
             <div className="space-y-4 font-mono text-sm">
@@ -390,6 +403,13 @@ export const DecisionDetail = () => {
           )}
         </div>
       </div>
+      <JiraLinearModal
+        isOpen={showJiraLinearModal}
+        onClose={() => setShowJiraLinearModal(false)}
+        title={currentDecision.title}
+        description={currentDecision.rationale || ''}
+        decisionId={id}
+      />
     </AppLayout>
   );
 };
