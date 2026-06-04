@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { MOCK_USER } from '../lib/mockData';
 
 interface AuthContextType {
   session: any;
@@ -25,6 +24,26 @@ const AuthContext = createContext<AuthContextType>({
   updatePassword: async () => ({ error: null }),
 });
 
+async function fetchCurrentUser(): Promise<any | null> {
+  try {
+    const res = await fetch('/api/auth/user', { credentials: 'include' });
+    if (res.status === 401) return null;
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data || !data.id) return null;
+    return {
+      id: data.id,
+      email: data.email || `${data.id}@replit.user`,
+      user_metadata: {
+        full_name: [data.firstName, data.lastName].filter(Boolean).join(' ') || data.id,
+        avatar_url: data.profileImageUrl || null,
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
@@ -33,55 +52,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initAuth = async () => {
       setIsInitializing(true);
-      // Simulate Supabase async session hydration
-      await new Promise(resolve => setTimeout(resolve, 600));
-      
-      // For the sake of strict backend-readiness, we remove localStorage hacks.
-      // A real Supabase client would call supabase.auth.getSession() here.
-      // We default to logged out to ensure the hydration flow is respected.
-      setUser(null);
-      setSession(null);
+      const appUser = await fetchCurrentUser();
+      if (appUser) {
+        setUser(appUser);
+        setSession({ access_token: 'replit_session', user: appUser });
+      } else {
+        setUser(null);
+        setSession(null);
+      }
       setIsInitializing(false);
     };
-    
+
     initAuth();
   }, []);
 
-  const simulateDelay = () => new Promise(resolve => setTimeout(resolve, 800));
-
-  const signIn = async (email: string, password: string) => {
-    await simulateDelay();
-    setUser(MOCK_USER);
-    setSession({ access_token: 'mock_token' });
+  const signIn = async (_email: string, _password: string) => {
+    window.location.href = '/api/login';
     return { error: null };
   };
 
-  const signUp = async (email: string, password: string, name: string) => {
-    await simulateDelay();
-    setUser({ ...MOCK_USER, email, user_metadata: { full_name: name } });
-    setSession({ access_token: 'mock_token' });
+  const signUp = async (_email: string, _password: string, _name: string) => {
+    window.location.href = '/api/login';
     return { error: null, needsConfirmation: false };
   };
 
   const signInWithGoogle = async () => {
-    await simulateDelay();
-    setUser(MOCK_USER);
-    setSession({ access_token: 'mock_token' });
+    window.location.href = '/api/login';
   };
 
   const signOut = async () => {
-    await simulateDelay();
     setUser(null);
     setSession(null);
+    window.location.href = '/api/logout';
   };
 
-  const resetPassword = async (email: string) => {
-    await simulateDelay();
+  const resetPassword = async (_email: string) => {
     return { error: null };
   };
 
-  const updatePassword = async (password: string) => {
-    await simulateDelay();
+  const updatePassword = async (_password: string) => {
     return { error: null };
   };
 
