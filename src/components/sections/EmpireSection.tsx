@@ -78,12 +78,15 @@ export const EmpireSection = () => {
             <ul className="space-y-4 text-sm text-gray-500 font-medium">
               <li><Link to="/#features" onClick={(e) => handleNavClick(e, '/#features')} className="hover:text-brand-blue transition-colors focus-visible:outline-none focus-visible:text-brand-blue">Features</Link></li>
               <li><Link to="/pricing" className="hover:text-brand-blue transition-colors focus-visible:outline-none focus-visible:text-brand-blue">Pricing</Link></li>
+              <li><Link to="/integrations" className="hover:text-brand-blue transition-colors focus-visible:outline-none focus-visible:text-brand-blue">Integrations</Link></li>
+              <li><Link to="/changelog" className="hover:text-brand-blue transition-colors focus-visible:outline-none focus-visible:text-brand-blue">Changelog</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold text-gray-900 mb-6 font-heading">Company & Legal</h4>
             <ul className="space-y-4 text-sm text-gray-500 font-medium">
+              <li><Link to="/contact" className="hover:text-brand-blue transition-colors focus-visible:outline-none focus-visible:text-brand-blue">Contact</Link></li>
               <li><Link to="/privacy" className="hover:text-brand-blue transition-colors focus-visible:outline-none focus-visible:text-brand-blue">Privacy Policy</Link></li>
               <li><Link to="/terms" className="hover:text-brand-blue transition-colors focus-visible:outline-none focus-visible:text-brand-blue">Terms of Service</Link></li>
             </ul>

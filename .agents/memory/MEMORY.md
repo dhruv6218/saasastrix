@@ -1,0 +1,1 @@
+- [Frontend completion state](frontend-completion.md) — all 38 routes wired, all filters live, plan names Free/Pro/Business/Enterprise everywhere

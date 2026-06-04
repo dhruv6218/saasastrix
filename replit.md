@@ -40,10 +40,10 @@ public/            - Static assets
 ## Completed Pages
 ### Public / Marketing
 - `/` Home landing page
-- `/pricing` Pricing page
+- `/pricing` Pricing page (Free / Pro $39/mo / Business $69/mo / Enterprise custom)
 - `/contact` Contact page
-- `/changelog` Public changelog
-- `/integrations` Integrations marketing page
+- `/changelog` Public changelog (v1.0–v1.4 timeline with New/Improved/Fixed tags + Coming Next section)
+- `/integrations` Integrations marketing page (16 integrations, category filter, search, connect CTA)
 - `/privacy` `/terms` Legal pages
 
 ### Auth
@@ -69,8 +69,25 @@ public/            - Static assets
 - `/app/launches` Post-Launch Tracker (all launches + measurement windows)
 - `/app/launches/:id` Launch Detail (before/after charts + outcome entry forms)
 - `/app/ask` Ask AI Assistant
-- `/app/integrations` Integrations Hub
-- `/app/settings` Settings
+- `/app/integrations` Integrations Hub (18 integrations, category filter, connect/disconnect, plan-gated)
+- `/app/settings` Settings (Profile, Team, Product Areas, Segments, Billing, Audit Log tabs)
+
+## Filters & Search (fully wired)
+- Signal Explorer: keyword search + date range filter
+- Accounts List: Plan Tier, ARR Range, Health Status filters
+- Opportunities List: AI Recommendation + Score Range filters
+- Decisions History: keyword search + Action filter
+- Integrations Hub: category filter + text search (both public and app pages)
+
+## Plan Tiers (everywhere consistent)
+- Free / Pro ($39/mo) / Business ($69/mo) / Enterprise (custom)
+- usePlan hook: type Plan = 'free' | 'pro' | 'business' | 'enterprise'
+- UpgradeModal: requiredPlan?: 'Pro' | 'Business' | 'Enterprise'
+
+## Navigation
+- MainLayout header: Pricing, Integrations, Changelog, Sign In, Start Free
+- AppLayout sidebar: Dashboard, Signals, Accounts, Problems, Opportunities, Decisions, Launches + Ask AI, Integrations, Artifacts, Settings
+- Footer (EmpireSection): Features, Pricing, Integrations, Changelog, Contact, Privacy, Terms
 
 ## Development
 - Run: `npm run dev` (starts on port 5000)

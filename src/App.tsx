@@ -10,6 +10,8 @@ import { KeyboardShortcuts } from './components/ui/KeyboardShortcuts';
 import { Home } from './pages/Home';
 import { Pricing } from './pages/Pricing';
 import { Contact } from './pages/Contact';
+import { Changelog } from './pages/Changelog';
+import { Integrations } from './pages/Integrations';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { ForgotPassword } from './pages/ForgotPassword';
@@ -67,6 +69,8 @@ function App() {
               <Route path="/accept-invitation" element={<AcceptInvitation />} />
               
               {/* Marketing & Legal */}
+              <Route path="/changelog" element={<Changelog />} />
+              <Route path="/integrations" element={<Integrations />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
 

@@ -21,7 +21,7 @@ const ARR_RANGES = [
   { label: '$500k+', value: 'over500k' },
 ];
 
-const PLAN_OPTIONS = ['', 'Enterprise', 'Growth', 'Pro', 'SMB', 'Standard'];
+const PLAN_OPTIONS = ['', 'Enterprise', 'Business', 'Pro', 'Free', 'SMB'];
 const HEALTH_OPTIONS = [
   { label: 'All Health', value: '' },
   { label: '🟢 Healthy (75+)', value: 'healthy' },
@@ -359,11 +359,11 @@ export const AccountsList = () => {
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-1">Plan Tier</label>
                   <select value={accPlan} onChange={e => setAccPlan(e.target.value)} className="w-full bg-gray-50 border border-gray-200 text-sm rounded-xl p-3 outline-none focus:ring-2 focus:ring-astrix-teal">
-                    <option>Standard</option>
+                    <option>Free</option>
                     <option>Pro</option>
+                    <option>Business</option>
                     <option>Enterprise</option>
                     <option>SMB</option>
-                    <option>Growth</option>
                   </select>
                 </div>
               </div>

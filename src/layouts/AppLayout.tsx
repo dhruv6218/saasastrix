@@ -202,8 +202,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle,
   ];
 
   const secondaryNav = [
-    { name: 'Artifacts', path: '/app/artifacts', icon: FileText },
-    { name: 'Settings',  path: '/app/settings',  icon: Settings },
+    { name: 'Ask AI',        path: '/app/ask',          icon: Sparkles },
+    { name: 'Integrations',  path: '/app/integrations', icon: Activity },
+    { name: 'Artifacts',     path: '/app/artifacts',    icon: FileText },
+    { name: 'Settings',      path: '/app/settings',     icon: Settings },
   ];
 
   const mobileNavItems = [

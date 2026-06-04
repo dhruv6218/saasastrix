@@ -34,6 +34,22 @@ export const OpportunitiesList = () => {
   const [savedDecisionId, setSavedDecisionId] = useState<string | null>(null);
   const [isGeneratingArtifact, setIsGeneratingArtifact] = useState(false);
 
+  const [filterAction, setFilterAction] = useState('');
+  const [filterScore, setFilterScore] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+
+  const filteredOpportunities = useMemo(() => {
+    return opportunities.filter(opp => {
+      if (filterAction && opp.recommended_action !== filterAction) return false;
+      if (filterScore === 'high' && opp.opportunity_score < 71) return false;
+      if (filterScore === 'medium' && (opp.opportunity_score < 41 || opp.opportunity_score > 70)) return false;
+      if (filterScore === 'low' && opp.opportunity_score > 40) return false;
+      return true;
+    });
+  }, [opportunities, filterAction, filterScore]);
+
+  const activeFilterCount = [filterAction, filterScore].filter(Boolean).length;
+
   const toggleOpp = (id: string) => {
     if (selectedOpps.includes(id)) {
       setSelectedOpps(selectedOpps.filter(o => o !== id));
@@ -180,6 +196,63 @@ export const OpportunitiesList = () => {
         </div>
       }
     >
+      {/* Filter bar */}
+      {!isCompareMode && opportunities.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold border transition-colors ${showFilters || activeFilterCount > 0 ? 'bg-astrix-teal text-white border-astrix-teal' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 shadow-sm'}`}
+          >
+            <Filter className="w-4 h-4" />
+            Filter
+            {activeFilterCount > 0 && (
+              <span className={`w-5 h-5 rounded-full text-xs font-black flex items-center justify-center ${showFilters ? 'bg-white text-astrix-teal' : 'bg-white text-astrix-teal'}`}>{activeFilterCount}</span>
+            )}
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+          </button>
+          {activeFilterCount > 0 && (
+            <button onClick={() => { setFilterAction(''); setFilterScore(''); }} className="text-sm font-bold text-red-500 hover:text-red-700 flex items-center gap-1.5 px-3 py-2 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 transition-colors">
+              <X className="w-3.5 h-3.5" /> Clear filters
+            </button>
+          )}
+          {activeFilterCount > 0 && (
+            <span className="text-sm font-medium text-gray-400">{filteredOpportunities.length} of {opportunities.length} opportunities</span>
+          )}
+        </div>
+      )}
+
+      {showFilters && !isCompareMode && (
+        <div className="flex flex-wrap gap-3 mb-4 p-4 bg-gray-50 border border-gray-200 rounded-xl animate-[fadeIn_0.2s_ease-out]">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">AI Recommendation</span>
+            <select
+              value={filterAction}
+              onChange={e => setFilterAction(e.target.value)}
+              className="bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-800 px-3 py-2 outline-none focus:ring-2 focus:ring-astrix-teal cursor-pointer min-w-[180px]"
+            >
+              <option value="">All Actions</option>
+              <option value="Build">Build</option>
+              <option value="Fix">Fix</option>
+              <option value="Experiment">Experiment</option>
+              <option value="Defer">Defer</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Score Range</span>
+            <select
+              value={filterScore}
+              onChange={e => setFilterScore(e.target.value)}
+              className="bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-800 px-3 py-2 outline-none focus:ring-2 focus:ring-astrix-teal cursor-pointer min-w-[160px]"
+            >
+              <option value="">All Scores</option>
+              <option value="high">High (71–100)</option>
+              <option value="medium">Medium (41–70)</option>
+              <option value="low">Low (1–40)</option>
+            </select>
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="space-y-4"><Skeleton className="w-full h-24" /><Skeleton className="w-full h-24" /></div>
       ) : opportunities.length === 0 ? (
@@ -191,9 +264,16 @@ export const OpportunitiesList = () => {
             Go to Problems
           </Link>
         </div>
+      ) : filteredOpportunities.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-48 text-gray-400 bg-white border border-gray-200 rounded-2xl shadow-sm">
+          <Target className="w-10 h-10 mb-3 opacity-20" />
+          <h3 className="text-base font-bold text-gray-900 mb-1">No matches</h3>
+          <p className="text-sm font-medium mb-3">No opportunities match your current filters.</p>
+          <button onClick={() => { setFilterAction(''); setFilterScore(''); }} className="text-sm font-bold text-astrix-teal hover:underline">Clear filters</button>
+        </div>
       ) : (
         <div className="space-y-4">
-          {opportunities.map((opp, idx) => {
+          {filteredOpportunities.map((opp, idx) => {
             const isLocked = idx >= limits.visibleOpps;
             return (
               <div key={opp.id} className="relative">
