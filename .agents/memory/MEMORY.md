@@ -1,1 +1,1 @@
-- [Frontend completion state](frontend-completion.md) — pure Vite mock-auth frontend, Integrations + Changelog fully removed (Jun 2026)
+- [Frontend completion state](frontend-completion.md) — pure Vite mock-auth frontend, Admin dashboard added, Ask AI removed (Jun 2026)

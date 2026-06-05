@@ -27,7 +27,6 @@ import {
   Timer,
   BadgeCheck,
   TrendingDown,
-  RefreshCw,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
@@ -218,14 +217,6 @@ export const Dashboard = () => {
 
   const contextActions = getContextActions();
 
-  const whatChanged = [
-    { icon: Signal, text: `${signalsCount} signal${signalsCount !== 1 ? 's' : ''} ingested`, color: 'text-brand-blue' },
-    ...(unmatchedSignals > 0 ? [{ icon: AlertCircle, text: `${unmatchedSignals} unmatched signal${unmatchedSignals !== 1 ? 's' : ''}`, color: 'text-amber-600' }] : []),
-    ...(opportunities.length > 0 ? [{ icon: TrendingUp, text: `"${topOpp?.problems?.title?.split(' ').slice(0, 3).join(' ')}…" at #1`, color: 'text-astrix-teal' }] : []),
-    ...(reviewsDue.length > 0 ? [{ icon: Timer, text: `${reviewsDue.length} review${reviewsDue.length !== 1 ? 's' : ''} overdue`, color: 'text-red-500' }] : []),
-    ...(decisions.length > 0 ? [{ icon: BadgeCheck, text: `${decisions.length} decision${decisions.length !== 1 ? 's' : ''} logged`, color: 'text-green-600' }] : []),
-    { icon: RefreshCw, text: 'Signals re-clustered', color: 'text-slate-400' },
-  ];
 
   return (
     <AppLayout
@@ -332,23 +323,6 @@ export const Dashboard = () => {
           </div>
         </div>
       )}
-
-      {/* ── What Changed Since Last Visit ─────────────────────────── */}
-      <div className="mb-6 bg-white border border-gray-200 rounded-2xl px-4 py-3 flex items-center gap-3 overflow-x-auto hide-scrollbar shadow-sm animate-slide-up">
-        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest shrink-0 flex items-center gap-1.5">
-          <RefreshCw className="w-3 h-3" /> Since last visit
-        </span>
-        <div className="w-px h-4 bg-gray-200 shrink-0" />
-        <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar">
-          {whatChanged.map(({ icon: Icon, text, color }, i) => (
-            <span key={i} className={`flex items-center gap-1.5 text-xs font-bold whitespace-nowrap ${color}`}>
-              <Icon className="w-3.5 h-3.5 shrink-0" />
-              {text}
-              {i < whatChanged.length - 1 && <span className="text-gray-200 ml-2">·</span>}
-            </span>
-          ))}
-        </div>
-      </div>
 
       {/* ── KPI Row ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 animate-slide-up stagger-1">
