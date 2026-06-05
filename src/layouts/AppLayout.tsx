@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Search, Layers, TrendingUp, CheckCircle,
   Settings, LogOut, Bell, Menu, X, ChevronDown, Check,
-  FileText, Rocket, Building2, Lock, User as UserIcon,
+  FileText, Rocket, Building2, Lock, Sparkles, User as UserIcon,
   Timer, AlertCircle, BadgeCheck, Signal, Activity, CheckCircle2, Plus,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
