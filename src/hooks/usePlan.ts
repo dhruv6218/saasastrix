@@ -1,10 +1,10 @@
-export type Plan = 'free' | 'pro' | 'business' | 'enterprise';
+export type Plan = 'free' | 'starter' | 'growth' | 'scale';
 
 const PLAN_RANK: Record<Plan, number> = {
   free: 0,
-  pro: 1,
-  business: 2,
-  enterprise: 3,
+  starter: 1,
+  growth: 2,
+  scale: 3,
 };
 
 export const PLAN_LIMITS: Record<Plan, {
@@ -29,7 +29,7 @@ export const PLAN_LIMITS: Record<Plan, {
     aiCalls: 100,
     multipleWorkspaces: false,
   },
-  pro: {
+  starter: {
     signals: 5000,
     accounts: 1000,
     problems: 50,
@@ -40,7 +40,7 @@ export const PLAN_LIMITS: Record<Plan, {
     aiCalls: 1500,
     multipleWorkspaces: false,
   },
-  business: {
+  growth: {
     signals: 25000,
     accounts: 5000,
     problems: 200,
@@ -51,7 +51,7 @@ export const PLAN_LIMITS: Record<Plan, {
     aiCalls: 4000,
     multipleWorkspaces: true,
   },
-  enterprise: {
+  scale: {
     signals: Infinity,
     accounts: Infinity,
     problems: Infinity,

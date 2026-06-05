@@ -22,9 +22,10 @@ export const Pricing = () => {
       name: "Free",
       monthlyPrice: "$0",
       annualPrice: "$0",
+      annualMonthlyPrice: "$0",
       period: "/month",
       annualBilled: "Free forever",
-      desc: "For solo founders and PMs completing their first evidence-based product loop.",
+      desc: "For solo founders and PMs exploring their first evidence-based product loop.",
       features: [
         "1 workspace · 2 maker seats",
         "Up to 200 signals & 50 accounts",
@@ -37,14 +38,15 @@ export const Pricing = () => {
       ],
       comingSoon: [],
       cta: "Start Free",
-      popular: false
+      popular: false,
     },
     {
-      name: "Pro",
-      monthlyPrice: "$39",
-      annualPrice: "$29",
+      name: "Starter",
+      monthlyPrice: "$59",
+      annualPrice: "$588",
+      annualMonthlyPrice: "$49",
       period: "/month",
-      annualBilled: "Billed $348 yearly",
+      annualBilled: "Billed $588/year",
       desc: "Run outcome-driven product rituals for a small team.",
       features: [
         "1 workspace · 3 maker seats",
@@ -59,15 +61,16 @@ export const Pricing = () => {
         "Email support",
       ],
       comingSoon: [],
-      cta: "Start with Pro",
-      popular: true
+      cta: "Start with Starter",
+      popular: false,
     },
     {
-      name: "Business",
-      monthlyPrice: "$69",
-      annualPrice: "$59",
+      name: "Growth",
+      monthlyPrice: "$179",
+      annualPrice: "$1,789",
+      annualMonthlyPrice: "$149",
       period: "/month",
-      annualBilled: "Billed $708 yearly",
+      annualBilled: "Billed $1,789/year",
       desc: "Make accountability a default in your product org.",
       features: [
         "Up to 3 workspaces · 8 maker seats",
@@ -83,16 +86,17 @@ export const Pricing = () => {
         "Priority email support",
       ],
       comingSoon: [],
-      cta: "Start with Business",
-      popular: false
+      cta: "Start with Growth",
+      popular: true,
     },
     {
-      name: "Enterprise",
-      monthlyPrice: "Custom",
-      annualPrice: "Custom",
-      period: "",
-      annualBilled: "Talk to our team",
-      desc: "Evidence-backed bets and accountability, at org scale.",
+      name: "Scale",
+      monthlyPrice: "$449",
+      annualPrice: "$4,489",
+      annualMonthlyPrice: "$374",
+      period: "/month",
+      annualBilled: "Billed $4,489/year",
+      desc: "Evidence-backed bets and accountability at org scale.",
       features: [
         "Unlimited workspaces · unlimited seats",
         "Unlimited signals & accounts",
@@ -106,12 +110,10 @@ export const Pricing = () => {
         "Advanced activity log + audit trail export",
         "Dedicated success manager + onboarding",
       ],
-      comingSoon: [
-        "Jira Two-Way Sync"
-      ],
-      cta: "Contact Sales",
-      popular: false
-    }
+      comingSoon: [],
+      cta: "Start with Scale",
+      popular: false,
+    },
   ];
 
   type CellValue = string | boolean | null;
@@ -124,7 +126,7 @@ export const Pricing = () => {
       label: "Workspace & Seats",
       rows: [
         { feature: "Workspaces", values: ["1", "1", "Up to 3", "Unlimited"] },
-        { feature: "Maker Seats", values: ["2", "3", "8", "20"] },
+        { feature: "Maker Seats", values: ["2", "3", "8", "Unlimited"] },
       ]
     },
     {
@@ -154,7 +156,7 @@ export const Pricing = () => {
         { feature: "Completed Launches", values: ["3 lifetime", "Unlimited", "Unlimited", "Unlimited"] },
         { feature: "Day 7 / 30 Outcome Reviews", values: [true, true, true, true] },
         { feature: "Verdict Dashboard Widgets", values: [false, true, true, true] },
-        { feature: "Accountability Dashboard", values: [false, "Launch & verdict widgets", "Outcome analytics (ARR, segments, verdicts)", "Executive & board reporting view"] },
+        { feature: "Outcome Analytics Dashboard", values: [false, "Launch & verdict widgets", "Full (ARR, segments, verdicts)", "Executive & board reporting"] },
         { feature: "Required Verdict Enforcement", values: [false, false, true, true] },
         { feature: "Decision Tags (Theme, OKR)", values: [false, false, true, true] },
         { feature: "Decision & Launch Templates", values: [false, false, false, true] },
@@ -165,7 +167,7 @@ export const Pricing = () => {
       rows: [
         { feature: "AI Calls / Month", values: ["~100", "~1,500", "~4,000", "~10,000+"] },
         { feature: "Signal Suggestions", values: [true, true, true, true] },
-        { feature: "Decision Memo & PRD Drafts", values: ["1 draft per decision", "Standard drafts", "Bulk drafts", "Bulk drafts + premium models"] },
+        { feature: "Decision Memo & PRD Drafts", values: ["1 draft per decision", "Standard drafts", "Bulk drafts", "Bulk + premium models"] },
         { feature: "User Story Draft", values: [false, true, true, true] },
         { feature: "Model Quality", values: ["Standard", "Standard", "Higher-quality", "Top-tier"] },
       ]
@@ -175,6 +177,7 @@ export const Pricing = () => {
       rows: [
         { feature: "Proof Summaries", values: ["Included", "Included", "Advanced", "Executive-ready"] },
         { feature: "Outcome Reminders (Day 7 / 30)", values: [true, true, true, "Advanced controls"] },
+        { feature: "Weekly Digest Email", values: [false, false, true, true] },
       ]
     },
     {
@@ -190,6 +193,7 @@ export const Pricing = () => {
       rows: [
         { feature: "Support Level", values: ["Docs + Email", "Email", "Priority Email", "High-Priority"] },
         { feature: "Onboarding Session", values: [false, false, false, true] },
+        { feature: "Dedicated Success Manager", values: [false, false, false, true] },
       ]
     },
   ];
@@ -199,18 +203,15 @@ export const Pricing = () => {
     { q: "What are the user roles?", a: "We keep it simple: Owners (billing & settings), Members (editors who can create decisions and artifacts), and Viewers (free, unlimited users who can read memos and track launch progress)." },
     { q: "How do I import data?", a: "Astrix supports CSV upload and manual signal entry on all plans. You can also start with a sample workspace to explore the full product loop before importing real data." },
     { q: "Does Astrix include a sample workspace?", a: "Yes. Every plan includes a sample workspace with pre-loaded signals, problems, opportunities, a decision memo, and an active launch so you can experience the full product loop immediately." },
-    { q: "Do you send weekly summary emails?", a: "Yes — Business and Enterprise plans include a weekly digest email summarising new signals, open reviews, and outcome verdicts for your workspace. Enterprise also includes a quarterly check-in call with an Astrix success manager to review your product loop health." },
+    { q: "Do you send weekly summary emails?", a: "Yes — Growth and Scale plans include a weekly digest email summarising new signals, open reviews, and outcome verdicts for your workspace. Scale also includes a quarterly check-in call with an Astrix success manager to review your product loop health." },
     { q: "Is my data used to train your AI models?", a: "Absolutely not. We use enterprise APIs with strict zero-retention policies. Your workspace data is isolated and never used for training." },
-    { q: "Can I cancel anytime?", a: "Yes, you can cancel your subscription at any time from the billing settings. You will retain access until the end of your current billing period." }
+    { q: "Can I cancel anytime?", a: "Yes, you can cancel your subscription at any time from the billing settings. You will retain access until the end of your current billing period." },
+    { q: "What's the difference between monthly and annual billing?", a: "Annual billing saves you ~17% compared to paying month-to-month. The full annual amount is charged upfront at the start of your billing cycle." },
   ];
 
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const handleCheckout = async (tier: any) => {
-    if (tier.name === 'Enterprise') {
-      navigate('/contact');
-      return;
-    }
     if (!activeWorkspace) {
       addToast("Please log in or create an account to upgrade.", "warning");
       navigate('/signup');
@@ -230,8 +231,6 @@ export const Pricing = () => {
     if (val === null) return <Minus className="w-4 h-4 mx-auto text-gray-300" />;
     return <span className={`text-sm font-semibold ${isPopular ? 'text-white' : 'text-gray-700'}`}>{val}</span>;
   };
-
-  const planColors = ['', 'bg-brand-blue', '', ''];
 
   return (
     <MainLayout>
@@ -256,7 +255,7 @@ export const Pricing = () => {
               <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 shadow-sm ${isAnnual ? 'translate-x-8' : 'translate-x-1'}`} />
             </button>
             <span className={`text-sm font-bold flex items-center gap-2 ${isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
-              Annually <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Save ~20%</span>
+              Annually <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Save ~17%</span>
             </span>
           </div>
         </div>
@@ -276,17 +275,27 @@ export const Pricing = () => {
                   Most Popular
                 </div>
               )}
+
               <h3 className={`text-xl font-heading font-bold mb-2 ${tier.popular ? 'text-white' : 'text-gray-900'}`}>{tier.name}</h3>
               <p className={`text-sm mb-6 h-16 font-medium ${tier.popular ? 'text-blue-100' : 'text-gray-500'}`}>{tier.desc}</p>
 
-              <div className="mb-2">
+              {/* Price display */}
+              <div className="mb-1">
                 <span className="text-4xl lg:text-5xl font-heading font-black tracking-tighter">
-                  {isAnnual ? tier.annualPrice : tier.monthlyPrice}
+                  {isAnnual ? tier.annualMonthlyPrice : tier.monthlyPrice}
                 </span>
-                {tier.period && <span className={`text-sm font-bold ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>{tier.period}</span>}
+                {tier.period && (
+                  <span className={`text-sm font-bold ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>{tier.period}</span>
+                )}
               </div>
-              <div className={`text-xs font-medium mb-8 h-4 ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>
-                {isAnnual && tier.annualPrice !== "$0" ? tier.annualBilled : (tier.annualPrice === "$0" ? "Free forever" : "Billed monthly")}
+
+              {/* Billed line */}
+              <div className={`text-xs font-medium mb-8 h-5 ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>
+                {tier.name === 'Free'
+                  ? 'Free forever'
+                  : isAnnual
+                    ? tier.annualBilled
+                    : 'Billed monthly'}
               </div>
 
               <ul className="space-y-3.5 mb-8 flex-1">
@@ -307,7 +316,7 @@ export const Pricing = () => {
               </ul>
 
               <button
-                onClick={() => handleCheckout(tier)}
+                onClick={() => tier.name === 'Free' ? navigate('/signup') : handleCheckout(tier)}
                 disabled={loadingTier === tier.name}
                 className={`w-full py-3.5 rounded-xl font-bold transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 flex items-center justify-center gap-2 ${tier.popular ? 'bg-white text-brand-blue hover:bg-gray-50 focus-visible:ring-white shadow-sm' : 'bg-gray-900 text-white hover:bg-brand-blue focus-visible:ring-brand-blue shadow-sm'} disabled:opacity-70`}
               >
@@ -330,16 +339,16 @@ export const Pricing = () => {
           <div className="grid grid-cols-5 border-b border-gray-100">
             <div className="p-5 col-span-1" />
             {tiers.map((tier, i) => (
-              <div
-                key={i}
-                className={`p-5 text-center ${tier.popular ? 'bg-brand-blue' : ''}`}
-              >
+              <div key={i} className={`p-5 text-center ${tier.popular ? 'bg-brand-blue' : ''}`}>
                 <div className={`text-sm font-black uppercase tracking-widest mb-1 ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>{tier.name}</div>
                 <div className={`text-2xl font-heading font-black tracking-tighter ${tier.popular ? 'text-white' : 'text-gray-900'}`}>
-                  {isAnnual ? tier.annualPrice : tier.monthlyPrice}
+                  {isAnnual ? tier.annualMonthlyPrice : tier.monthlyPrice}
                 </div>
                 {tier.period && (
                   <div className={`text-xs font-medium ${tier.popular ? 'text-blue-200' : 'text-gray-400'}`}>{tier.period}</div>
+                )}
+                {tier.name !== 'Free' && isAnnual && (
+                  <div className={`text-[10px] font-medium mt-1 ${tier.popular ? 'text-blue-300' : 'text-gray-400'}`}>{tier.annualBilled}</div>
                 )}
               </div>
             ))}
@@ -348,17 +357,15 @@ export const Pricing = () => {
           {/* Table Body */}
           {comparisonCategories.map((cat, ci) => (
             <div key={ci}>
-              {/* Category Label */}
               <div className="grid grid-cols-5 bg-gray-50 border-b border-gray-100">
                 <div className="col-span-5 px-5 py-3">
                   <span className="text-xs font-black uppercase tracking-widest text-gray-400">{cat.label}</span>
                 </div>
               </div>
-              {/* Rows */}
               {cat.rows.map((row, ri) => (
                 <div
                   key={ri}
-                  className={`grid grid-cols-5 border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-colors`}
+                  className="grid grid-cols-5 border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-colors"
                 >
                   <div className="px-5 py-3.5 flex items-center">
                     <span className="text-sm font-medium text-gray-600">{row.feature}</span>
@@ -382,7 +389,7 @@ export const Pricing = () => {
             {tiers.map((tier, i) => (
               <div key={i} className={`px-4 py-5 flex items-center justify-center ${tier.popular ? 'bg-brand-blue/5' : ''}`}>
                 <button
-                  onClick={() => handleCheckout(tier)}
+                  onClick={() => tier.name === 'Free' ? navigate('/signup') : handleCheckout(tier)}
                   disabled={loadingTier === tier.name}
                   className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all duration-300 focus-visible:outline-none flex items-center justify-center gap-2 ${tier.popular ? 'bg-brand-blue text-white hover:bg-blue-700 shadow-sm' : 'bg-gray-900 text-white hover:bg-brand-blue shadow-sm'} disabled:opacity-70`}
                 >
