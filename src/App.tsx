@@ -10,8 +10,6 @@ import { KeyboardShortcuts } from './components/ui/KeyboardShortcuts';
 import { Home } from './pages/Home';
 import { Pricing } from './pages/Pricing';
 import { Contact } from './pages/Contact';
-import { Changelog } from './pages/Changelog';
-import { Integrations } from './pages/Integrations';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { ForgotPassword } from './pages/ForgotPassword';
@@ -19,7 +17,7 @@ import { ResetPassword } from './pages/ResetPassword';
 import { NotFound } from './pages/NotFound';
 import { AcceptInvitation } from './pages/AcceptInvitation';
 
-// Marketing & Legal Pages
+// Legal Pages
 import { PrivacyPolicy } from './pages/legal/PrivacyPolicy';
 import { TermsOfService } from './pages/legal/TermsOfService';
 
@@ -48,7 +46,6 @@ import { Settings } from './pages/app/Settings';
 import { AccountDetail } from './pages/app/AccountDetail';
 import { SignalDetail } from './pages/app/SignalDetail';
 import { Assistant } from './pages/app/Assistant';
-import { IntegrationsHub } from './pages/app/IntegrationsHub';
 
 function App() {
   return (
@@ -67,51 +64,47 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/accept-invitation" element={<AcceptInvitation />} />
-              
-              {/* Marketing & Legal */}
-              <Route path="/changelog" element={<Changelog />} />
-              <Route path="/integrations" element={<Integrations />} />
+
+              {/* Legal */}
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
 
-              {/* Protected Onboarding Flow */}
+              {/* Protected Onboarding */}
               <Route path="/onboarding" element={<Navigate to="/onboarding/step-1" replace />} />
               <Route path="/onboarding/step-1" element={<ProtectedRoute><Step1Workspace /></ProtectedRoute>} />
               <Route path="/onboarding/step-2" element={<ProtectedRoute><Step2Data /></ProtectedRoute>} />
               <Route path="/onboarding/step-3" element={<ProtectedRoute><Step3Results /></ProtectedRoute>} />
 
-              {/* Protected Main App Routes */}
+              {/* Protected App Routes */}
               <Route path="/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/app/dashboard" element={<Navigate to="/app" replace />} />
-              
+
               <Route path="/app/signals" element={<ProtectedRoute><SignalExplorer /></ProtectedRoute>} />
               <Route path="/app/signals/new" element={<ProtectedRoute><SignalNew /></ProtectedRoute>} />
               <Route path="/app/signals/:id" element={<ProtectedRoute><SignalDetail /></ProtectedRoute>} />
-              
+
               <Route path="/app/accounts" element={<ProtectedRoute><AccountsList /></ProtectedRoute>} />
               <Route path="/app/accounts/:id" element={<ProtectedRoute><AccountDetail /></ProtectedRoute>} />
-              
+
               <Route path="/app/problems" element={<ProtectedRoute><ProblemsList /></ProtectedRoute>} />
               <Route path="/app/problems/:id" element={<ProtectedRoute><ProblemDetail /></ProtectedRoute>} />
-              
+
               <Route path="/app/opportunities" element={<ProtectedRoute><OpportunitiesList /></ProtectedRoute>} />
               <Route path="/app/opportunities/:id" element={<ProtectedRoute><OpportunityDetail /></ProtectedRoute>} />
               <Route path="/app/evidence/:problemId" element={<ProtectedRoute><EvidenceView /></ProtectedRoute>} />
-              
+
               <Route path="/app/decisions" element={<ProtectedRoute><DecisionsHistory /></ProtectedRoute>} />
               <Route path="/app/decisions/:id" element={<ProtectedRoute><DecisionDetail /></ProtectedRoute>} />
 
               <Route path="/app/artifacts" element={<ProtectedRoute><ArtifactStudio /></ProtectedRoute>} />
               <Route path="/app/artifacts/:id" element={<ProtectedRoute><ArtifactDetail /></ProtectedRoute>} />
-              
+
               <Route path="/app/launches" element={<ProtectedRoute><PostLaunchTracker /></ProtectedRoute>} />
               <Route path="/app/launches/:id" element={<ProtectedRoute><LaunchDetail /></ProtectedRoute>} />
-              
+
               <Route path="/app/ask" element={<ProtectedRoute><Assistant /></ProtectedRoute>} />
-              <Route path="/app/integrations" element={<ProtectedRoute><IntegrationsHub /></ProtectedRoute>} />
-              
               <Route path="/app/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-              
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>

@@ -1,1 +1,1 @@
-- [Frontend completion state](frontend-completion.md) — all 38 routes wired, all 7 new features built (Jun 2026), PRD created
+- [Frontend completion state](frontend-completion.md) — pure Vite mock-auth frontend, Integrations + Changelog fully removed (Jun 2026)

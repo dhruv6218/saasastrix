@@ -16,8 +16,6 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
         </Link>
         <div className="flex items-center gap-6 md:gap-10">
           <Link to="/pricing" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors hidden sm:block">Pricing</Link>
-          <Link to="/integrations" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors hidden md:block">Integrations</Link>
-          <Link to="/changelog" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors hidden lg:block">Changelog</Link>
           <Link to="/login" className="text-sm font-bold text-gray-900 hover:text-brand-blue transition-colors">Sign In</Link>
           <Link to="/signup" className="bg-gray-900 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-brand-blue transition-all shadow-sm">
             Start Free
