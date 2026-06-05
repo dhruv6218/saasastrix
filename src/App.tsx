@@ -11,6 +11,8 @@ import { KeyboardShortcuts } from './components/ui/KeyboardShortcuts';
 import { Home } from './pages/Home';
 import { Pricing } from './pages/Pricing';
 import { Contact } from './pages/Contact';
+import { Changelog } from './pages/Changelog';
+import { Integrations } from './pages/Integrations';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { ForgotPassword } from './pages/ForgotPassword';
@@ -46,6 +48,7 @@ import { LaunchDetail } from './pages/app/LaunchDetail';
 import { Settings } from './pages/app/Settings';
 import { AccountDetail } from './pages/app/AccountDetail';
 import { SignalDetail } from './pages/app/SignalDetail';
+import { IntegrationsHub } from './pages/app/IntegrationsHub';
 
 // Admin Pages
 import { AdminDashboard } from './pages/admin/AdminDashboard';
@@ -65,6 +68,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/changelog" element={<Changelog />} />
+              <Route path="/integrations" element={<Integrations />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -109,6 +114,7 @@ function App() {
               <Route path="/app/launches/:id" element={<ProtectedRoute><LaunchDetail /></ProtectedRoute>} />
 
               <Route path="/app/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/app/integrations" element={<ProtectedRoute><IntegrationsHub /></ProtectedRoute>} />
 
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />

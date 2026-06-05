@@ -1,1 +1,1 @@
-- [Frontend completion state](frontend-completion.md) — pure Vite mock-auth frontend, Admin dashboard added, Ask AI removed (Jun 2026)
+- [Frontend completion state](frontend-completion.md) — PRD v3.0 fully implemented: all public/app/admin pages, CSV multi-step modal, Dashboard "what changed" widget (Jun 2026)

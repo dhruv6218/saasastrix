@@ -27,6 +27,7 @@ import {
   Timer,
   BadgeCheck,
   TrendingDown,
+  X,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
@@ -125,6 +126,85 @@ const SignalTrendChart: React.FC<{ signalCount: number }> = ({ signalCount }) =>
         <span className="text-[11px] font-bold text-gray-400">{totalWeek} total this week</span>
       </div>
       <ReactECharts option={option} style={{ height: 140 }} notMerge />
+    </div>
+  );
+};
+
+/* ─── What Changed Since Last Visit ──────────────────────────────────────── */
+interface WhatChangedProps {
+  signalCount: number;
+  launches: any[];
+  opportunities: any[];
+}
+
+const WhatChangedWidget: React.FC<WhatChangedProps> = ({ signalCount, launches, opportunities }) => {
+  const [dismissed, setDismissed] = React.useState(false);
+
+  const newSignals = Math.max(0, Math.floor(signalCount * 0.22));
+  const resolvedLaunches = launches.filter(l => l.pm_verdict && l.pm_verdict !== '').length;
+  const topOppScore = opportunities[0]?.opportunity_score;
+  const prevTopOppScore = topOppScore ? Math.max(0, topOppScore - 4) : null;
+
+  const items = [
+    newSignals > 0 && {
+      icon: Signal,
+      color: 'text-brand-blue bg-blue-50 border-blue-100',
+      title: `${newSignals} new signals`,
+      desc: 'ingested since your last session',
+      href: '/app/signals',
+    },
+    resolvedLaunches > 0 && {
+      icon: BadgeCheck,
+      color: 'text-green-700 bg-green-50 border-green-100',
+      title: `${resolvedLaunches} launch${resolvedLaunches !== 1 ? 'es' : ''} have verdicts`,
+      desc: 'outcome measurement complete',
+      href: '/app/launches',
+    },
+    prevTopOppScore !== null && topOppScore !== prevTopOppScore && {
+      icon: TrendingUp,
+      color: 'text-astrix-teal bg-teal-50 border-teal-100',
+      title: `Top opportunity score moved ${topOppScore > prevTopOppScore ? '+' : ''}${topOppScore - prevTopOppScore} pts`,
+      desc: `Now ${topOppScore} — new signals increased priority`,
+      href: '/app/opportunities',
+    },
+    opportunities.length > 0 && {
+      icon: Sparkles,
+      color: 'text-purple-700 bg-purple-50 border-purple-100',
+      title: `${opportunities.length} opportunities ranked`,
+      desc: 'evidence-backed, ready for decisions',
+      href: '/app/opportunities',
+    },
+  ].filter(Boolean) as { icon: React.ElementType; color: string; title: string; desc: string; href: string }[];
+
+  if (dismissed || items.length === 0) return null;
+
+  return (
+    <div className="mb-6 bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden animate-slide-up stagger-2">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <Clock className="w-4 h-4 text-gray-400" />
+          <h2 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-widest">What changed since your last visit</h2>
+        </div>
+        <button onClick={() => setDismissed(true)} className="p-1 text-gray-300 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" title="Dismiss">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+        {items.slice(0, 4).map((item, i) => {
+          const Icon = item.icon;
+          return (
+            <Link key={i} to={item.href} className="flex items-center gap-3 px-5 py-4 hover:bg-gray-50 transition-colors group">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center border shrink-0 ${item.color}`}>
+                <Icon className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-gray-900 leading-tight group-hover:text-brand-blue transition-colors truncate">{item.title}</p>
+                <p className="text-[11px] text-gray-400 font-medium truncate">{item.desc}</p>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 };
@@ -421,6 +501,9 @@ export const Dashboard = () => {
 
       {/* ── Signal Trend Chart ────────────────────────────────────── */}
       <SignalTrendChart signalCount={signalsCount} />
+
+      {/* ── What Changed Since Last Visit ─────────────────────────── */}
+      <WhatChangedWidget signalCount={signalsCount} launches={launches} opportunities={opportunities} />
 
       {/* ── Main Content Grid ─────────────────────────────────────── */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-12">

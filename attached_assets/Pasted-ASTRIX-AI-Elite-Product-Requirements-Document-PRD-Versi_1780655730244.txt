@@ -1,0 +1,1437 @@
+ASTRIX AI — Elite Product Requirements Document (PRD)
+Version: v3.0
+Product: ASTRIX AI
+Category: B2B SaaS — Product Decision & Outcome Intelligence Platform
+Stage: MVP to enterprise-ready foundation
+Status: Implementation-ready
+Date: June 2026
+Primary owner: Founder / Product Lead
+Suggested stack: Next.js, React, Tailwind CSS, shadcn/ui, Supabase, Resend, Stripe, Dodo Payments, provider-routed AI layer
+
+1. Product definition
+ASTRIX AI is a product decision and accountability platform for B2B SaaS teams. It transforms scattered customer feedback into structured problems, ranks those problems as opportunities, records product decisions with evidence, and tracks whether shipped work actually solved the underlying issue.
+
+The core value proposition is simple: product teams should be able to answer two questions with proof — what should be built next, and did it work after launch. A strong PRD should define the problem, users, scope, features, technical requirements, success metrics, and release criteria clearly enough that design and engineering can build without ambiguity.
+
+2. Vision, mission, and promise
+2.1 Vision
+ASTRIX AI becomes the operating system for product decisions and post-launch accountability in B2B SaaS companies. Every meaningful product change should be traceable to evidence, a decision, and a measurable verdict.
+
+2.2 Mission
+Give product teams a single evidence-backed system to decide what to build, ship it, and prove whether it worked.
+
+2.3 Core promise
+Know what to build next — and whether it worked — with proof.
+
+2.4 Positioning
+Category: Product decision intelligence / product accountability platform
+Positioning line: The accountability layer for product decisions
+Mental model: The missing layer between scattered feedback and shipped outcomes
+Secondary mental model: Cursor for Product Managers, but grounded in structured evidence
+
+3. Problem statement
+B2B SaaS product teams receive customer signals from many disconnected sources: support tickets, CS notes, emails, sales calls, spreadsheets, Slack threads, and feature request boards. This creates fragmented evidence, noisy prioritization, and weak post-launch accountability.
+
+Today, teams often suffer from the following:
+
+Feedback is scattered across tools and people.
+
+Loud customers can distort prioritization.
+
+Revenue impact is weakly connected to product prioritization.
+
+Decisions are poorly documented.
+
+Teams launch features but do not consistently measure whether customer pain decreased.
+
+Leadership lacks a clean record of which bets worked and which failed.
+
+ASTRIX AI solves this by creating one controlled system of record:
+
+Signals → Problems → Opportunities → Decisions → Launches → Verdicts
+
+This loop is the product’s defining mechanism and the core scope gate for MVP. Any feature that does not strengthen this loop should be excluded from MVP scope, which aligns with PRD best practice to define scope and out-of-scope items explicitly.
+
+4. Goals
+4.1 Business goals
+Validate demand with 5–10 design partner B2B SaaS companies.
+
+Convert at least 3 design partners into paying customers within the first structured beta cycle.
+
+Establish ASTRIX AI as a differentiated product around launch accountability, not just feedback capture.
+
+Create a technical and data-model foundation that can later support integrations, enterprise permissions, and deeper analytics.
+
+4.2 Product goals
+Reduce time from signup to first ranked opportunity to under 10 minutes.
+
+Make the product usable as a weekly ritual for PMs and Heads of Product.
+
+Ensure every launch in the system can be reviewed at baseline, Day 7, Day 30, and final verdict.
+
+Make AI assistance useful but non-autonomous: draft, explain, summarize, and suggest — never silently decide.
+
+4.3 User goals
+Primary users should be able to:
+
+Understand what product problems matter most.
+
+Defend prioritization with evidence.
+
+Record decision rationale clearly.
+
+Track whether launches improved signal volume, affected accounts, and ARR at risk.
+
+Present outcome summaries to founders, leadership, or boards.
+
+5. Personas
+5.1 Primary persona — Head of Product
+Profile: Series A/B B2B SaaS, 30–100 employees, 2–4 PMs, collaborates with support, CS, engineering, and leadership.
+Pain: Drowning in scattered feedback and cannot justify priorities or outcomes with proof.
+Jobs to be done: Rank opportunities, align stakeholders, document decisions, and prove whether launches worked.
+
+5.2 Secondary personas
+Founder / CEO: Wants evidence-backed prioritization and clearer visibility into winning vs. losing bets.
+
+Senior Product Manager / PM: Wants a structured workspace for weekly opportunity review and decision writing.
+
+Support Lead: Wants recurring customer pain to influence product priorities.
+
+CS Lead / Account Manager: Wants ARR, churn risk, and segment impact visible in prioritization.
+
+6. MVP thesis
+ASTRIX AI’s MVP is not a generic feedback board, roadmap tool, or analytics dashboard. It is a product accountability workflow that links evidence, prioritization, decisions, launches, and outcomes in a single operating loop.
+
+6.1 Hero wedge
+The strongest initial wedge is post-launch accountability for product teams.
+
+Why this wedge matters:
+
+Feedback aggregation alone is crowded.
+
+Roadmapping alone is crowded.
+
+AI drafting alone is easy to imitate.
+
+Structured verdicts and proof summaries tied to launches are more differentiated and habit-forming.
+
+6.2 Aha moment
+A new workspace reaches the first meaningful aha moment when the user has:
+
+Uploaded or loaded at least 20 signals.
+
+Linked signals to at least 5 accounts.
+
+Seen at least 3 generated opportunities with transparent scores.
+
+Opened one opportunity and viewed the evidence behind its ranking.
+
+7. Product principles
+Core loop is sacred: Features must strengthen the journey from signal to verdict.
+
+Evidence first: Every meaningful recommendation must connect back to signals, accounts, or metrics.
+
+Account impact over noise: ARR, segment, and affected accounts matter more than raw volume alone.
+
+User in control: AI assists but does not silently change scores, clusters, decisions, or verdicts.
+
+A launch without a verdict is incomplete: The system should nudge until the loop is closed.
+
+Explainability over magic: Scoring and recommendations must be inspectable.
+
+Fast and credible: MVP should feel lightweight and useful within minutes.
+
+8. Scope
+8.1 In scope for MVP
+Authentication and workspace creation.
+
+Sample workspace seeding.
+
+Signals import via CSV and manual entry.
+
+Accounts import via CSV.
+
+Signal-to-account matching.
+
+AI-assisted signal metadata classification.
+
+Problem creation, linking, merging, and splitting.
+
+Opportunity generation and fixed transparent scoring.
+
+Decision records with rationale, risks, assumptions, and alternatives.
+
+AI-generated artifacts: decision memo, PRD skeleton, user stories.
+
+Launch creation from decisions.
+
+Baseline, Day 7, and Day 30 outcome reviews.
+
+Final verdict and proof summary.
+
+Dashboard with top opportunities, reviews due, active launches, recent decisions, and unmatched signals.
+
+Notifications via email and in-app.
+
+Settings, team members, workspace configuration, billing surface, activity log.
+
+Subscription plan logic and soft/hard limit behavior.
+
+8.2 Out of scope for MVP
+Jira, Linear, Slack, Intercom, Zendesk, Salesforce, PostHog, or similar integrations.
+
+Real-time ingestion pipelines.
+
+Embeddings and semantic search.
+
+PDF export.
+
+Collaborative editing, comments, or mentions.
+
+Advanced analytics and portfolio planning.
+
+Mobile app.
+
+SSO and enterprise identity controls.
+
+Custom scoring weight configuration in UI.
+
+8.3 Scope gate
+If a feature does not directly improve this chain — Signal → Problem → Opportunity → Decision → Launch → Verdict — it does not block MVP release.
+
+9. User journeys
+9.1 Primary journey — from signup to verdict
+User signs up via email/password or Google.
+
+User creates a workspace and chooses timezone.
+
+User selects either “Load sample workspace” or “Start from scratch.”
+
+User uploads signals CSV or adds signals manually.
+
+User uploads accounts CSV.
+
+System suggests signal-to-account matches by domain or email patterns.
+
+User reviews AI-enriched signal metadata.
+
+User groups signals into problems, manually or using AI suggestions.
+
+System creates and scores opportunities.
+
+User opens a top opportunity and reviews score breakdown and supporting evidence.
+
+User creates a decision: Build, Fix, Experiment, Defer, or Reject.
+
+System drafts a decision memo and optional PRD skeleton.
+
+User creates a launch linked to the decision.
+
+User records baseline values.
+
+System triggers Day 7 reminder.
+
+User completes Day 7 review.
+
+System triggers Day 30 reminder.
+
+User completes Day 30 review.
+
+User submits final verdict.
+
+System generates a proof summary and updates the dashboard.
+
+9.2 Weekly ritual journey
+PM opens dashboard on Monday.
+
+Reviews “Top opportunities” and “Reviews due.”
+
+Filters opportunities by segment, product area, or ARR.
+
+Compares 2–3 opportunities.
+
+Creates or updates a decision.
+
+Checks pending launch reviews.
+
+Completes any overdue outcome review.
+
+9.3 Leadership review journey
+Founder or HoP opens dashboard or launches list.
+
+Filters launches by verdict, owner, date range, or product area.
+
+Reviews proof summaries for recent launches.
+
+Uses recent decisions and verdict patterns to discuss what worked and what failed.
+
+10. Functional requirements
+10.1 Authentication and workspace
+Purpose
+Provide secure access and strict workspace isolation.
+
+Features
+Sign up with email/password.
+
+Sign in with email/password.
+
+Google OAuth.
+
+Create workspace with name and timezone.
+
+Onboarding choice: sample workspace or empty workspace.
+
+Role model with Owner and Member.
+
+Requirements
+Every authenticated user must belong to at least one workspace before accessing app data.
+
+Each app request must resolve against the current active workspace.
+
+Workspace-scoped access must be enforced in the database using RLS.
+
+Owner can manage members, billing, and workspace settings.
+
+Member can manage core product records but cannot delete workspace or change billing.
+
+Acceptance criteria
+User can sign up and reach workspace creation without manual admin help.
+
+User cannot access records from a workspace they do not belong to.
+
+Invalid login attempts show clear non-technical errors.
+
+Auth redirect always returns user to last active app context after successful sign-in.
+
+10.2 Onboarding and sample workspace
+Purpose
+Reduce time-to-value and demonstrate the product loop immediately.
+
+Features
+Guided onboarding screen.
+
+“Load sample workspace” action.
+
+“Start from scratch” action.
+
+Contextual empty-state guidance on dashboard.
+
+Sample workspace seed data
+10–20 sample accounts.
+
+50–100 sample signals across support, sales, and CS-type records.
+
+2–3 problems.
+
+2–3 opportunities with different score ranges.
+
+1 decision.
+
+1 completed launch with baseline, Day 7, Day 30, verdict, and proof summary.
+
+Acceptance criteria
+Sample workspace must load in under 60 seconds.
+
+User must see a ranked opportunities list immediately after seed completion.
+
+Seeded data must tell a coherent narrative, not random disconnected records.
+
+10.3 Dashboard / home
+Purpose
+Answer the question: what matters now?
+
+Components
+Top opportunities.
+
+Reviews due.
+
+Active launches.
+
+Recent decisions.
+
+Signal trend chart.
+
+Unmatched signals.
+
+Quick stats.
+
+“What changed since last visit?” summary.
+
+Requirements
+Dashboard must prioritize actions over passive reporting.
+
+Reviews due must appear above the fold when there are pending reviews.
+
+Empty dashboard state must guide next setup action.
+
+Widgets should deep-link to the relevant detail page with preserved filters where useful.
+
+Acceptance criteria
+New workspace shows clear onboarding CTAs.
+
+Existing workspace shows at least one action-oriented widget above the fold.
+
+Reviews due list must surface launches with pending Day 7, Day 30, or missing verdict.
+
+10.4 Signals
+Purpose
+Centralize customer evidence and enrich it into structured product signals.
+
+Core fields
+id
+
+workspace_id
+
+source_type
+
+source_name
+
+external_reference
+
+title
+
+raw_text
+
+severity
+
+sentiment
+
+product_area_id
+
+account_id (nullable)
+
+raw_record_json
+
+created_at
+
+updated_at
+
+created_by
+
+Features
+Upload CSV.
+
+Manual signal creation.
+
+Search by title and raw text.
+
+Filters by severity, sentiment, product area, account, source, date range.
+
+Bulk selection.
+
+Bulk actions.
+
+Signal detail page with editable metadata.
+
+AI suggestions for title, severity, sentiment, and product area.
+
+CSV import rules
+System must support column mapping before import.
+
+Required import preview must show sample rows.
+
+Invalid rows must be flagged with reason.
+
+Duplicate handling must support: skip, import anyway, or merge by user-selected rule.
+
+Import summary must show total processed, imported, skipped, failed.
+
+AI classification rules
+AI suggestions must be displayed as editable proposals.
+
+Each suggestion must include source evidence reference and confidence label where available.
+
+Failed AI classification must not block manual save.
+
+Acceptance criteria
+User can upload a valid CSV and see imported signals in the list.
+
+User can edit metadata on an individual signal.
+
+User can bulk-create a problem from selected signals.
+
+No AI action can silently overwrite user-entered metadata.
+
+10.5 Accounts
+Purpose
+Connect product pain to business impact.
+
+Core fields
+id
+
+workspace_id
+
+name
+
+domain
+
+arr
+
+plan
+
+segment_id
+
+renewal_date
+
+churn_risk
+
+expansion_potential
+
+owner_email
+
+created_at
+
+updated_at
+
+Features
+Accounts CSV upload.
+
+Accounts list with filters.
+
+Account detail page.
+
+Domain-based matching suggestions.
+
+Signals tab.
+
+Problems and opportunities tab.
+
+Launches tab.
+
+Matching rules
+Matching should use exact domain first, then normalized email domain where possible.
+
+Low-confidence matches should require explicit user approval.
+
+User must be able to unlink and relink accounts at any time.
+
+Acceptance criteria
+User can import accounts and view them in a structured list.
+
+System can suggest at least one signal-to-account link where matching data exists.
+
+Account detail must show connected signals and impacted problems.
+
+10.6 Problems
+Purpose
+Turn messy evidence into reusable product problem definitions.
+
+Core fields
+id
+
+workspace_id
+
+title
+
+description
+
+product_area_id
+
+severity
+
+status
+
+signal_count
+
+first_seen
+
+last_seen
+
+created_at
+
+updated_at
+
+Features
+Create problem from selected signals.
+
+Link and unlink signals.
+
+Merge problems.
+
+Split problems.
+
+Change status.
+
+View accounts impacted and approximate ARR.
+
+Trend chart for linked signals over time.
+
+AI suggestion mode for clustering recent signals.
+
+Rules
+Problem creation must always be user-confirmed.
+
+Merge must retain source links and audit trail.
+
+Split must preserve signal history.
+
+Solved problem status should not delete its historical opportunity or launch connections.
+
+Acceptance criteria
+User can create a problem manually from one or more signals.
+
+User can reassign signals between problems.
+
+User can merge two problems without losing signal links.
+
+10.7 Opportunities
+Purpose
+Rank problems by business importance using transparent scoring.
+
+Core fields
+id
+
+workspace_id
+
+problem_id
+
+score
+
+affected_arr
+
+affected_accounts_count
+
+recommended_action
+
+effort_estimate
+
+strategic_alignment
+
+confidence
+
+manual_score_adjustment
+
+manual_score_adjustment_note
+
+score_breakdown_json
+
+created_at
+
+updated_at
+
+Fixed MVP scoring model
+Total opportunity score = 100 points.
+
+Signal count: 0–30
+
+Affected accounts: 0–20
+
+ARR at risk: 0–30
+
+Severity: 0–10
+
+Recency: 0–10
+
+Scoring definitions
+Signal count: normalized based on relative signal count within workspace in the chosen analysis window.
+
+Affected accounts: normalized count of unique linked accounts.
+
+ARR at risk: sum of linked account ARR weighted by churn risk where available.
+
+Severity: derived from weighted mix of linked signal severity values.
+
+Recency: based on freshness of linked signals and recent growth trend.
+
+Formula guidance
+For MVP, use deterministic normalization rather than ML scoring. Each factor should calculate a subscore using capped min-max logic within the workspace and current time window, then sum into total score. PRDs should make requirements testable and implementation-friendly, including release criteria and success logic.
+
+Features
+Opportunities list.
+
+Opportunity detail.
+
+Score breakdown UI.
+
+Compare mode for 2–3 opportunities.
+
+Recommended action suggestion.
+
+Manual adjustment with audit note.
+
+Acceptance criteria
+User can view ranked opportunities sorted by score descending.
+
+User can inspect score breakdown by component.
+
+User can compare 2–3 opportunities side-by-side.
+
+Manual score adjustment must preserve both original score and adjusted score note in history.
+
+10.8 Decisions
+Purpose
+Create an explicit, reviewable record of product choices.
+
+Core fields
+id
+
+workspace_id
+
+opportunity_id
+
+problem_id
+
+action
+
+rationale
+
+assumptions_json
+
+risks_json
+
+alternatives_json
+
+author_id
+
+created_at
+
+updated_at
+
+Supported actions
+Build
+
+Fix
+
+Experiment
+
+Defer
+
+Reject
+
+Features
+Decisions list.
+
+Decision detail page.
+
+Rich text rationale.
+
+Structured assumptions.
+
+Structured risks.
+
+Structured alternatives.
+
+Linked signals and accounts evidence panel.
+
+AI-assisted draft generation.
+
+Requirements
+Every decision must link to either an opportunity or a problem.
+
+Decision should capture enough reasoning for someone outside the original discussion to understand why it was made.
+
+AI-generated rationale must remain editable.
+
+Acceptance criteria
+User can create a decision from an opportunity.
+
+User can edit rationale, assumptions, risks, and alternatives.
+
+Decision detail must show linked evidence references.
+
+10.9 Artifacts
+Purpose
+Convert decisions into execution-ready documents.
+
+Artifact types
+Decision memo
+
+PRD skeleton
+
+User stories
+
+Core fields
+id
+
+workspace_id
+
+decision_id
+
+type
+
+title
+
+content_markdown
+
+version
+
+author_id
+
+created_at
+
+updated_at
+
+Template requirements
+Decision memo sections
+
+Context
+
+Problem
+
+Evidence
+
+Decision
+
+Alternatives
+
+Risks
+
+Expected outcome
+
+PRD skeleton sections
+
+Problem statement
+
+Goals and non-goals
+
+Scope in and out
+
+Target users
+
+User scenarios
+
+Success metrics
+
+User stories format
+
+As a [role], I want [action], so that [benefit].
+
+Acceptance criteria
+User can generate a draft artifact from a decision.
+
+User can edit markdown content and save changes.
+
+System retains last 3 versions.
+
+User can copy content to clipboard.
+
+10.10 Launches
+Purpose
+Create a measured bridge between a decision and its real-world outcome.
+
+Core fields
+id
+
+workspace_id
+
+decision_id
+
+problem_id
+
+title
+
+owner_id
+
+launch_date
+
+tracking_window_days
+
+expected_outcome
+
+target_metrics_json
+
+status
+
+created_at
+
+updated_at
+
+Statuses
+Planned
+
+Live
+
+Under Review
+
+Completed
+
+Features
+Create launch from decision.
+
+Edit expected outcome and target metrics.
+
+Timeline display.
+
+Reminder banners.
+
+Baseline capture.
+
+Day 7 review.
+
+Day 30 review.
+
+Final verdict form.
+
+Proof summary card.
+
+Requirements
+Every launch must link to one decision.
+
+Launch cannot be marked completed without final verdict.
+
+Status should update automatically based on review state where appropriate.
+
+Launch must display pending review banners and next due date.
+
+Acceptance criteria
+User can create a launch from a decision.
+
+User can record baseline data before or at launch.
+
+User sees clear review checkpoints on the timeline.
+
+Launch completion is blocked until verdict submission.
+
+10.11 Outcome measurements
+Purpose
+Measure whether a launch changed the underlying problem.
+
+Core fields
+id
+
+launch_id
+
+review_point
+
+baseline_signal_count
+
+post_signal_count
+
+signal_delta
+
+baseline_affected_accounts
+
+post_affected_accounts
+
+baseline_arr_at_risk
+
+post_arr_at_risk
+
+severity_mix_json
+
+pm_notes
+
+created_at
+
+Review points
+Baseline
+
+Day 7
+
+Day 30
+
+Source-of-truth logic for MVP
+For MVP, measurements may combine:
+
+Auto-derived counts from linked signals and accounts.
+
+User-entered contextual notes and qualitative interpretation.
+
+Optional manual overrides where source data is incomplete.
+
+This hybrid model should be explicit in product behavior to avoid false precision.
+
+Acceptance criteria
+User can complete Day 7 and Day 30 reviews.
+
+System stores both before/after values and deltas.
+
+PM notes are editable and preserved.
+
+10.12 Verdicts and proof summaries
+Purpose
+Force explicit outcome closure and preserve learning.
+
+Verdict values
+Solved
+
+Partially Solved
+
+Not Solved
+
+Regressed
+
+Features
+Final verdict form.
+
+Required rationale.
+
+Auto-generated proof summary.
+
+Dashboard surfacing.
+
+Launch-level display.
+
+Proof summary expectations
+Brief narrative summary.
+
+Before/after metrics.
+
+Outcome interpretation.
+
+Link back to decision and launch.
+
+Acceptance criteria
+User can submit a verdict only after at least one post-launch review exists.
+
+Verdict requires rationale.
+
+Proof summary appears on launch detail and dashboard after verdict.
+
+10.13 Notifications
+Purpose
+Drive loop completion and repeated engagement.
+
+Channels
+Email via Resend.
+
+In-app toasts.
+
+Basic notification center.
+
+MVP notification types
+Workspace invite.
+
+Launch review reminder for Day 7.
+
+Launch review reminder for Day 30.
+
+Verdict due reminder.
+
+Success and error confirmations.
+
+Trigger rules
+Day 7 reminder: send at local workspace morning on due date.
+
+Day 30 reminder: send at local workspace morning on due date.
+
+Verdict reminder: send 24 hours after final required review exists and verdict is still missing.
+
+If email delivery fails, in-app reminder still appears.
+
+Acceptance criteria
+Eligible launches generate reminders on schedule.
+
+User can reach launch review directly from notification link.
+
+Duplicate reminders should be avoided within the same reminder window.
+
+10.14 Settings and admin
+Purpose
+Allow workspace configuration without exposing enterprise complexity.
+
+Sections
+Workspace profile.
+
+Product areas.
+
+Segments.
+
+Team members and roles.
+
+Billing and usage.
+
+Activity log.
+
+Billing requirements
+Show current plan and usage bars.
+
+Show warnings at approximately 80% of limits.
+
+Apply hard stop at 100% for limited resources.
+
+Present upgrade paths clearly.
+
+Acceptance criteria
+Owner can update workspace settings.
+
+Owner can invite members.
+
+Usage bars reflect current plan constraints.
+
+Activity log records critical mutations.
+
+11. Assistant module
+11.1 MVP status
+Optional, de-prioritized for MVP.
+
+11.2 Purpose
+Support structured query access over workspace data without introducing broad chat complexity.
+
+11.3 Allowed queries
+Show top 3 opportunities.
+
+Which accounts are affected by a given problem?
+
+What was the verdict on the last launch?
+
+Show decisions marked Build.
+
+11.4 Constraints
+Only structured, permission-scoped lookups.
+
+No autonomous edits or task execution.
+
+No semantic search dependency.
+
+12. Non-functional requirements
+A complete PRD should include non-functional requirements such as performance, security, and operational constraints in addition to features.
+
+12.1 Performance
+App shell should load in under 3 seconds on standard broadband for core authenticated routes.
+
+List pages should return initial results in under 2 seconds for MVP-scale datasets.
+
+CSV import preview should render in under 10 seconds for supported file sizes.
+
+AI generation actions should return draft output or visible progress state within 20 seconds.
+
+12.2 Security
+RLS on all workspace-scoped tables.
+
+No client-side secrets.
+
+Sensitive actions only via secure server or edge functions.
+
+Audit logging for critical actions.
+
+HTTPS-only deployment.
+
+Secrets stored in environment configuration.
+
+12.3 Reliability
+CSV import failures must be recoverable without corrupting existing data.
+
+Reminder jobs must be idempotent.
+
+AI provider failure must degrade gracefully to manual workflows.
+
+12.4 Accessibility
+Keyboard-accessible core flows.
+
+Clear labels, validation, and error states.
+
+Color contrast meeting standard accessibility expectations.
+
+12.5 Explainability
+Opportunity score breakdown must always be inspectable.
+
+AI-generated output must be labeled as editable AI output.
+
+Any citation or evidence panel must link to underlying structured records.
+
+13. AI architecture
+13.1 Role of AI
+AI helps with classification, clustering suggestions, recommendation text, and content drafting. AI does not own final decisions, verdicts, or silent prioritization.
+
+13.2 Providers
+Gemini for low-cost and free-tier support use cases.
+
+Groq or equivalent fast providers for premium tiers where latency and quality matter.
+
+Experimental providers may be used behind an internal abstraction layer, but production assumptions must not rely on permanent free credits.
+
+13.3 AI output contract
+Every AI response should support the following structure where relevant:
+
+suggested_value
+
+reasoning_summary
+
+evidence_refs
+
+confidence
+
+editable = true
+
+generated_at
+
+provider
+
+13.4 Fallback behavior
+If AI fails, allow manual workflow.
+
+If AI confidence is low, present weaker suggestion language.
+
+Never silently commit AI-generated changes.
+
+14. Data model
+14.1 Core entities
+profiles
+
+workspaces
+
+workspace_members
+
+product_areas
+
+segments
+
+signals
+
+accounts
+
+problems
+
+problem_signal_links
+
+opportunities
+
+decisions
+
+artifacts
+
+launches
+
+outcome_measurements
+
+launch_verdicts
+
+proof_summaries
+
+activity_logs
+
+notification_events
+
+billing_events
+
+14.2 Cross-entity rules
+Every workspace-scoped record must include workspace_id.
+
+Deleting a workspace should be restricted and protected behind owner-only safeguards.
+
+Historical records must be preserved for launches, verdicts, and activity logs.
+
+Problem, opportunity, decision, and launch references must not break when status changes.
+
+15. Permissions
+Action	Owner	Member
+Update workspace settings	Yes	No
+Manage billing	Yes	No
+Invite members	Yes	No
+Upload signals	Yes	Yes
+Upload accounts	Yes	Yes
+Edit problems	Yes	Yes
+Create decisions	Yes	Yes
+Create launches	Yes	Yes
+Submit verdicts	Yes	Yes
+Delete workspace	Yes	No
+16. Billing and pricing logic
+no need to change  frontend is already  done with pricing and feature if you  want please check 
+
+16.2 Enforcement logic
+At 80% usage, show warning banners and billing tab alerts.
+
+At 100%, block creation of the constrained resource and show upgrade CTA.
+
+Existing data remains visible even when limits are reached.
+
+AI-generation actions should fail gracefully with upgrade prompt when AI quota is exhausted.
+
+17. Metrics and success criteria
+PRD best practices recommend explicit goals, success metrics, and release criteria so teams know what “done” means and how the product will be judged.
+
+17.1 North Star metric
+Launches with final verdict per active workspace per quarter.
+
+17.2 Activation metrics
+Workspace created.
+
+Signals imported.
+
+Accounts imported.
+
+At least one problem created.
+
+At least one opportunity viewed.
+
+At least one decision created.
+
+At least one launch created.
+
+17.3 Engagement metrics
+Weekly active workspaces.
+
+Weekly opportunity review events.
+
+Reviews completed on time.
+
+Verdict completion rate.
+
+Repeat weekly sessions per workspace.
+
+17.4 Monetization metrics
+MRR.
+
+ARPU.
+
+Paid conversion from design partners.
+
+Expansion by seats or workspaces.
+
+Churn and churn reasons.
+
+17.5 MVP release criteria
+MVP can be considered release-ready when:
+
+Users can complete the full workflow from signup to verdict.
+
+At least 5 real workspaces have imported non-sample data.
+
+At least 3 launches have completed Day 30 review and verdict in real usage.
+
+Opportunity ranking is judged useful by design partners in qualitative feedback.
+
+No critical RLS, billing, or data-loss issues remain open.
+
+18. Edge cases and failure states
+18.1 CSV edge cases
+Missing required columns.
+
+Duplicate identifiers.
+
+Mixed date formats.
+
+Empty rows.
+
+Invalid ARR values.
+
+Oversized files.
+
+Invalid encoding.
+
+18.2 Data quality edge cases
+Signals with no account data.
+
+Accounts with multiple domains.
+
+Problems with only one signal.
+
+Opportunities created from sparse or low-confidence data.
+
+Launches missing baseline review.
+
+18.3 AI edge cases
+Provider timeout.
+
+Invalid JSON output.
+
+Unsupported classification due to missing raw text.
+
+Hallucinated recommendation not grounded in workspace data.
+
+18.4 UX failure requirements
+Every failed operation must return a user-readable message.
+
+Recovery path must be explicit where possible.
+
+User-entered text must not be lost on retryable failures.
+
+19. Risks and mitigations
+Risk	Description	Mitigation
+Scope creep	Product expands into roadmaps, analytics, or integrations too early	Enforce scope gate tied to the core loop
+Over-automation	AI may appear to replace judgment rather than assist	Keep user approval mandatory
+Weak RLS	Multi-workspace leakage would be existentially damaging	Test permissions early and repeatedly
+CSV complexity	Imports often fail in real-world messy datasets	Build import preview, row-level errors, and retry flows
+AI hallucination	Drafts may sound convincing but be wrong	Ground outputs in stored records and show evidence refs
+Weak differentiation	Competitors can copy feedback AI quickly	Focus GTM and product narrative on accountability and verdicts
+20. Rollout plan
+Phase 1 — Internal alpha
+Founder-only use.
+
+Validate schema, auth, and first vertical slice.
+
+Polish sample workspace.
+
+Resolve core UX gaps.
+
+Phase 2 — Private beta
+5–10 design partners.
+
+Manual onboarding.
+
+Real CSV import usage.
+
+Real decisions, launches, and verdicts.
+
+Weekly founder-led feedback loops.
+
+Phase 3 — Public MVP
+Public pricing and marketing site.
+
+Stable core workflow.
+
+Usable billing path.
+
+Soft self-serve onboarding.
+
+21. Delivery sequence
+A good PRD should align scope, requirements, and implementation order so teams can build incrementally without ambiguity.
+
+Recommended build order
+Auth and workspace creation.
+
+Signals list and signal detail.
+
+Accounts import and matching.
+
+Problems creation and management.
+
+Opportunity scoring and detail.
+
+Decision creation and AI drafts.
+
+Launch creation and review workflow.
+
+Verdicts and proof summaries.
+
+Dashboard aggregation.
+
+Billing, usage enforcement, notifications, and polish.
+
+22. Open questions
+These questions should be resolved before final engineering lock:
+
+What exact formula will convert ARR, churn risk, and recency into normalized opportunity subscores?
+
+Will baseline metrics be always auto-derived, always manually editable, or hybrid by field?
+
+What is the exact maximum CSV size and row count for MVP?
+
+Should members be able to delete decisions, launches, or verdicts, or only archive them?
+
+How will AI evidence references be rendered in UI — inline citations, side panel links, or both?
+
+Is compare mode MVP-critical or launchable shortly after MVP?
+
+Does billing enforcement happen synchronously in app actions, via webhook-updated entitlements, or both?
+
+23. Definition of done
+ASTRIX AI MVP is done when a user can:
+
+Sign up.
+
+Create a workspace.
+
+Import signals and accounts.
+
+Link signals to accounts.
+
+Create and manage problems.
+
+View explainable ranked opportunities.
+
+Record a decision with rationale.
+
+Generate a decision memo or PRD skeleton.
+
+Create a launch from the decision.
+
+Complete baseline, Day 7, and Day 30 reviews.
+
+Submit a final verdict.
+
+See a generated proof summary on the dashboard and launch detail page.
+
+24. One-line summary
+ASTRIX AI is the accountability layer for product teams: it turns scattered customer signals into ranked product decisions and then proves whether those decisions worked.

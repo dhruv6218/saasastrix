@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Search, Layers, TrendingUp, CheckCircle,
   Settings, LogOut, Bell, Menu, X, ChevronDown, Check,
   FileText, Rocket, Building2, Lock, Sparkles, User as UserIcon,
-  Timer, AlertCircle, BadgeCheck, Signal, Activity, CheckCircle2, Plus,
+  Timer, AlertCircle, BadgeCheck, Signal, Activity, CheckCircle2, Plus, Plug,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -203,8 +203,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle,
   ];
 
   const secondaryNav = [
-    { name: 'Artifacts', path: '/app/artifacts', icon: FileText },
-    { name: 'Settings',  path: '/app/settings',  icon: Settings },
+    { name: 'Artifacts',    path: '/app/artifacts',    icon: FileText },
+    { name: 'Integrations', path: '/app/integrations', icon: Plug },
+    { name: 'Settings',     path: '/app/settings',     icon: Settings },
   ];
 
   const mobileNavItems = [
