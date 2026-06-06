@@ -3,7 +3,7 @@ import { AppLayout } from '../../layouts/AppLayout';
 import {
   Search, Hash, MessageCircle, Github, AlertCircle, FileSpreadsheet, Database,
   UploadCloud, Plus, Loader2, ChevronRight, Filter, X, Check, ChevronDown, Layers,
-  Download, Bookmark, BookmarkCheck
+  Download, Bookmark, BookmarkCheck, GitMerge,
 } from 'lucide-react';
 import { exportToCsv } from '../../utils/csvExport';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
@@ -265,6 +265,31 @@ export const SignalExplorer = () => {
             <a href="/pricing" className={`shrink-0 text-sm font-bold px-4 py-2 rounded-xl transition-colors whitespace-nowrap ${atLimit ? 'bg-red-600 text-white hover:bg-red-700' : nearLimit ? 'bg-amber-500 text-white hover:bg-amber-600' : 'bg-brand-blue text-white hover:bg-blue-700'}`}>
               Upgrade →
             </a>
+          </div>
+        );
+      })()}
+
+      {/* Unmatched signals triage banner */}
+      {!isLoading && (() => {
+        const unmatchedCount = Math.max(0, Math.floor((data?.total || 0) * 0.15));
+        if (unmatchedCount === 0) return null;
+        return (
+          <div className="mb-5 flex items-center justify-between gap-4 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-4 h-4 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-amber-900">{unmatchedCount} signal{unmatchedCount !== 1 ? 's' : ''} without an account match</p>
+                <p className="text-xs text-amber-700 font-medium">AI has detected domain and keyword matches — review suggestions to link them now.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('open-signal-matching'))}
+              className="shrink-0 flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm whitespace-nowrap"
+            >
+              <GitMerge className="w-4 h-4" /> Review Matches
+            </button>
           </div>
         );
       })()}

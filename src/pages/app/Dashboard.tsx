@@ -28,6 +28,7 @@ import {
   BadgeCheck,
   TrendingDown,
   X,
+  GitMerge,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
@@ -428,7 +429,7 @@ export const Dashboard = () => {
         </div>
 
         {/* Unmatched signals */}
-        <Link to="/app/signals" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 hover:border-amber-200 transition-all duration-300 block">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 hover:border-amber-200 transition-all duration-300">
           <div className="flex items-center justify-between mb-3">
             <div className="p-2 bg-amber-50 rounded-lg border border-amber-100 text-amber-600"><AlertCircle className="w-4 h-4" /></div>
             {unmatchedSignals > 0 && (
@@ -438,15 +439,18 @@ export const Dashboard = () => {
           <div className="text-3xl font-heading font-black text-gray-900 leading-none mb-0.5">{unmatchedSignals}</div>
           <div className="text-xs font-medium text-gray-500 mb-3">Unmatched signals</div>
           {unmatchedSignals > 0 ? (
-            <div className="text-[10px] font-bold text-amber-600 flex items-center gap-1 group-hover:gap-2 transition-all">
-              <ArrowRight className="w-3 h-3" /> No account match · Review triage
-            </div>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('open-signal-matching'))}
+              className="w-full text-left text-[10px] font-bold text-amber-600 flex items-center gap-1 group-hover:gap-2 transition-all hover:text-amber-700"
+            >
+              <GitMerge className="w-3 h-3 shrink-0" /> Review AI match suggestions
+            </button>
           ) : (
             <div className="text-[10px] font-bold text-green-600 flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" /> All signals matched
             </div>
           )}
-        </Link>
+        </div>
 
         {/* Active launches */}
         <Link to="/app/launches" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 hover:border-blue-200 transition-all duration-300 block">

@@ -9,6 +9,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { CsvUploadModal } from '../components/modals/CsvUploadModal';
+import { SignalMatchingModal } from '../components/modals/SignalMatchingModal';
 import { OnboardingChecklist } from '../components/ui/OnboardingChecklist';
 import { useSignals, useLaunches } from '../lib/api';
 
@@ -517,6 +518,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle,
       </main>
 
       <CsvUploadModal />
+      <SignalMatchingModal />
 
       {/* ── New Workspace — free-plan gate modal ─────────────────── */}
       {showNewWsModal && (
