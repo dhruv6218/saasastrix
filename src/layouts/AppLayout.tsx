@@ -216,7 +216,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle,
     { name: 'More',    path: '/app/settings',       icon: Menu },
   ];
 
-  const fullName   = user?.user_metadata?.full_name || 'User';
+  const fullName   = user?.full_name || user?.email || 'User';
   const initials   = fullName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
   const wsName     = activeWorkspace?.name || 'Workspace';
   const wsInitials = wsName.substring(0, 2).toUpperCase();

@@ -19,7 +19,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subti
   const { user, signOut } = useAuth();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  const fullName = user?.user_metadata?.full_name || 'Admin';
+  const fullName = user?.full_name || user?.email || 'Admin';
   const initials = fullName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
 
   const nav = [

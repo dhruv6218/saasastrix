@@ -223,7 +223,7 @@ export const Dashboard = () => {
 
   const { plan, limits } = usePlan();
 
-  const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'there';
+  const firstName = (user?.full_name || user?.email || 'there').split(' ')[0];
   const opportunities = oppData || [];
   const signalsCount = sigData?.total || 0;
   const decisions = decData || [];

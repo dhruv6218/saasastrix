@@ -73,7 +73,7 @@ export const DecisionDetail = () => {
       await new Promise(r => setTimeout(r, 2500));
       const content = type === 'prd'
         ? `# Product Requirements Document\n\n## Problem Statement\n${currentDecision?.rationale || ''}\n\n## Goals\n- Solve the core problem affecting accounts\n- Ship within 3 sprints\n\n## Success Metrics\n- Signal count drops by 80% at Day 30\n- 0 related churns next quarter\n\n## Out of Scope\n- Advanced analytics (v2)\n- PDF export (v2)`
-        : `# Decision Memo\n\n## Context\n${currentDecision?.rationale || ''}\n\n## Decision\nAction: ${currentDecision?.action}\n\n## Expected Outcome\nReduce churn signals and unblock Enterprise renewals.\n\n## Risks\n${sectionValues.risks || 'See decision detail.'}\n\n## Sign-off\nAuthor: ${user?.user_metadata?.full_name || 'PM'}`;
+        : `# Decision Memo\n\n## Context\n${currentDecision?.rationale || ''}\n\n## Decision\nAction: ${currentDecision?.action}\n\n## Expected Outcome\nReduce churn signals and unblock Enterprise renewals.\n\n## Risks\n${sectionValues.risks || 'See decision detail.'}\n\n## Sign-off\nAuthor: ${user?.full_name || 'PM'}`;
 
       await api.artifacts.create({
         workspace_id: activeWorkspace.id,

@@ -1,1 +1,2 @@
 - [Frontend completion state](frontend-completion.md) — PRD v3.0 fully implemented: all public/app/admin pages, CSV multi-step modal, Dashboard "what changed" widget (Jun 2026)
+- [Full-stack migration](fullstack-migration.md) — Express backend + PostgreSQL live; JWT auth, all API routes wired, Dodo Payments + Gemini integrated (Jun 2026)

@@ -23,11 +23,15 @@ export const Step1Workspace = () => {
     setIsLoading(true);
     setError(null);
 
-    // Simulate Workspace Creation
-    setTimeout(async () => {
+    try {
+      const { post } = await import('../../lib/apiClient');
+      await post('/workspaces', { name, timezone });
       await refreshWorkspaces();
       navigate('/onboarding/step-2');
-    }, 1000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to create workspace. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   return (
