@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { generalLimiter } from './middleware/rateLimit';
 import { errorHandler, notFound } from './middleware/errorHandler';
+import { startCronJobs } from './services/cron';
 
 import authRoutes from './routes/auth';
 import workspaceRoutes from './routes/workspaces';
@@ -36,12 +37,16 @@ app.use(helmet({
 const allowedOrigins = [
   'http://localhost:5000',
   'http://localhost:3000',
+  'https://astrixai.app',
+  'https://www.astrixai.app',
   ...(process.env.REPLIT_DEV_DOMAIN ? [`https://${process.env.REPLIT_DEV_DOMAIN}`] : []),
 ];
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || allowedOrigins.some(o => origin.startsWith(o))) return cb(null, true);
-    cb(null, true); // permissive in dev — lock down in prod
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.some(o => origin.startsWith(o))) return cb(null, true);
+    if (process.env.NODE_ENV !== 'production') return cb(null, true);
+    cb(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,
 }));
@@ -67,7 +72,11 @@ if (process.env.NODE_ENV !== 'test') {
 app.use('/api/', generalLimiter);
 
 // Health check
-app.get('/api/health', (_req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));
+app.get('/api/health', (_req, res) => res.json({
+  status: 'ok',
+  ts: new Date().toISOString(),
+  env: process.env.NODE_ENV || 'development',
+}));
 
 // Auth
 app.use('/api/auth', authRoutes);
@@ -97,6 +106,8 @@ app.use(errorHandler);
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`[API] Server running on port ${PORT}`);
   console.log(`[API] Environment: ${process.env.NODE_ENV || 'development'}`);
+  // Start background cron jobs
+  startCronJobs();
 });
 
 export default app;

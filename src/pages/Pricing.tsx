@@ -211,18 +211,45 @@ export const Pricing = () => {
 
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
+  const PLAN_MAP: Record<string, string> = {
+    Starter: 'starter',
+    Growth: 'growth',
+    Scale: 'scale',
+  };
+
   const handleCheckout = async (tier: any) => {
-    if (!activeWorkspace) {
-      addToast("Please log in or create an account to upgrade.", "warning");
+    if (tier.name === 'Free') {
       navigate('/signup');
       return;
     }
+    if (!activeWorkspace) {
+      addToast("Please log in or create a free account first.", "warning");
+      navigate('/signup');
+      return;
+    }
+    const plan = PLAN_MAP[tier.name];
+    if (!plan) return;
     setLoadingTier(tier.name);
-    setTimeout(() => {
+    try {
+      const res = await fetch(`/api/workspaces/${activeWorkspace.id}/billing/checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('astrix_token') || ''}`,
+        },
+        body: JSON.stringify({ plan, billing_period: isAnnual ? 'annual' : 'monthly' }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        addToast(data.error || 'Checkout failed. Please try again.', 'error');
+      }
+    } catch {
+      addToast('Network error. Please try again.', 'error');
+    } finally {
       setLoadingTier(null);
-      addToast(`Redirecting to checkout for ${tier.name} plan...`, "success");
-      navigate('/app/settings?tab=billing');
-    }, 1500);
+    }
   };
 
   const renderCell = (val: CellValue, isPopular: boolean) => {

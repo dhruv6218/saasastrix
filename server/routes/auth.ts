@@ -1,9 +1,11 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { z } from 'zod';
 import { query } from '../db';
 import { signToken, requireAuth } from '../middleware/auth';
 import { authLimiter } from '../middleware/rateLimit';
+import { sendWelcomeEmail, sendPasswordResetEmail } from '../services/email';
 
 const router = Router();
 
@@ -33,6 +35,8 @@ router.post('/signup', authLimiter, async (req: Request, res: Response) => {
     const user = result.rows[0];
     const token = signToken(user);
     res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 });
+    // Send welcome email async (don't await — don't block response)
+    sendWelcomeEmail(user.email, user.full_name).catch(() => {});
     res.status(201).json({ user, token });
   } catch (err: any) {
     if (err.name === 'ZodError') return res.status(400).json({ error: err.errors[0].message });
@@ -98,6 +102,67 @@ router.post('/change-password', requireAuth, authLimiter, async (req: Request, r
   const hash = await bcrypt.hash(new_password, 12);
   await query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, req.user!.id]);
   res.json({ success: true });
+});
+
+// POST /api/auth/forgot-password — send reset email
+router.post('/forgot-password', authLimiter, async (req: Request, res: Response) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+
+  // Always respond with success (don't leak whether email exists)
+  res.json({ success: true, message: 'If that email exists, a reset link has been sent.' });
+
+  // Do the actual work async
+  (async () => {
+    try {
+      const userRes = await query('SELECT id, email, full_name FROM users WHERE email = $1', [email.toLowerCase()]);
+      if (!userRes.rows[0]) return;
+      const user = userRes.rows[0];
+
+      // Delete any existing tokens for this user
+      await query('DELETE FROM password_reset_tokens WHERE user_id = $1', [user.id]);
+
+      // Create new token
+      const token = crypto.randomBytes(32).toString('hex');
+      await query(
+        'INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES ($1, $2, NOW() + INTERVAL \'1 hour\')',
+        [user.id, token]
+      );
+
+      await sendPasswordResetEmail(user.email, user.full_name || 'there', token);
+    } catch (err) {
+      console.error('[Auth] forgot-password error:', err);
+    }
+  })();
+});
+
+// POST /api/auth/reset-password — consume token and set new password
+router.post('/reset-password', authLimiter, async (req: Request, res: Response) => {
+  const { token, password } = req.body;
+  if (!token || !password || password.length < 8) {
+    return res.status(400).json({ error: 'Valid token and password (min 8 chars) required' });
+  }
+
+  try {
+    const tokenRes = await query(
+      'SELECT t.id, t.user_id, t.expires_at, t.used_at FROM password_reset_tokens t WHERE t.token = $1',
+      [token]
+    );
+    if (!tokenRes.rows[0]) return res.status(400).json({ error: 'Invalid or expired reset link' });
+
+    const row = tokenRes.rows[0];
+    if (row.used_at) return res.status(400).json({ error: 'This reset link has already been used' });
+    if (new Date(row.expires_at) < new Date()) return res.status(400).json({ error: 'Reset link has expired. Please request a new one.' });
+
+    const hash = await bcrypt.hash(password, 12);
+    await query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, row.user_id]);
+    await query('UPDATE password_reset_tokens SET used_at = NOW() WHERE id = $1', [row.id]);
+
+    res.json({ success: true, message: 'Password updated successfully' });
+  } catch (err) {
+    console.error('[Auth] reset-password error:', err);
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
 });
 
 export default router;

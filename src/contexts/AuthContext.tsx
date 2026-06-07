@@ -18,7 +18,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, name: string) => Promise<{ error: string | null; needsConfirmation: boolean }>;
   signInWithGoogle: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
-  updatePassword: (password: string) => Promise<{ error: string | null }>;
+  updatePassword: (password: string, token?: string) => Promise<{ error: string | null }>;
   refreshUser: () => Promise<void>;
 }
 
@@ -96,7 +96,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signInWithGoogle = async () => {
-    // Google OAuth not available — show message
     throw new Error('Google sign-in not available. Please use email and password.');
   };
 
@@ -107,14 +106,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSession(null);
   };
 
-  const resetPassword = async (_email: string) => {
-    // Placeholder — would send email in production
-    return { error: null };
+  // Send forgot-password email via real API
+  const resetPassword = async (email: string) => {
+    try {
+      await post('/auth/forgot-password', { email });
+      return { error: null };
+    } catch (err: any) {
+      return { error: err.message || 'Failed to send reset email' };
+    }
   };
 
-  const updatePassword = async (password: string) => {
+  // If token provided → unauthenticated reset; otherwise → authenticated change
+  const updatePassword = async (password: string, token?: string) => {
     try {
-      await post('/auth/change-password', { new_password: password });
+      if (token) {
+        await post('/auth/reset-password', { token, password });
+      } else {
+        await post('/auth/change-password', { new_password: password });
+      }
       return { error: null };
     } catch (err: any) {
       return { error: err.message || 'Failed to update password' };
