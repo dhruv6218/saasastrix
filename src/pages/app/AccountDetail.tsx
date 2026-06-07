@@ -29,7 +29,7 @@ type Tab = 'overview' | 'signals' | 'problems' | 'launches';
 export const AccountDetail = () => {
   const { id } = useParams();
   const { activeWorkspace } = useWorkspace();
-  const { data, isLoading } = useAccount(id);
+  const { data, isLoading } = useAccount(activeWorkspace?.id, id);
   const { data: allLaunches } = useLaunches(activeWorkspace?.id);
   const [activeTab, setActiveTab] = useState<Tab>('overview');
 

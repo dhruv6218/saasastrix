@@ -31,7 +31,7 @@ export const DecisionDetail = () => {
   const { activeWorkspace } = useWorkspace();
   const { addToast } = useToast();
 
-  const { data: currentDecision, isLoading, refetch } = useDecision(id);
+  const { data: currentDecision, isLoading, refetch } = useDecision(activeWorkspace?.id, id);
   const { data: artifacts, refetch: fetchArtifacts } = useArtifacts(activeWorkspace?.id);
   const { data: launches } = useLaunches(activeWorkspace?.id);
 

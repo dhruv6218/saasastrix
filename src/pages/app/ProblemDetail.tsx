@@ -9,9 +9,9 @@ import { useToast } from '../../contexts/ToastContext';
 
 export const ProblemDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { data, isLoading, refetch } = useProblem(id);
-  const { data: allProblems } = useProblems(id ? 'ws-1' : undefined);
   const { activeWorkspace } = useWorkspace();
+  const { data, isLoading, refetch } = useProblem(activeWorkspace?.id, id);
+  const { data: allProblems } = useProblems(activeWorkspace?.id);
   const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   const [showMergeModal, setShowMergeModal] = useState(false);

@@ -24,7 +24,7 @@ export const SignalDetail = () => {
   const { addToast } = useToast();
   const navigate = useNavigate();
   const { activeWorkspace } = useWorkspace();
-  const { data: signal, isLoading, refetch } = useSignal(id);
+  const { data: signal, isLoading, refetch } = useSignal(activeWorkspace?.id, id);
   const { data: accountsData } = useAccounts(activeWorkspace?.id);
   const { data: problems } = useProblems(activeWorkspace?.id);
 

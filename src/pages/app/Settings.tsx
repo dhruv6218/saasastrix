@@ -13,8 +13,8 @@ export const Settings = () => {
 
   const { data: teamData, isLoading: teamLoading, refetch: refetchTeam } = useTeam(activeWorkspace?.id);
   const { data: activities, isLoading: activitiesLoading } = useActivities(activeWorkspace?.id);
-  const { data: productAreas, refetch: refetchAreas } = useProductAreas();
-  const { data: segments, refetch: refetchSegments } = useSegments();
+  const { data: productAreas, refetch: refetchAreas } = useProductAreas(activeWorkspace?.id);
+  const { data: segments, refetch: refetchSegments } = useSegments(activeWorkspace?.id);
 
   const members = teamData?.members || [];
 

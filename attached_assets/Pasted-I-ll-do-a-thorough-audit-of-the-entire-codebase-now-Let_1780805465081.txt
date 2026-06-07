@@ -1,0 +1,234 @@
+I'll do a thorough audit of the entire codebase now. Let me explore everything in parallel.
+
+
+8 actions
+I now have everything I need from all five parallel audits. Let me compile the full report.
+
+Astrix AI — Complete Project Audit
+1. Frontend Structure
+Routes & Pages
+Route	Component File	Status
+/	src/pages/Home.tsx	Marketing UI
+/pricing	src/pages/Pricing.tsx	Marketing UI
+/contact	src/pages/Contact.tsx	Real (Formspree)
+/changelog	src/pages/Changelog.tsx	Static UI
+/integrations	src/pages/Integrations.tsx	Static UI
+/privacy	src/pages/legal/PrivacyPolicy.tsx	Static UI
+/terms	src/pages/legal/TermsOfService.tsx	Static UI
+/login	src/pages/Login.tsx	UI only (mock auth)
+/signup	src/pages/Signup.tsx	UI only (mock auth)
+/forgot-password	src/pages/ForgotPassword.tsx	UI only
+/reset-password	src/pages/ResetPassword.tsx	UI only
+/accept-invitation	src/pages/AcceptInvitation.tsx	UI only
+/onboarding/step-1	src/pages/onboarding/Step1Workspace.tsx	UI only (1s fake delay)
+/onboarding/step-2	src/pages/onboarding/Step2Data.tsx	UI only (explicit comment: "save to DB here")
+/onboarding/step-3	src/pages/onboarding/Step3Results.tsx	Functional mock (seeds mockDb)
+/app	src/pages/app/Dashboard.tsx	UI only (mock)
+/app/signals	src/pages/app/SignalExplorer.tsx	UI only (mock)
+/app/signals/new	src/pages/app/SignalNew.tsx	UI only (mock)
+/app/signals/:id	src/pages/app/SignalDetail.tsx	UI only (mock)
+/app/accounts	src/pages/app/AccountsList.tsx	UI only (mock)
+/app/accounts/:id	src/pages/app/AccountDetail.tsx	UI only (mock)
+/app/problems	src/pages/app/ProblemsList.tsx	UI only (mock)
+/app/problems/:id	src/pages/app/ProblemDetail.tsx	UI only (mock)
+/app/opportunities	src/pages/app/OpportunitiesList.tsx	UI only (mock)
+/app/opportunities/:id	src/pages/app/OpportunityDetail.tsx	UI only (mock)
+/app/evidence/:problemId	src/pages/app/EvidenceView.tsx	UI only (mock)
+/app/decisions	src/pages/app/DecisionsHistory.tsx	UI only (mock)
+/app/decisions/:id	src/pages/app/DecisionDetail.tsx	UI only (mock)
+/app/artifacts	src/pages/app/ArtifactStudio.tsx	UI only (mock)
+/app/artifacts/:id	src/pages/app/ArtifactDetail.tsx	UI only (mock)
+/app/launches	src/pages/app/PostLaunchTracker.tsx	UI only (mock)
+/app/launches/:id	src/pages/app/LaunchDetail.tsx	UI only (mock)
+/app/settings	src/pages/app/Settings.tsx	UI only (mock)
+/app/integrations	src/pages/app/IntegrationsHub.tsx	UI only (mock)
+/admin	src/pages/admin/AdminDashboard.tsx	UI only (mock)
+/admin/users	src/pages/admin/AdminUsers.tsx	UI only (mock)
+/admin/workspaces	src/pages/admin/AdminWorkspaces.tsx	UI only (mock)
+/admin/revenue	src/pages/admin/AdminRevenue.tsx	UI only (mock)
+Layouts
+File	Purpose
+src/layouts/AppLayout.tsx	Dark sidebar, workspace switcher, notifications, profile dropdown
+src/layouts/AdminLayout.tsx	Admin panel wrapper
+src/layouts/AuthLayout.tsx	Login/signup centered layout
+src/layouts/MainLayout.tsx	Public marketing nav + footer
+src/layouts/OnboardingLayout.tsx	3-step onboarding progress wrapper
+Reusable Components
+UI atoms (src/components/ui/): AIBadge, CustomCursor, KeyboardShortcuts, MagneticButton, OnboardingChecklist, ScrollProgress, Skeleton + TableSkeleton, TextReveal, Toast
+
+Modals (src/components/modals/): CsvUploadModal, SignalMatchingModal, JiraLinearModal, UpgradeModal
+
+Sections (src/components/sections/): Navigation, Footer, HeroSection, ChaosSection, ClaritySection and other marketing sections
+
+Auth guards (src/components/auth/): ProtectedRoute, AdminRoute
+
+State Management
+No Zustand store directory exists despite replit.md listing one. State is managed via:
+
+src/contexts/AuthContext.tsx — auth session (fully mocked)
+src/contexts/WorkspaceContext.tsx — active workspace + roles
+src/contexts/ToastContext.tsx — global toasts
+src/lib/api.ts — in-memory mockDb with a custom useQuery hook + triggerUpdate event bus
+Frontend Completeness
+The UI is visually complete. Every page exists and renders with mock data. Zero pages are connected to a real backend. This is a high-fidelity prototype.
+
+2. Backend / Supabase Integration Status
+Supabase Client
+File: src/lib/supabase.ts
+Status: DUMMY. The file is explicitly self-described as a "Dummy Supabase Client for Frontend-Only Prototype." Every method (auth, from, rpc, storage) returns hardcoded empty data or null. No network calls are made.
+
+Auth
+File: src/contexts/AuthContext.tsx
+Status: FULLY MOCKED.
+
+signIn / signUp → sets a hardcoded MOCK_USER with token 'mock_token'
+signOut → clears local state
+No real Supabase auth.signInWithPassword, auth.signUp, or auth.onAuthStateChange calls wired
+Queries / Mutations
+File: src/lib/api.ts
+All operations run against an in-memory mockDb. Nothing touches Supabase:
+
+Operation	Entities
+List/Get	Signals, Accounts, Problems, Opportunities, Decisions, Artifacts, Launches, Team, Activities, Workspace Areas/Segments
+Create	Signals, Accounts, Problems, Decisions, Artifacts, Launches, Team invites
+Update	Signals, Decisions, Artifacts, Launches, Workspace Areas/Segments
+Delete	Team member removal, Signal-Problem unlink (placeholder only)
+Storage
+Missing. No Supabase Storage calls exist anywhere in the codebase. File upload UI (CSV modal) processes files client-side only.
+
+Edge Functions / Server Actions
+Missing. None exist or are referenced.
+
+3. Product Coverage vs. PRD
+Module	Status	Notes
+Auth	UI only	Login/signup/reset UI complete; backed entirely by MOCK_USER in AuthContext.tsx
+Workspace onboarding	UI only	3-step flow exists; Step 1 has a 1s fake delay, Step 2 has explicit "TODO: save to DB" comment, Step 3 seeds mockDb only
+Dashboard	UI only	Charts, KPI cards, signal feed, "what changed" widget — all mock data
+Signals	UI only	Explorer, detail view, CSV upload modal, new signal form — all mockDb
+Accounts	UI only	List + detail with ARR/health/plan filters — all mockDb
+Problems	UI only	List + detail with Evidence/Accounts/History tabs — all mockDb
+Opportunities	UI only	Ranked list, compare mode (plan-gated), detail with score breakdown + what-if — all mockDb
+Decisions	UI only	History list + decision detail + artifact linking — all mockDb
+Artifacts	UI only	PRD/memo viewer, version history — all mockDb; AI generation is a local timeout
+Launches	UI only	Tracker list + launch detail with before/after charts, outcome entry — all mockDb
+Outcome reviews	UI only	Verdict entry form exists in LaunchDetail.tsx — writes to mockDb only
+Verdicts	UI only	pm_verdict field in Launch type; UI exists in Launch detail
+Notifications	UI only	Notification panel in AppLayout.tsx derived from mock signals/launches
+Settings	UI only	Profile, Team, Product Areas, Segments, Billing, Audit Log tabs — all mocked
+Billing	UI only	Plan display + upgrade prompts exist; no Stripe or payment processor wired
+Admin controls	UI only	/admin routes with AdminRoute guard exist; 4 admin pages, all mock data
+4. Database Readiness
+Tables Implied by Frontend Code
+Based on src/types/index.ts and src/lib/mockData.ts, the following tables are required:
+
+Table	Key Columns Implied
+users	id, email, full_name, avatar_url, role
+workspaces	id, name, slug, timezone, logo_url, product_areas[], segments[]
+workspace_members	id, workspace_id, user_id, role (owner/admin/maker/viewer)
+workspace_invites	id, workspace_id, email, role, token, expires_at, status
+accounts	id, workspace_id, name, domain, arr, plan, health_score, industry, country
+signals	id, workspace_id, account_id, source_type, raw_text, normalized_text, sentiment_label, severity_label, category, product_area, created_at
+problems	id, workspace_id, title, description, status, severity, trend, product_area, evidence_count, affected_arr
+signal_problems	signal_id, problem_id (join table implied by signal-problem linking)
+opportunities	id, workspace_id, problem_id, opportunity_score, demand_score, pain_score, arr_score, trend_score, recommended_action
+decisions	id, workspace_id, opportunity_id, problem_id, title, action, rationale, author_id, assumptions[], risks[], alternatives[]
+artifacts	id, workspace_id, decision_id, title, type, content, author_id, version, external_url
+launches	id, workspace_id, decision_id, title, status, launched_at, expected_outcome, pm_verdict, baseline_metrics, current_metrics
+activities	id, workspace_id, actor_id, action, object_type, object_id, metadata, created_at
+TypeScript Types Defined
+All types are in src/types/index.ts: Signal, Workspace, Account, Problem, Opportunity, Decision, Artifact, Launch, TeamMember, WorkspaceInvite. These are clean and match the implied schema above — they can be reused directly when wiring real Supabase queries.
+
+Missing Schema Elements (Inferred from UI)
+Audit log table — Settings tab shows an audit log; no type or table defined
+Notification preferences — Settings has a notifications tab; no schema
+Artifact versions table — Version history UI exists in Artifact Studio; current type has no versions[] or separate version rows
+Integration connections table — Integrations Hub shows connect/disconnect state; no persistence schema
+Billing / subscription table — Billing tab and plan-gating exist; no subscription record schema
+5. Security & Architecture Gaps
+Missing Auth Guards
+src/pages/onboarding/ — ProtectedRoute wraps these in App.tsx but the WorkspaceContext doesn't validate that the user has not yet completed onboarding, so a fully onboarded user can freely revisit /onboarding/step-1 and overwrite workspace state
+src/contexts/AuthContext.tsx — user is set to MOCK_USER on any sign-in; no real token validation, no JWT verification, no session expiry
+Missing Role Checks
+Maker vs. Viewer RBAC — usePlan.ts gates features by billing plan but the Maker/Viewer role distinction referenced in Pricing.tsx is never enforced in any app page
+Admin route guard — src/components/auth/AdminRoute.tsx exists but since AuthContext returns a mock user with no real role field, the guard can be trivially bypassed by any authenticated mock user
+Write actions — Signal creation, decision commits, artifact publishing — none check whether the current user's workspace role permits writes
+Multi-Tenant Workspace Logic Missing
+src/contexts/WorkspaceContext.tsx — activeWorkspace is set from mockDb; there is no validation that the signed-in user is actually a member of the selected workspace
+src/lib/api.ts — All queries accept a workspace_id parameter but it's sourced from mock context; no server-side row-level security or workspace membership check exists
+Workspace switcher in AppLayout.tsx — Allows switching to any workspace in mockDb; in production this must be scoped to the user's memberships only
+Dangerous Client-Side Logic
+src/lib/api.ts — Entire data layer is client-side. All "authorization" is implicit. Moving to Supabase without RLS policies will expose all rows to all authenticated users
+src/pages/onboarding/Step2Data.tsx — Contains the explicit code comment: "In a real app, we would save these to the database here" — this page does nothing on submit
+src/lib/supabase.ts — The dummy client will silently succeed on all calls; any component that imports supabase directly and doesn't use src/lib/api.ts will receive empty data with no error
+Missing Loading / Error / Empty States
+Most list pages have a basic empty illustration but filtered/searched views (Signal Explorer, Decisions History) default to blank table rather than "No results for these filters"
+No global error boundary — A thrown JS error in any page component will crash the full app
+No network error handling — When api.ts is replaced with real Supabase calls, rejection paths are not handled in most pages (only Contact.tsx and SignalNew.tsx have try/catch)
+No optimistic update rollback — Mutations that succeed in UI but fail on server would leave stale state
+6. Build Risk List — Top 20
+#	Issue	Severity
+1	src/lib/supabase.ts is a dummy — zero real DB connectivity	Critical
+2	src/contexts/AuthContext.tsx uses mock user — no real sessions, JWTs, or tokens	Critical
+3	No Supabase RLS policies defined — wiring real queries without RLS exposes all tenant data to all users	Critical
+4	Multi-tenant isolation not enforced — workspace membership never validated server-side	Critical
+5	AdminRoute guard is bypassable — mock auth returns any user as potentially admin	Critical
+6	No real database schema exists — all tables need to be created in Supabase before any query can run	Critical
+7	Onboarding Step 1 & 2 don't persist — workspace creation is a fake delay; no row is ever written	High
+8	Billing / plan enforcement is client-side only — usePlan reads from context, not a real subscription record	High
+9	No error boundaries — any runtime error crashes the entire app	High
+10	Invite acceptance flow (/accept-invitation) is UI only — token validation and workspace joining not implemented	High
+11	CSV upload processes files client-side only — no storage, no server-side parsing	High
+12	AI artifact generation is a local setTimeout — no real LLM call or edge function	High
+13	Signal-Problem linking is a placeholder — unlinkSignal in api.ts is noted as not actually removing data	High
+14	Maker/Viewer RBAC never enforced in UI — any workspace member can perform write actions	Medium
+15	No global network error handling — pages will silently show stale/empty data on Supabase errors	Medium
+16	Audit log has no backing table — Settings audit tab exists but no schema or writes defined	Medium
+17	Notification system is derived from mock signals — no real-time subscriptions or push delivery	Medium
+18	Artifact version history UI exists but no versions table schema is defined	Medium
+19	Integration connections (Jira, Linear, Slack) have no persistence schema	Medium
+20	Password reset / forgot-password flow sends no real email — no Supabase Auth email template configured	Low
+7. Recommended Implementation Order
+Phase 1 — Foundation (nothing else works without this)
+  1.1  Create Supabase project + configure real client in src/lib/supabase.ts
+  1.2  Design and migrate full DB schema (all 13 tables above) with foreign keys
+  1.3  Enable Row Level Security on every table; write workspace-scoped policies
+  1.4  Wire real Supabase Auth (signUp, signIn, onAuthStateChange, JWT) into AuthContext.tsx
+  1.5  Implement real password reset email via Supabase Auth templates
+Phase 2 — Workspace & Onboarding
+  2.1  Wire onboarding Step 1 to INSERT into workspaces + workspace_members
+  2.2  Wire onboarding Step 2 to persist context selections
+  2.3  Wire workspace switcher in AppLayout to query only the user's own memberships
+  2.4  Implement invite token creation, email dispatch, and /accept-invitation validation
+Phase 3 — Core Data Layer (replace mockDb entity by entity)
+  3.1  Signals — replace useSignals / api.signals.* with real Supabase queries
+  3.2  Accounts — replace useAccounts / api.accounts.*
+  3.3  Problems — replace useProblems / api.problems.*
+  3.4  Opportunities — replace with real queries + scoring logic
+  3.5  Decisions — replace with real queries
+  3.6  Artifacts — replace with real queries + introduce versions table
+  3.7  Launches — replace with real queries + outcome entry persistence
+  3.8  Activities — wire audit log writes on every mutation; surface in Settings
+Phase 4 — Security & RBAC
+  4.1  Define role hierarchy (owner / admin / maker / viewer) in workspace_members
+  4.2  Enforce Maker/Viewer checks in all write-action UI paths
+  4.3  Harden AdminRoute with a real role check from the DB (not mock context)
+  4.4  Add workspace membership validation to all API calls
+Phase 5 — Features requiring external services
+  5.1  Billing — integrate Stripe (subscriptions, webhooks, plan enforcement server-side)
+  5.2  CSV upload — wire to Supabase Storage + server-side parsing (edge function)
+  5.3  AI artifact generation — wire to an LLM via a Supabase edge function
+  5.4  Real-time notifications — wire Supabase Realtime subscriptions
+Phase 6 — Resilience & production hardening
+  6.1  Add a global React error boundary
+  6.2  Add try/catch + error states to every page that calls Supabase
+  6.3  Add "No results" states for all filtered/searched list views
+  6.4  Add optimistic update + rollback patterns to mutation hooks
+  6.5  End-to-end QA across all routes with a real Supabase connection
+
+Suggested Next Step
+Start with Phase 1.1–1.3. The entire app is blocked on the database existing. Before a single page can show real data, you need:
+
+A live Supabase project with its SUPABASE_URL and SUPABASE_ANON_KEY in your environment secrets
+The full schema migrated (SQL migration file for all 13 tables)
+RLS policies written for every table before any other query is wired — adding them later is riskier
+Once those three are done, src/lib/supabase.ts can be replaced with a single real client, and every subsequent phase unblocks cleanly.

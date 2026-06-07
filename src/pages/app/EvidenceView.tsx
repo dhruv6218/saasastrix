@@ -8,11 +8,13 @@ import {
 import { AIBadge } from '../../components/ui/AIBadge';
 import { useToast } from '../../contexts/ToastContext';
 import { useProblem } from '../../lib/api';
+import { useWorkspace } from '../../contexts/WorkspaceContext';
 
 export const EvidenceView = () => {
   const { problemId } = useParams<{ problemId: string }>();
   const { addToast } = useToast();
-  const { data, isLoading } = useProblem(problemId);
+  const { activeWorkspace } = useWorkspace();
+  const { data, isLoading } = useProblem(activeWorkspace?.id, problemId);
   
   const problemSignals = data?.signals || [];
   

@@ -6,10 +6,12 @@ import { FileText, ArrowLeft, Copy, Edit2, Check, Clock, User, Share2 } from 'lu
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useToast } from '../../contexts/ToastContext';
+import { useWorkspace } from '../../contexts/WorkspaceContext';
 
 export const ArtifactDetail = () => {
   const { id } = useParams();
-  const { data: artifact, isLoading } = useArtifact(id);
+  const { activeWorkspace } = useWorkspace();
+  const { data: artifact, isLoading } = useArtifact(activeWorkspace?.id, id);
   const { addToast } = useToast();
   const [isCopying, setIsCopying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);

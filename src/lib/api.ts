@@ -1,335 +1,207 @@
 import { useState, useEffect, useCallback } from 'react';
-import * as mocks from './mockData';
-import { Signal, Account, Problem, Opportunity, Decision, Artifact, Launch, TeamMember, WorkspaceInvite } from '../types';
-
-const delay = (ms = 500) => new Promise(r => setTimeout(r, ms));
-
-export const mockDb = {
-  signals: [...mocks.MOCK_SIGNALS] as Signal[],
-  accounts: [...mocks.MOCK_ACCOUNTS] as Account[],
-  problems: [...mocks.MOCK_PROBLEMS] as Problem[],
-  opportunities: [...mocks.MOCK_OPPORTUNITIES] as Opportunity[],
-  decisions: [...mocks.MOCK_DECISIONS] as Decision[],
-  artifacts: [...mocks.MOCK_ARTIFACTS] as Artifact[],
-  launches: [...mocks.MOCK_LAUNCHES] as Launch[],
-  members: [...mocks.MOCK_MEMBERS] as TeamMember[],
-  invites: [] as WorkspaceInvite[],
-  activities: [...mocks.MOCK_ACTIVITIES] as typeof mocks.MOCK_ACTIVITIES,
-  productAreas: [...(mocks.MOCK_WORKSPACE.product_areas)] as string[],
-  segments: [...(mocks.MOCK_WORKSPACE.segments)] as string[],
-};
+import { get, post, patch, del } from './apiClient';
 
 export const triggerUpdate = () => window.dispatchEvent(new Event('data-updated'));
 
+function getActiveWsId(): string {
+  return localStorage.getItem('astrix_active_ws') || '';
+}
+
+function resolve3(a: string, b: any, c?: any): [string, string, any] {
+  if (c !== undefined) return [a, b, c];
+  return [getActiveWsId(), a, b];
+}
+
+function resolveCreate(a: string | any, b?: any): [string, any] {
+  if (b !== undefined) return [a as string, b];
+  const wsId = (typeof a === 'object' && a?.workspace_id) ? a.workspace_id : getActiveWsId();
+  return [wsId, a];
+}
+
+function resolve2(a: string, b?: string): [string, string] {
+  if (b !== undefined) return [a, b];
+  return [getActiveWsId(), a];
+}
+
 export const api = {
   signals: {
-    list: async (wsId: string, opts?: any) => {
-      await delay(300);
-      let res = mockDb.signals.filter(s => s.workspace_id === wsId);
-      if (opts?.globalFilter) {
-        const q = opts.globalFilter.toLowerCase();
-        res = res.filter(s =>
-          s.raw_text?.toLowerCase().includes(q) ||
-          s.accounts?.name?.toLowerCase().includes(q) ||
-          s.product_area?.toLowerCase().includes(q)
-        );
-      }
-      if (opts?.severity) res = res.filter(s => s.severity_label === opts.severity);
-      if (opts?.sentiment) res = res.filter(s => s.sentiment_label === opts.sentiment);
-      if (opts?.product_area) res = res.filter(s => s.product_area === opts.product_area);
-      if (opts?.account_id) res = res.filter(s => s.account_id === opts.account_id);
-      if (opts?.date_from) res = res.filter(s => new Date(s.created_at) >= new Date(opts.date_from));
-      if (opts?.date_to) res = res.filter(s => new Date(s.created_at) <= new Date(opts.date_to + 'T23:59:59'));
-      if (opts?.sorting?.length > 0) {
-        const sort = opts.sorting[0];
-        res.sort((a: any, b: any) => {
-          if (a[sort.id] < b[sort.id]) return sort.desc ? 1 : -1;
-          if (a[sort.id] > b[sort.id]) return sort.desc ? -1 : 1;
-          return 0;
-        });
-      }
-      const total = res.length;
-      if (opts?.page && opts?.limit) {
-        const start = (opts.page - 1) * opts.limit;
-        res = res.slice(start, start + opts.limit);
-      }
-      return { rows: res, total };
+    list: (wsId: string, opts?: any) => get(`/workspaces/${wsId}/signals`, {
+      search: opts?.globalFilter,
+      severity: opts?.severity,
+      sentiment: opts?.sentiment,
+      product_area: opts?.product_area,
+      account_id: opts?.account_id,
+      date_from: opts?.date_from,
+      date_to: opts?.date_to,
+      page: opts?.page,
+      limit: opts?.limit,
+      sort_by: opts?.sorting?.[0]?.id,
+      sort_dir: opts?.sorting?.[0]?.desc ? 'desc' : 'asc',
+    }),
+    create: (a: string | any, b?: any) => {
+      const [wsId, data] = resolveCreate(a, b);
+      return post(`/workspaces/${wsId}/signals`, data);
     },
-    create: async (data: Partial<Signal>) => {
-      await delay();
-      const account = data.account_id ? mockDb.accounts.find(a => a.id === data.account_id) || null : null;
-      const newItem = { ...data, id: `sig-${Date.now()}`, created_at: new Date().toISOString(), accounts: account } as Signal;
-      mockDb.signals = [newItem, ...mockDb.signals];
-      mockDb.activities = [
-        { id: `act-${Date.now()}`, action: 'Added signal manually', object_type: 'Signal', object_id: newItem.id, actor: 'Demo User', metadata: data.raw_text?.substring(0, 50) || '', time: new Date().toISOString() },
-        ...mockDb.activities
-      ];
-      triggerUpdate();
-      return newItem;
+    get: (wsId: string, id: string) => get(`/workspaces/${wsId}/signals/${id}`),
+    update: (a: string, b: any, c?: any) => {
+      const [wsId, id, data] = resolve3(a, b, c);
+      return patch(`/workspaces/${wsId}/signals/${id}`, data);
     },
-    get: async (id: string) => {
-      await delay();
-      const signal = mockDb.signals.find(s => s.id === id);
-      const account = signal?.account_id ? mockDb.accounts.find(a => a.id === signal.account_id) : null;
-      return { ...signal, accounts: account };
-    },
-    update: async (id: string, data: Partial<Signal>) => {
-      await delay();
-      const idx = mockDb.signals.findIndex(s => s.id === id);
-      if (idx === -1) throw new Error('Signal not found');
-      const account = data.account_id !== undefined
-        ? (data.account_id ? mockDb.accounts.find(a => a.id === data.account_id) || null : null)
-        : mockDb.signals[idx].accounts;
-      mockDb.signals[idx] = { ...mockDb.signals[idx], ...data, accounts: account as Account };
-      mockDb.activities = [
-        { id: `act-${Date.now()}`, action: 'Updated signal classification', object_type: 'Signal', object_id: id, actor: 'Demo User', metadata: `Severity: ${data.severity_label || 'unchanged'}`, time: new Date().toISOString() },
-        ...mockDb.activities
-      ];
-      triggerUpdate();
-      return mockDb.signals[idx];
-    }
+    csvImport: (wsId: string, rows: any[]) => post(`/workspaces/${wsId}/signals/csv-import`, { rows }),
   },
+
   accounts: {
-    list: async (wsId: string, opts?: any) => {
-      await delay(300);
-      let res = mockDb.accounts.filter(a => a.workspace_id === wsId);
-      if (opts?.globalFilter) {
-        const q = opts.globalFilter.toLowerCase();
-        res = res.filter(a => a.name.toLowerCase().includes(q) || (a.domain && a.domain.toLowerCase().includes(q)));
-      }
-      if (opts?.plan) res = res.filter(a => a.plan === opts.plan);
-      if (opts?.arr_min !== undefined) res = res.filter(a => a.arr >= opts.arr_min);
-      if (opts?.arr_max !== undefined) res = res.filter(a => a.arr <= opts.arr_max);
-      if (opts?.health === 'healthy') res = res.filter(a => parseInt(a.health_score || '0') >= 75);
-      else if (opts?.health === 'warning') res = res.filter(a => { const s = parseInt(a.health_score || '0'); return s >= 50 && s < 75; });
-      else if (opts?.health === 'at_risk') res = res.filter(a => parseInt(a.health_score || '0') < 50 && parseInt(a.health_score || '0') > 0);
-      if (opts?.sorting?.length > 0) {
-        const sort = opts.sorting[0];
-        res.sort((a: any, b: any) => {
-          if (a[sort.id] < b[sort.id]) return sort.desc ? 1 : -1;
-          if (a[sort.id] > b[sort.id]) return sort.desc ? -1 : 1;
-          return 0;
-        });
-      }
-      const total = res.length;
-      if (opts?.page && opts?.limit) {
-        const start = (opts.page - 1) * opts.limit;
-        res = res.slice(start, start + opts.limit);
-      }
-      return { rows: res, total };
+    list: (wsId: string, opts?: any) => get(`/workspaces/${wsId}/accounts`, {
+      search: opts?.globalFilter,
+      plan: opts?.plan,
+      arr_min: opts?.arr_min,
+      arr_max: opts?.arr_max,
+      health: opts?.health,
+      page: opts?.page,
+      limit: opts?.limit,
+      sort_by: opts?.sorting?.[0]?.id,
+      sort_dir: opts?.sorting?.[0]?.desc ? 'desc' : 'asc',
+    }),
+    create: (a: string | any, b?: any) => {
+      const [wsId, data] = resolveCreate(a, b);
+      return post(`/workspaces/${wsId}/accounts`, data);
     },
-    create: async (data: Partial<Account>) => {
-      await delay();
-      const newItem = { ...data, id: `acc-${Date.now()}`, created_at: new Date().toISOString(), signal_count: 0 } as Account;
-      mockDb.accounts = [newItem, ...mockDb.accounts];
-      triggerUpdate();
-      return newItem;
+    get: (wsId: string, id: string) => get(`/workspaces/${wsId}/accounts/${id}`),
+    update: (a: string, b: any, c?: any) => {
+      const [wsId, id, data] = resolve3(a, b, c);
+      return patch(`/workspaces/${wsId}/accounts/${id}`, data);
     },
-    get: async (id: string) => {
-      await delay();
-      const account = mockDb.accounts.find(a => a.id === id);
-      const signals = mockDb.signals.filter(s => s.account_id === id);
-      const problems = mockDb.problems.filter(p => signals.some(s => s.normalized_text?.includes(p.title)));
-      return { account, signals, problems };
-    }
   },
+
   problems: {
-    list: async (wsId: string) => {
-      await delay();
-      return mockDb.problems.filter(p => p.workspace_id === wsId);
+    list: (wsId: string, opts?: any) => get(`/workspaces/${wsId}/problems`, opts),
+    get: (wsId: string, id: string) => get(`/workspaces/${wsId}/problems/${id}`),
+    create: (a: string | any, b?: any) => {
+      const [wsId, data] = resolveCreate(a, b);
+      return post(`/workspaces/${wsId}/problems`, data);
     },
-    get: async (id: string) => {
-      await delay();
-      const problem = mockDb.problems.find(p => p.id === id);
-      const signals = mockDb.signals.filter(s => {
-        if (id === 'prob-1') return s.product_area === 'Authentication';
-        if (id === 'prob-2') return s.product_area === 'API';
-        if (id === 'prob-3') return s.product_area === 'Core UI';
-        return false;
-      });
-      const accounts = mockDb.accounts.slice(0, 2);
-      return { problem, signals, accounts };
+    update: (a: string, b: any, c?: any) => {
+      const [wsId, id, data] = resolve3(a, b, c);
+      return patch(`/workspaces/${wsId}/problems/${id}`, data);
     },
-    create: async (data: Partial<Problem>) => {
-      await delay();
-      const newItem = { ...data, id: `prob-${Date.now()}`, created_at: new Date().toISOString(), evidence_count: 0, affected_arr: 0, status: 'Active', trend: 'Stable' } as Problem;
-      mockDb.problems = [newItem, ...mockDb.problems];
-      mockDb.activities = [
-        { id: `act-${Date.now()}`, action: 'Created problem', object_type: 'Problem', object_id: newItem.id, actor: 'Demo User', metadata: data.title || '', time: new Date().toISOString() },
-        ...mockDb.activities
-      ];
-      triggerUpdate();
-      return newItem;
+    linkSignal: (a: string, b: string, c?: string) => {
+      const [wsId, problemId] = resolve2(a, c !== undefined ? b : undefined);
+      const signalId = c !== undefined ? c : b;
+      return post(`/workspaces/${wsId}/problems/${problemId}/signals/${signalId}`);
     },
-    unlinkSignal: async (problemId: string, signalId: string) => {
-      await delay(300);
-      triggerUpdate();
-    }
+    unlinkSignal: (a: string, b: string, c?: string) => {
+      const [wsId, problemId] = resolve2(a, c !== undefined ? b : undefined);
+      const signalId = c !== undefined ? c : b;
+      return del(`/workspaces/${wsId}/problems/${problemId}/signals/${signalId}`);
+    },
   },
+
   opportunities: {
-    list: async (wsId: string) => {
-      await delay();
-      const opps = mockDb.opportunities.filter(o => o.workspace_id === wsId);
-      return opps.map(opp => {
-        const prob = mockDb.problems.find(p => p.id === opp.problem_id);
-        const relSignals = mockDb.signals.filter(s => s.product_area === prob?.product_area);
-        const accountIds = [...new Set(relSignals.map(s => s.account_id).filter(Boolean))] as string[];
-        const topAccounts = accountIds.slice(0, 3)
-          .map(id => mockDb.accounts.find(a => a.id === id))
-          .filter(Boolean)
-          .map(a => ({ name: a!.name, arr: a!.arr }));
-        return { ...opp, top_accounts: topAccounts };
-      });
+    list: (wsId: string, opts?: any) => get(`/workspaces/${wsId}/opportunities`, opts),
+    get: (wsId: string, id: string) => get(`/workspaces/${wsId}/opportunities/${id}`),
+    create: (a: string | any, b?: any) => {
+      const [wsId, data] = resolveCreate(a, b);
+      return post(`/workspaces/${wsId}/opportunities`, data);
     },
-    get: async (id: string) => {
-      await delay();
-      return mockDb.opportunities.find(o => o.id === id);
-    }
   },
+
   decisions: {
-    list: async (wsId: string) => {
-      await delay();
-      return mockDb.decisions.filter(d => d.workspace_id === wsId);
+    list: (wsId: string, opts?: any) => get(`/workspaces/${wsId}/decisions`, opts),
+    get: (wsId: string, id: string) => get(`/workspaces/${wsId}/decisions/${id}`),
+    create: (a: string | any, b?: any) => {
+      const [wsId, data] = resolveCreate(a, b);
+      return post(`/workspaces/${wsId}/decisions`, data);
     },
-    get: async (id: string) => {
-      await delay();
-      return mockDb.decisions.find(d => d.id === id);
+    update: (a: string, b: any, c?: any) => {
+      const [wsId, id, data] = resolve3(a, b, c);
+      return patch(`/workspaces/${wsId}/decisions/${id}`, data);
     },
-    create: async (data: Partial<Decision>) => {
-      await delay();
-      const newItem = { ...data, id: `dec-${Date.now()}`, created_at: new Date().toISOString(), users: { full_name: 'Demo User' } } as Decision;
-      mockDb.decisions = [newItem, ...mockDb.decisions];
-      mockDb.activities = [
-        { id: `act-${Date.now()}`, action: 'Committed decision', object_type: 'Decision', object_id: newItem.id, actor: 'Demo User', metadata: `${data.action} · ${data.title}`, time: new Date().toISOString() },
-        ...mockDb.activities
-      ];
-      triggerUpdate();
-      return newItem;
-    },
-    update: async (id: string, data: Partial<Decision>) => {
-      await delay();
-      mockDb.decisions = mockDb.decisions.map(d => d.id === id ? { ...d, ...data } : d);
-      triggerUpdate();
-    }
   },
+
   artifacts: {
-    list: async (wsId: string) => {
-      await delay();
-      return mockDb.artifacts.filter(a => a.workspace_id === wsId);
+    list: (wsId: string) => get(`/workspaces/${wsId}/artifacts`),
+    get: (wsId: string, id: string) => get(`/workspaces/${wsId}/artifacts/${id}`),
+    create: (a: string | any, b?: any) => {
+      const [wsId, data] = resolveCreate(a, b);
+      return post(`/workspaces/${wsId}/artifacts`, data);
     },
-    create: async (data: Partial<Artifact>) => {
-      await delay();
-      const newItem = { ...data, id: `art-${Date.now()}`, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), users: { full_name: 'Demo User' } } as Artifact;
-      mockDb.artifacts = [newItem, ...mockDb.artifacts];
-      mockDb.activities = [
-        { id: `act-${Date.now()}`, action: 'Generated artifact', object_type: 'Artifact', object_id: newItem.id, actor: 'Demo User', metadata: `${data.type} via AI`, time: new Date().toISOString() },
-        ...mockDb.activities
-      ];
-      triggerUpdate();
-      return newItem;
+    update: (a: string, b: any, c?: any) => {
+      const [wsId, id, data] = resolve3(a, b, c);
+      return patch(`/workspaces/${wsId}/artifacts/${id}`, data);
     },
-    update: async (id: string, data: Partial<Artifact>) => {
-      await delay();
-      mockDb.artifacts = mockDb.artifacts.map(a => a.id === id ? { ...a, ...data, updated_at: new Date().toISOString() } : a);
-      triggerUpdate();
-    },
-    get: async (id: string) => {
-      await delay();
-      return mockDb.artifacts.find(a => a.id === id);
-    }
   },
+
   launches: {
-    list: async (wsId: string) => {
-      await delay();
-      return mockDb.launches.filter(l => l.workspace_id === wsId);
+    list: (wsId: string) => get(`/workspaces/${wsId}/launches`),
+    get: (wsId: string, id: string) => get(`/workspaces/${wsId}/launches/${id}`),
+    create: (a: string | any, b?: any) => {
+      const [wsId, data] = resolveCreate(a, b);
+      return post(`/workspaces/${wsId}/launches`, data);
     },
-    create: async (data: Partial<Launch>) => {
-      await delay();
-      const newItem = { ...data, id: `launch-${Date.now()}`, created_at: new Date().toISOString(), status: 'active' } as Launch;
-      mockDb.launches = [newItem, ...mockDb.launches];
-      mockDb.activities = [
-        { id: `act-${Date.now()}`, action: 'Logged launch', object_type: 'Launch', object_id: newItem.id, actor: 'Demo User', metadata: data.title || '', time: new Date().toISOString() },
-        ...mockDb.activities
-      ];
-      triggerUpdate();
-      return newItem;
+    update: (a: string, b: any, c?: any) => {
+      const [wsId, id, data] = resolve3(a, b, c);
+      return patch(`/workspaces/${wsId}/launches/${id}`, data);
     },
-    update: async (id: string, data: Partial<Launch>) => {
-      await delay();
-      mockDb.launches = mockDb.launches.map(l => l.id === id ? { ...l, ...data } : l);
-      if (data.pm_verdict) {
-        mockDb.activities = [
-          { id: `act-${Date.now()}`, action: `Submitted verdict: ${data.pm_verdict}`, object_type: 'Launch', object_id: id, actor: 'Demo User', metadata: data.pm_verdict, time: new Date().toISOString() },
-          ...mockDb.activities
-        ];
-      }
-      triggerUpdate();
-    }
   },
+
   team: {
-    list: async (wsId: string) => {
-      await delay();
-      return {
-        members: mockDb.members.filter(m => m.workspace_id === wsId),
-        invites: mockDb.invites.filter(i => i.workspace_id === wsId)
-      };
+    list: (wsId: string) => get(`/workspaces/${wsId}/team`),
+    invite: (wsId: string, email: string, role: string) =>
+      post(`/workspaces/${wsId}/team/invite`, { email, role }),
+    removeMember: (a: string, b?: string) => {
+      if (b !== undefined) return del(`/workspaces/${a}/team/${b}`);
+      return del(`/workspaces/${getActiveWsId()}/team/${a}`);
     },
-    invite: async (wsId: string, email: string, role: string) => {
-      await delay();
-      const newInv = { id: `inv-${Date.now()}`, workspace_id: wsId, email, role, token: `tok-${Date.now()}`, created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 86400000).toISOString() };
-      mockDb.invites = [...mockDb.invites, newInv];
-      mockDb.activities = [
-        { id: `act-${Date.now()}`, action: 'Invited team member', object_type: 'Member', object_id: '', actor: 'Demo User', metadata: `${email} as ${role}`, time: new Date().toISOString() },
-        ...mockDb.activities
-      ];
-      triggerUpdate();
+    updateRole: (a: string, b: any, c?: any) => {
+      const [wsId, id, data] = resolve3(a, b, c);
+      return patch(`/workspaces/${wsId}/team/${id}`, data);
     },
-    removeMember: async (id: string) => {
-      await delay();
-      mockDb.members = mockDb.members.filter(m => m.id !== id);
-      triggerUpdate();
-    }
   },
+
   activities: {
-    list: async (wsId: string) => {
-      await delay(200);
-      return mockDb.activities;
-    }
+    list: (wsId: string, opts?: any) => get(`/workspaces/${wsId}/activities`, opts),
   },
+
   workspace: {
-    updateAreas: async (areas: string[]) => {
-      await delay(300);
-      mockDb.productAreas = [...areas];
-      triggerUpdate();
-    },
-    updateSegments: async (segments: string[]) => {
-      await delay(300);
-      mockDb.segments = [...segments];
-      triggerUpdate();
-    },
-    getAreas: async () => {
-      await delay(200);
-      return [...mockDb.productAreas];
-    },
-    getSegments: async () => {
-      await delay(200);
-      return [...mockDb.segments];
-    }
-  }
+    updateAreas: (wsId: string, areas: string[]) =>
+      patch(`/workspaces/${wsId}`, { product_areas: areas }),
+    updateSegments: (wsId: string, segments: string[]) =>
+      patch(`/workspaces/${wsId}`, { segments }),
+  },
+
+  billing: {
+    checkout: (wsId: string, plan: string, billing_period: string) =>
+      post(`/billing/${wsId}/checkout`, { plan, billing_period }),
+    status: (wsId: string) => get(`/billing/${wsId}/status`),
+  },
+
+  ai: {
+    generateArtifact: (wsId: string, decision_id: string, artifact_type: string) =>
+      post(`/workspaces/${wsId}/ai/generate-artifact`, { decision_id, artifact_type }),
+    suggestClassification: (wsId: string, raw_text: string) =>
+      post(`/workspaces/${wsId}/ai/suggest-classification`, { raw_text }),
+  },
 };
+
+// ─── React hooks ─────────────────────────────────────────────────────────────
 
 export function useQuery<T>(fetcher: () => Promise<T>, deps: any[]) {
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const execute = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const res = await fetcher();
       setData(res);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load data');
     } finally {
       setIsLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
   useEffect(() => {
@@ -338,7 +210,7 @@ export function useQuery<T>(fetcher: () => Promise<T>, deps: any[]) {
     return () => window.removeEventListener('data-updated', execute);
   }, [execute]);
 
-  return { data, isLoading, refetch: execute };
+  return { data, isLoading, error, refetch: execute };
 }
 
 export const useSignals = (wsId?: string, opts?: any) => {
@@ -349,11 +221,11 @@ export const useSignals = (wsId?: string, opts?: any) => {
   return { data: data || { rows: [], total: 0 }, isLoading, refetch };
 };
 
-export const useSignal = (id?: string) => {
+export const useSignal = (wsId?: string, id?: string) => {
   const { data, isLoading, refetch } = useQuery(async () => {
-    if (!id) return null;
-    return api.signals.get(id);
-  }, [id]);
+    if (!wsId || !id) return null;
+    return api.signals.get(wsId, id);
+  }, [wsId, id]);
   return { data, isLoading, refetch };
 };
 
@@ -365,11 +237,11 @@ export const useAccounts = (wsId?: string, opts?: any) => {
   return { data: data || { rows: [], total: 0 }, isLoading, refetch };
 };
 
-export const useAccount = (id?: string) => {
+export const useAccount = (wsId?: string, id?: string) => {
   const { data, isLoading } = useQuery(async () => {
-    if (!id) return null;
-    return api.accounts.get(id);
-  }, [id]);
+    if (!wsId || !id) return null;
+    return api.accounts.get(wsId, id);
+  }, [wsId, id]);
   return { data, isLoading };
 };
 
@@ -381,11 +253,11 @@ export const useProblems = (wsId?: string) => {
   return { data: data || [], isLoading };
 };
 
-export const useProblem = (id?: string) => {
+export const useProblem = (wsId?: string, id?: string) => {
   const { data, isLoading, refetch } = useQuery(async () => {
-    if (!id) return null;
-    return api.problems.get(id);
-  }, [id]);
+    if (!wsId || !id) return null;
+    return api.problems.get(wsId, id);
+  }, [wsId, id]);
   return { data, isLoading, refetch };
 };
 
@@ -397,27 +269,28 @@ export const useOpportunities = (wsId?: string) => {
   return { data: data || [], isLoading };
 };
 
-export const useOpportunity = (id?: string) => {
+export const useOpportunity = (wsId?: string, id?: string) => {
   const { data, isLoading } = useQuery(async () => {
-    if (!id) return null;
-    return api.opportunities.get(id);
-  }, [id]);
+    if (!wsId || !id) return null;
+    return api.opportunities.get(wsId, id);
+  }, [wsId, id]);
   return { data, isLoading };
 };
 
-export const useDecisions = (wsId?: string) => {
+export const useDecisions = (wsId?: string, opts?: any) => {
   const { data, isLoading } = useQuery(async () => {
     if (!wsId) return [];
-    return api.decisions.list(wsId);
-  }, [wsId]);
+    const res = await api.decisions.list(wsId, opts) as any;
+    return Array.isArray(res) ? res : (res?.rows || []);
+  }, [wsId, JSON.stringify(opts)]);
   return { data: data || [], isLoading };
 };
 
-export const useDecision = (id?: string) => {
+export const useDecision = (wsId?: string, id?: string) => {
   const { data, isLoading, refetch } = useQuery(async () => {
-    if (!id) return null;
-    return api.decisions.get(id);
-  }, [id]);
+    if (!wsId || !id) return null;
+    return api.decisions.get(wsId, id);
+  }, [wsId, id]);
   return { data, isLoading, refetch };
 };
 
@@ -429,11 +302,11 @@ export const useArtifacts = (wsId?: string) => {
   return { data: data || [], isLoading, refetch };
 };
 
-export const useArtifact = (id?: string) => {
+export const useArtifact = (wsId?: string, id?: string) => {
   const { data, isLoading } = useQuery(async () => {
-    if (!id) return null;
-    return api.artifacts.get(id);
-  }, [id]);
+    if (!wsId || !id) return null;
+    return api.artifacts.get(wsId, id);
+  }, [wsId, id]);
   return { data, isLoading };
 };
 
@@ -461,16 +334,20 @@ export const useActivities = (wsId?: string) => {
   return { data: data || [], isLoading, refetch };
 };
 
-export const useProductAreas = () => {
+export const useProductAreas = (wsId?: string) => {
   const { data, isLoading, refetch } = useQuery(async () => {
-    return api.workspace.getAreas();
-  }, []);
+    if (!wsId) return [];
+    const ws = await get<any>(`/workspaces/${wsId}`);
+    return ws?.product_areas || [];
+  }, [wsId]);
   return { data: data || [], isLoading, refetch };
 };
 
-export const useSegments = () => {
+export const useSegments = (wsId?: string) => {
   const { data, isLoading, refetch } = useQuery(async () => {
-    return api.workspace.getSegments();
-  }, []);
+    if (!wsId) return [];
+    const ws = await get<any>(`/workspaces/${wsId}`);
+    return ws?.segments || [];
+  }, [wsId]);
   return { data: data || [], isLoading, refetch };
 };

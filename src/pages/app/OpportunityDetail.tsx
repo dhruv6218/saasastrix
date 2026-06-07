@@ -11,10 +11,10 @@ import { AIBadge } from '../../components/ui/AIBadge';
 export const OpportunityDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: currentOpportunity, isLoading } = useOpportunity(id);
-  const { data: allOpps } = useOpportunities('ws-1');
   const { addToast } = useToast();
   const { activeWorkspace } = useWorkspace();
+  const { data: currentOpportunity, isLoading } = useOpportunity(activeWorkspace?.id, id);
+  const { data: allOpps } = useOpportunities(activeWorkspace?.id);
   const { user } = useAuth();
 
   const [activeTab, setActiveTab] = useState('overview');

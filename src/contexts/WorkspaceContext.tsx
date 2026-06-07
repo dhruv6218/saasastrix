@@ -1,14 +1,19 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
-import { MOCK_WORKSPACE } from '../lib/mockData';
+import { get, patch } from '../lib/apiClient';
 import { Workspace } from '../types';
 
+interface WorkspaceWithRole extends Workspace {
+  role?: string;
+}
+
 interface WorkspaceContextType {
-  activeWorkspace: Workspace | null;
-  workspaces: Workspace[];
+  activeWorkspace: WorkspaceWithRole | null;
+  workspaces: WorkspaceWithRole[];
   isWorkspaceInitializing: boolean;
-  setActiveWorkspace: (ws: Workspace) => void;
+  setActiveWorkspace: (ws: WorkspaceWithRole) => void;
   refreshWorkspaces: () => Promise<void>;
+  updateWorkspace: (data: Partial<Workspace>) => Promise<void>;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType>({
@@ -17,45 +22,56 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
   isWorkspaceInitializing: true,
   setActiveWorkspace: () => {},
   refreshWorkspaces: async () => {},
+  updateWorkspace: async () => {},
 });
 
 export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null);
+  const [workspaces, setWorkspaces] = useState<WorkspaceWithRole[]>([]);
+  const [activeWorkspace, setActiveWorkspaceState] = useState<WorkspaceWithRole | null>(null);
   const [isWorkspaceInitializing, setIsWorkspaceInitializing] = useState(true);
 
-  const fetchWorkspaces = async () => {
+  const fetchWorkspaces = useCallback(async () => {
     if (!user) {
       setWorkspaces([]);
-      setActiveWorkspace(null);
+      setActiveWorkspaceState(null);
       setIsWorkspaceInitializing(false);
       return;
     }
-
     setIsWorkspaceInitializing(true);
-    
-    // Simulate Supabase async fetch
-    await new Promise(resolve => setTimeout(resolve, 600));
-    
-    const fetchedWorkspaces = [{
-      ...MOCK_WORKSPACE,
-      product_areas: ['Authentication', 'Core UI', 'API', 'Billing'],
-      segments: ['Enterprise', 'SMB', 'Growth']
-    }];
-    setWorkspaces(fetchedWorkspaces);
-    setActiveWorkspace(fetchedWorkspaces[0]);
-
-    setIsWorkspaceInitializing(false);
-  };
-
-  const handleSetActiveWorkspace = (ws: Workspace) => {
-    setActiveWorkspace(ws);
-  };
+    try {
+      const data = await get<WorkspaceWithRole[]>('/workspaces');
+      setWorkspaces(data);
+      if (data.length > 0) {
+        const savedId = localStorage.getItem('astrix_active_ws');
+        const saved = savedId ? data.find(w => w.id === savedId) : null;
+        setActiveWorkspaceState(saved || data[0]);
+      } else {
+        setActiveWorkspaceState(null);
+      }
+    } catch {
+      setWorkspaces([]);
+      setActiveWorkspaceState(null);
+    } finally {
+      setIsWorkspaceInitializing(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     fetchWorkspaces();
-  }, [user]);
+  }, [fetchWorkspaces]);
+
+  const handleSetActiveWorkspace = (ws: WorkspaceWithRole) => {
+    setActiveWorkspaceState(ws);
+    localStorage.setItem('astrix_active_ws', ws.id);
+  };
+
+  const updateWorkspace = async (data: Partial<Workspace>) => {
+    if (!activeWorkspace) return;
+    const updated = await patch<WorkspaceWithRole>(`/workspaces/${activeWorkspace.id}`, data);
+    setActiveWorkspaceState(prev => prev ? { ...prev, ...updated } : updated);
+    setWorkspaces(prev => prev.map(w => w.id === activeWorkspace.id ? { ...w, ...updated } : w));
+  };
 
   return (
     <WorkspaceContext.Provider value={{
@@ -63,7 +79,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       workspaces,
       isWorkspaceInitializing,
       setActiveWorkspace: handleSetActiveWorkspace,
-      refreshWorkspaces: fetchWorkspaces
+      refreshWorkspaces: fetchWorkspaces,
+      updateWorkspace,
     }}>
       {children}
     </WorkspaceContext.Provider>

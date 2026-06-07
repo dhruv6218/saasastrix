@@ -32,6 +32,10 @@ args = "npm install && npm run dev"
 waitForPort = 5000
 
 [[ports]]
+localPort = 3000
+externalPort = 3000
+
+[[ports]]
 localPort = 5000
 externalPort = 80
 
@@ -39,3 +43,16 @@ externalPort = 80
 deploymentTarget = "static"
 build = ["npm", "run", "build"]
 publicDir = "dist"
+
+[userenv]
+
+[userenv.shared]
+API_PORT = "3000"
+DODO_STARTER_MONTHLY_ID = "pdt_0NbFfMOQIsJF9X0LrtkH9"
+DODO_STARTER_ANNUAL_ID = "pdt_0NbC7p1x3vArb3CYIqAT6"
+DODO_GROWTH_MONTHLY_ID = "pdt_0NbC3RvgjyFoZ6wJ7LLqP"
+DODO_GROWTH_ANNUAL_ID = "pdt_0NbC5NQsoxq2leqmoeDmB"
+DODO_SCALE_MONTHLY_ID = "pdt_0NcBuLfSXkF4hSJFs0AbV"
+DODO_SCALE_ANNUAL_ID = "pdt_0NbFhELrTC3P4kNf8On24"
+DODO_API_BASE = "https://api.dodopayments.com"
+NODE_ENV = "development"

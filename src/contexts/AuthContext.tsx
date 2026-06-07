@@ -1,9 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { MOCK_USER } from '../lib/mockData';
+import { post, get, setAuthToken, getStoredToken } from '../lib/apiClient';
+
+interface AuthUser {
+  id: string;
+  email: string;
+  full_name: string;
+  avatar_url?: string;
+  is_admin: boolean;
+}
 
 interface AuthContextType {
-  session: any;
-  user: any;
+  session: { access_token: string } | null;
+  user: AuthUser | null;
   isInitializing: boolean;
   signOut: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
@@ -11,6 +19,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
   updatePassword: (password: string) => Promise<{ error: string | null }>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -23,64 +32,97 @@ const AuthContext = createContext<AuthContextType>({
   signInWithGoogle: async () => {},
   resetPassword: async () => ({ error: null }),
   updatePassword: async () => ({ error: null }),
+  refreshUser: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<any>(null);
-  const [user, setUser] = useState<any>(null);
+  const [session, setSession] = useState<{ access_token: string } | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
 
-  useEffect(() => {
-    const initAuth = async () => {
-      setIsInitializing(true);
-      await new Promise(resolve => setTimeout(resolve, 400));
+  const refreshUser = async () => {
+    try {
+      const me = await get<AuthUser>('/auth/me');
+      setUser(me);
+    } catch {
       setUser(null);
       setSession(null);
-      setIsInitializing(false);
-    };
-    initAuth();
-  }, []);
-
-  const simulateDelay = () => new Promise(resolve => setTimeout(resolve, 600));
-
-  const signIn = async (_email: string, _password: string) => {
-    await simulateDelay();
-    setUser(MOCK_USER);
-    setSession({ access_token: 'mock_token' });
-    return { error: null };
+      setAuthToken(null);
+    }
   };
 
-  const signUp = async (_email: string, _password: string, name: string) => {
-    await simulateDelay();
-    setUser({ ...MOCK_USER, user_metadata: { full_name: name } });
-    setSession({ access_token: 'mock_token' });
-    return { error: null, needsConfirmation: false };
+  useEffect(() => {
+    const init = async () => {
+      setIsInitializing(true);
+      const token = getStoredToken();
+      if (token) {
+        setAuthToken(token);
+        setSession({ access_token: token });
+        try {
+          const me = await get<AuthUser>('/auth/me');
+          setUser(me);
+        } catch {
+          setAuthToken(null);
+          setSession(null);
+        }
+      }
+      setIsInitializing(false);
+    };
+    init();
+  }, []);
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      const res = await post<{ user: AuthUser; token: string }>('/auth/signin', { email, password });
+      setAuthToken(res.token);
+      setSession({ access_token: res.token });
+      setUser(res.user);
+      return { error: null };
+    } catch (err: any) {
+      return { error: err.message || 'Sign in failed' };
+    }
+  };
+
+  const signUp = async (email: string, password: string, name: string) => {
+    try {
+      const res = await post<{ user: AuthUser; token: string }>('/auth/signup', { email, password, full_name: name });
+      setAuthToken(res.token);
+      setSession({ access_token: res.token });
+      setUser(res.user);
+      return { error: null, needsConfirmation: false };
+    } catch (err: any) {
+      return { error: err.message || 'Sign up failed', needsConfirmation: false };
+    }
   };
 
   const signInWithGoogle = async () => {
-    await simulateDelay();
-    setUser(MOCK_USER);
-    setSession({ access_token: 'mock_token' });
+    // Google OAuth not available — show message
+    throw new Error('Google sign-in not available. Please use email and password.');
   };
 
   const signOut = async () => {
-    await simulateDelay();
+    try { await post('/auth/signout'); } catch {}
+    setAuthToken(null);
     setUser(null);
     setSession(null);
   };
 
   const resetPassword = async (_email: string) => {
-    await simulateDelay();
+    // Placeholder — would send email in production
     return { error: null };
   };
 
-  const updatePassword = async (_password: string) => {
-    await simulateDelay();
-    return { error: null };
+  const updatePassword = async (password: string) => {
+    try {
+      await post('/auth/change-password', { new_password: password });
+      return { error: null };
+    } catch (err: any) {
+      return { error: err.message || 'Failed to update password' };
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, isInitializing, signOut, signIn, signUp, signInWithGoogle, resetPassword, updatePassword }}>
+    <AuthContext.Provider value={{ session, user, isInitializing, signOut, signIn, signUp, signInWithGoogle, resetPassword, updatePassword, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
