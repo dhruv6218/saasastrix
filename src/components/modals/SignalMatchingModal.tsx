@@ -139,7 +139,7 @@ export const SignalMatchingModal: React.FC = () => {
   const { activeWorkspace } = useWorkspace();
   const { data: accountData } = useAccounts(activeWorkspace?.id);
 
-  const accounts = accountData || [];
+  const accounts = accountData?.rows || [];
 
   const signals = useMemo(() => generateUnmatchedSignals(accounts), [accounts]);
 

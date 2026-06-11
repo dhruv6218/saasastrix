@@ -46,7 +46,7 @@ export const OnboardingChecklist: React.FC = () => {
   const completedMap: Record<string, boolean> = {
     workspace: true,
     signals: (signals?.total ?? 0) > 0,
-    accounts: (accounts?.data?.length ?? 0) > 0,
+    accounts: (accounts?.total ?? 0) > 0,
     problems: (problems?.length ?? 0) > 0,
     opportunities: (opportunities?.length ?? 0) > 0,
     decisions: (decisions?.length ?? 0) > 0,
