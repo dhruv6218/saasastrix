@@ -17,6 +17,7 @@ export const Settings = () => {
   const { data: segments, refetch: refetchSegments } = useSegments(activeWorkspace?.id);
 
   const members = teamData?.members || [];
+  const pendingInvites = teamData?.invites || [];
 
   const [wsName, setWsName] = useState('');
   const [wsTimezone, setWsTimezone] = useState('');
@@ -128,9 +129,25 @@ export const Settings = () => {
   };
 
   const removeMember = async (id: string) => {
-    await api.team.removeMember(id);
-    addToast('Member removed', 'success');
-    refetchTeam();
+    if (!activeWorkspace) return;
+    try {
+      await api.team.removeMember(activeWorkspace.id, id);
+      addToast('Member removed', 'success');
+      refetchTeam();
+    } catch (err: any) {
+      addToast(err.message || 'Failed to remove member', 'error');
+    }
+  };
+
+  const cancelInvite = async (inviteId: string) => {
+    if (!activeWorkspace) return;
+    try {
+      await api.team.cancelInvite(activeWorkspace.id, inviteId);
+      addToast('Invitation cancelled', 'success');
+      refetchTeam();
+    } catch {
+      addToast('Failed to cancel invitation', 'error');
+    }
   };
 
   const handleAddArea = async () => {
@@ -321,9 +338,12 @@ export const Settings = () => {
                     </div>
                   </div>
 
-                  <div>
+                  <div className="mb-6">
                     <h4 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">Active Members ({members.length})</h4>
                     <div className="border border-gray-200 rounded-xl divide-y divide-gray-100">
+                      {members.length === 0 && (
+                        <div className="p-6 text-center text-sm text-gray-400">No members yet.</div>
+                      )}
                       {members.map(member => (
                         <div key={member.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
                           <div className="flex items-center gap-3">
@@ -336,15 +356,55 @@ export const Settings = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
-                            <span className={`text-xs font-mono font-bold uppercase px-2 py-1 rounded ${member.role === 'viewer' ? 'bg-blue-50 text-brand-blue' : member.role === 'admin' ? 'bg-purple-50 text-purple-600' : 'bg-gray-100 text-gray-600'}`}>
+                            <span className={`text-xs font-mono font-bold uppercase px-2 py-1 rounded ${member.role === 'viewer' ? 'bg-blue-50 text-brand-blue' : member.role === 'admin' ? 'bg-purple-50 text-purple-600' : member.role === 'owner' ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-600'}`}>
                               {member.role}
                             </span>
-                            <button onClick={() => removeMember(member.id)} className="text-gray-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                            {member.role !== 'owner' && (
+                              <button onClick={() => removeMember(member.id)} className="text-gray-400 hover:text-red-500 transition-colors" title="Remove member">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
+
+                  {/* Pending Invites */}
+                  {pendingInvites.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">Pending Invites ({pendingInvites.length})</h4>
+                      <div className="border border-dashed border-gray-200 rounded-xl divide-y divide-gray-100">
+                        {pendingInvites.map((inv: any) => (
+                          <div key={inv.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-400">
+                                {inv.email?.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <div className="font-bold text-gray-700 text-sm">{inv.email}</div>
+                                <div className="text-xs text-gray-400">
+                                  Expires {new Date(inv.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs font-mono font-bold uppercase px-2 py-1 rounded bg-amber-50 text-amber-600">
+                                pending · {inv.role}
+                              </span>
+                              <button
+                                onClick={() => cancelInvite(inv.id)}
+                                className="text-gray-400 hover:text-red-500 transition-colors"
+                                title="Cancel invite"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -615,9 +675,9 @@ export const Settings = () => {
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-1">Role</label>
                 <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} className="w-full bg-gray-50 border border-gray-200 text-sm rounded-xl p-3 outline-none focus:ring-2 focus:ring-astrix-teal">
-                  <option value="viewer">Viewer — Read-only (free, unlimited)</option>
-                  <option value="member">Member — Create decisions & artifacts</option>
-                  <option value="admin">Admin — Manage settings & billing</option>
+                  <option value="viewer">Viewer — Read-only access (free, unlimited)</option>
+                  <option value="maker">Member — Create decisions & artifacts</option>
+                  <option value="admin">Admin — Manage workspace settings & billing</option>
                 </select>
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">

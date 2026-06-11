@@ -20,6 +20,7 @@ import teamRoutes from './routes/team';
 import activityRoutes from './routes/activities';
 import billingRoutes from './routes/billing';
 import aiRoutes from './routes/ai';
+import inviteRoutes from './routes/invites';
 
 const app = express();
 const PORT = parseInt(process.env.API_PORT || '3000');
@@ -98,6 +99,9 @@ app.use('/api/workspaces/:wsId/launches', launchRoutes);
 app.use('/api/workspaces/:wsId/team', teamRoutes);
 app.use('/api/workspaces/:wsId/activities', activityRoutes);
 app.use('/api/workspaces/:wsId/ai', aiRoutes);
+
+// Invite acceptance (public + auth)
+app.use('/api/invites', inviteRoutes);
 
 // 404 + error handler
 app.use(notFound);

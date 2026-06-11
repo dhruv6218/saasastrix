@@ -156,6 +156,8 @@ export const api = {
       const [wsId, id, data] = resolve3(a, b, c);
       return patch(`/workspaces/${wsId}/team/${id}`, data);
     },
+    cancelInvite: (wsId: string, inviteId: string) =>
+      del(`/workspaces/${wsId}/team/invites/${inviteId}`),
   },
 
   activities: {
@@ -163,10 +165,18 @@ export const api = {
   },
 
   workspace: {
-    updateAreas: (wsId: string, areas: string[]) =>
-      patch(`/workspaces/${wsId}`, { product_areas: areas }),
-    updateSegments: (wsId: string, segments: string[]) =>
-      patch(`/workspaces/${wsId}`, { segments }),
+    updateAreas: (wsIdOrAreas: string | string[], areas?: string[]) => {
+      if (Array.isArray(wsIdOrAreas)) {
+        return patch(`/workspaces/${getActiveWsId()}`, { product_areas: wsIdOrAreas });
+      }
+      return patch(`/workspaces/${wsIdOrAreas}`, { product_areas: areas });
+    },
+    updateSegments: (wsIdOrSegs: string | string[], segments?: string[]) => {
+      if (Array.isArray(wsIdOrSegs)) {
+        return patch(`/workspaces/${getActiveWsId()}`, { segments: wsIdOrSegs });
+      }
+      return patch(`/workspaces/${wsIdOrSegs}`, { segments });
+    },
   },
 
   billing: {

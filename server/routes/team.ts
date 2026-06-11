@@ -5,6 +5,7 @@ import { query } from '../db';
 import { requireAuth, attachWorkspaceRole } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
 import { logActivity } from './activities';
+import { sendTeamInviteEmail } from '../services/email';
 
 const router = Router({ mergeParams: true });
 router.use(requireAuth, attachWorkspaceRole);
@@ -21,8 +22,8 @@ router.get('/', async (req: Request, res: Response) => {
       [req.params.wsId]
     ),
     query(
-      'SELECT * FROM workspace_invites WHERE workspace_id = $1 AND status = $2 ORDER BY created_at DESC',
-      [req.params.wsId, 'pending']
+      `SELECT * FROM workspace_invites WHERE workspace_id = $1 AND status = 'pending' ORDER BY created_at DESC`,
+      [req.params.wsId]
     ),
   ]);
 
@@ -40,45 +41,72 @@ router.post('/invite', requireRole('admin'), async (req: Request, res: Response)
   const { email, role = 'maker' } = req.body;
   if (!email) return res.status(400).json({ error: 'Email required' });
 
+  const validRoles = ['admin', 'maker', 'viewer'];
+  if (!validRoles.includes(role)) return res.status(400).json({ error: 'Invalid role' });
+
+  // Check if already a member
+  const existingMember = await query(
+    `SELECT u.id FROM users u
+     JOIN workspace_members wm ON wm.user_id = u.id
+     WHERE u.email = $1 AND wm.workspace_id = $2`,
+    [email.toLowerCase(), req.params.wsId]
+  );
+  if (existingMember.rows.length > 0) {
+    return res.status(409).json({ error: 'This person is already a member of this workspace' });
+  }
+
+  // Check for existing pending invite
+  const existingInvite = await query(
+    `SELECT id FROM workspace_invites WHERE email = $1 AND workspace_id = $2 AND status = 'pending'`,
+    [email.toLowerCase(), req.params.wsId]
+  );
+  if (existingInvite.rows.length > 0) {
+    return res.status(409).json({ error: 'An invite is already pending for this email' });
+  }
+
   const token = crypto.randomBytes(32).toString('hex');
   await query(
-    `INSERT INTO workspace_invites (workspace_id, email, role, token)
-     VALUES ($1,$2,$3,$4)
-     ON CONFLICT DO NOTHING`,
+    `INSERT INTO workspace_invites (workspace_id, email, role, token, expires_at)
+     VALUES ($1, $2, $3, $4, NOW() + INTERVAL '7 days')`,
     [req.params.wsId, email.toLowerCase(), role, token]
   );
+
+  // Get workspace name + inviter name for email
+  const [wsRes, inviterRes] = await Promise.all([
+    query('SELECT name FROM workspaces WHERE id = $1', [req.params.wsId]),
+    query('SELECT full_name FROM users WHERE id = $1', [req.user!.id]),
+  ]);
+  const workspaceName = wsRes.rows[0]?.name || 'your workspace';
+  const inviterName = inviterRes.rows[0]?.full_name || 'A teammate';
+
+  // Send email async (don't block response)
+  sendTeamInviteEmail(email, inviterName, workspaceName, token, role).catch(() => {});
+
   await logActivity(req.params.wsId, req.user!.id, 'Invited team member', 'Member', '', `${email} as ${role}`);
-  res.status(201).json({ success: true, token });
+  res.status(201).json({ success: true });
 });
 
-// POST /api/invites/:token/accept — accept invite (no wsId needed)
-router.post('/invites/:token/accept', async (req: Request, res: Response) => {
-  const { token } = req.params;
-  const inv = await query(
-    'SELECT * FROM workspace_invites WHERE token = $1 AND status = $2 AND expires_at > NOW()',
-    [token, 'pending']
-  );
-  if (!inv.rows[0]) return res.status(400).json({ error: 'Invalid or expired invite' });
-  const invite = inv.rows[0];
-
+// DELETE /api/workspaces/:wsId/team/invites/:inviteId — cancel pending invite
+router.delete('/invites/:inviteId', requireRole('admin'), async (req: Request, res: Response) => {
   await query(
-    `INSERT INTO workspace_members (workspace_id, user_id, role) VALUES ($1,$2,$3)
-     ON CONFLICT (workspace_id, user_id) DO UPDATE SET role = $3`,
-    [invite.workspace_id, req.user!.id, invite.role]
+    `UPDATE workspace_invites SET status = 'expired' WHERE id = $1 AND workspace_id = $2 AND status = 'pending'`,
+    [req.params.inviteId, req.params.wsId]
   );
-  await query('UPDATE workspace_invites SET status = $1 WHERE id = $2', ['accepted', invite.id]);
-  res.json({ workspace_id: invite.workspace_id, role: invite.role });
+  res.json({ success: true });
 });
 
-// DELETE /api/workspaces/:wsId/team/:memberId
+// DELETE /api/workspaces/:wsId/team/:memberId — remove member
 router.delete('/:memberId', requireRole('admin'), async (req: Request, res: Response) => {
   const memberRes = await query(
-    'SELECT role FROM workspace_members WHERE id = $1 AND workspace_id = $2',
+    'SELECT role, user_id FROM workspace_members WHERE id = $1 AND workspace_id = $2',
     [req.params.memberId, req.params.wsId]
   );
   if (!memberRes.rows[0]) return res.status(404).json({ error: 'Member not found' });
   if (memberRes.rows[0].role === 'owner') {
     return res.status(403).json({ error: 'Cannot remove workspace owner' });
+  }
+  if (memberRes.rows[0].user_id === req.user!.id) {
+    return res.status(403).json({ error: 'Cannot remove yourself' });
   }
   await query('DELETE FROM workspace_members WHERE id = $1 AND workspace_id = $2', [req.params.memberId, req.params.wsId]);
   await logActivity(req.params.wsId, req.user!.id, 'Removed team member', 'Member', req.params.memberId, '');
@@ -91,10 +119,12 @@ router.patch('/:memberId', requireRole('admin'), async (req: Request, res: Respo
   const valid = ['admin', 'maker', 'viewer'];
   if (!valid.includes(role)) return res.status(400).json({ error: 'Invalid role' });
   const result = await query(
-    'UPDATE workspace_members SET role = $1 WHERE id = $2 AND workspace_id = $3 AND role != $4 RETURNING *',
-    [role, req.params.memberId, req.params.wsId, 'owner']
+    `UPDATE workspace_members SET role = $1
+     WHERE id = $2 AND workspace_id = $3 AND role != 'owner'
+     RETURNING *`,
+    [role, req.params.memberId, req.params.wsId]
   );
-  if (!result.rows[0]) return res.status(404).json({ error: 'Member not found or owner cannot be changed' });
+  if (!result.rows[0]) return res.status(404).json({ error: 'Member not found or owner role cannot be changed' });
   res.json(result.rows[0]);
 });
 
